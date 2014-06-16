@@ -13,6 +13,31 @@ namespace SharpBgfx {
         OpenGL
     }
 
+    public enum VertexAttribute {
+        Position,
+        Normal,
+        Tangent,
+        Color0,
+        Color1,
+        Indices,
+        Weight,
+        TexCoord0,
+        TexCoord1,
+        TexCoord2,
+        TexCoord3,
+        TexCoord4,
+        TexCoord5,
+        TexCoord6,
+        TexCoord7
+    }
+
+    public enum VertexAttributeType {
+        UInt8,
+        Int16,
+        Half,
+        Float
+    }
+
     [Flags]
     public enum ResetFlags {
         None = 0,
@@ -25,12 +50,21 @@ namespace SharpBgfx {
         Capture = 0x100
     }
 
+    [Flags]
     public enum DebugFlags {
         None = 0,
         Wireframe = 0x1,
         InfinitelyFastHardware = 0x2,
         DisplayStatistics = 0x4,
         DisplayText = 0x8
+    }
+
+    [Flags]
+    public enum ClearFlags {
+        None = 0,
+        ColorBit = 0x1,
+        DepthBit = 0x2,
+        StencilBit = 0x4
     }
 
     [Flags]
@@ -59,8 +93,8 @@ namespace SharpBgfx {
         TextureFormatD24F = 0x00100000,
         TextureFormatD32F = 0x00200000,
         TextureFormatD0S8 = 0x00400000,
-        TextureCompareLessEqual = 0x01000000,
-        TextureCompareAll = 0x03000000,
+        DepthTextureCompare = 0x01000000,
+        ShadowSamplerCompare = 0x02000000,
         Texture3D = 0x04000000,
         VertexAttributeHalf = 0x08000000,
         Instancing = 0x10000000,
