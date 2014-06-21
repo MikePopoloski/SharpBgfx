@@ -45,7 +45,8 @@
     <Compile Include="Structs.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="bgfx.dll">
+    <Content Include="..\External\bgfx\bgfx.dll">
+      <Link>bgfx.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
