@@ -29,6 +29,10 @@ static class Program {
         // load shaders
         var program = ResourceLoader.LoadProgram("vs_cubes", "fs_cubes");
 
+        // start the frame clock
+        var clock = new Clock();
+        clock.Start();
+
         // main loop
         while (sample.ProcessEvents(ResetFlags.Vsync)) {
             // set view 0 viewport
@@ -36,21 +40,30 @@ static class Program {
 
             // view transforms
             var viewMatrix = Matrix.LookAtLH(new Vector3(0.0f, 0.0f, -35.0f), Vector3.Zero, Vector3.UnitY);
-            var projMatrix = Matrix.PerspectiveFovLH(60.0f, (float)sample.WindowWidth / sample.WindowHeight, 0.1f, 100.0f);
+            var projMatrix = Matrix.PerspectiveFovLH(60.0f * (float)Math.PI / 180.0f, (float)sample.WindowWidth / sample.WindowHeight, 0.1f, 100.0f);
             Bgfx.SetViewTransform(0, &viewMatrix.M11, &projMatrix.M11);
 
             // dummy draw call to make sure view 0 is cleared if no other draw calls are submitted
             Bgfx.Submit(0, 0);
 
+            // tick the clock
+            var elapsed = clock.Frame();
+            var time = clock.TotalTime();
+
             // write some debug text
             Bgfx.DebugTextClear(0, false);
             Bgfx.DebugTextWrite(0, 1, 0x4f, "SharpBgfx/Samples/01-Cubes");
             Bgfx.DebugTextWrite(0, 2, 0x6f, "Description: Rendering simple static mesh.");
-            Bgfx.DebugTextWrite(0, 3, 0x6f, string.Format("Frame: {0} ms", 0.0f));
+            Bgfx.DebugTextWrite(0, 3, 0x6f, string.Format("Frame: {0:F3} ms", elapsed * 1000));
 
             // submit 11x11 cubes
             for (int y = 0; y < 11; y++) {
                 for (int x = 0; x < 11; x++) {
+                    // model matrix
+                    var transform = Matrix.RotationYawPitchRoll(time + x * 0.21f, time + y * 0.37f, 0.0f);
+                    transform.TranslationVector = new Vector3(-15.0f + x * 3.0f, -15.0f + y * 3.0f, 0.0f);
+                    Bgfx.SetTransform(&transform.M11, 1);
+
                     // set pipeline states
                     Bgfx.SetProgram(program);
                     Bgfx.SetVertexBuffer(vbh, 0, -1);
@@ -68,6 +81,9 @@ static class Program {
         }
 
         // clean up
+        Bgfx.DestroyIndexBuffer(ibh);
+        Bgfx.DestroyVertexBuffer(vbh);
+        Bgfx.DestroyProgram(program);
         Bgfx.Shutdown();
     }
 

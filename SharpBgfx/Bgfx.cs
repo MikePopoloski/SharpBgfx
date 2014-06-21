@@ -112,6 +112,9 @@ namespace SharpBgfx {
         [DllImport(DllName, EntryPoint = "bgfx_set_view_transform_mask", CallingConvention = CallingConvention.Cdecl)]
         public static extern void SetViewTransformMask (int viewMask, float* view, float* proj);
 
+        [DllImport(DllName, EntryPoint = "bgfx_set_transform", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int SetTransform (float* matrix, ushort count);
+
         [DllImport(DllName, EntryPoint = "bgfx_submit", CallingConvention = CallingConvention.Cdecl)]
         public static extern int Submit (byte id, int depth);
 
