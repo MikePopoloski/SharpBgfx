@@ -40,7 +40,7 @@ static class Program {
 
             // view transforms
             var viewMatrix = Matrix.LookAtLH(new Vector3(0.0f, 0.0f, -35.0f), Vector3.Zero, Vector3.UnitY);
-            var projMatrix = Matrix.PerspectiveFovLH(60.0f * (float)Math.PI / 180.0f, (float)sample.WindowWidth / sample.WindowHeight, 0.1f, 100.0f);
+            var projMatrix = Matrix.PerspectiveFovLH((float)Math.PI / 3, (float)sample.WindowWidth / sample.WindowHeight, 0.1f, 100.0f);
             Bgfx.SetViewTransform(0, &viewMatrix.M11, &projMatrix.M11);
 
             // dummy draw call to make sure view 0 is cleared if no other draw calls are submitted
