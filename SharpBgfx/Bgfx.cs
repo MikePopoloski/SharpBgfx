@@ -26,6 +26,12 @@ namespace SharpBgfx {
         [DllImport(DllName, EntryPoint = "bgfx_set_marker", CallingConvention = CallingConvention.Cdecl)]
         public static extern void SetDebugMarker (string marker);
 
+        [DllImport(DllName, EntryPoint = "bgfx_dbg_text_clear", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void DebugTextClear(byte color, bool smallText);
+
+        [DllImport(DllName, EntryPoint = "bgfx_dbg_text_printf", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void DebugTextWrite(ushort x, ushort y, byte color, string text);
+
         [DllImport(DllName, EntryPoint = "bgfx_frame", CallingConvention = CallingConvention.Cdecl)]
         public static extern int Frame ();
 
