@@ -71,13 +71,13 @@ namespace SharpBgfx {
         public static extern void VertexDeclEnd (ref VertexDecl decl);
 
         [DllImport(DllName, EntryPoint = "bgfx_alloc", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr Alloc (int size);
+        public static extern MemoryHandle Alloc (int size);
 
         [DllImport(DllName, EntryPoint = "bgfx_copy", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr Copy (IntPtr data, int size);
+        public static extern MemoryHandle Copy (IntPtr data, int size);
 
         [DllImport(DllName, EntryPoint = "bgfx_make_ref", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr MakeRef (IntPtr data, int size);
+        public static extern MemoryHandle MakeRef (IntPtr data, int size);
 
         [DllImport(DllName, EntryPoint = "bgfx_set_view_name", CallingConvention = CallingConvention.Cdecl)]
         public static extern void SetViewName (byte id, string name);
@@ -117,5 +117,29 @@ namespace SharpBgfx {
 
         [DllImport(DllName, EntryPoint = "bgfx_save_screen_shot", CallingConvention = CallingConvention.Cdecl)]
         public static extern void SaveScreenShot (string filePath);
+
+        [DllImport(DllName, EntryPoint = "bgfx_create_index_buffer", CallingConvention = CallingConvention.Cdecl)]
+        public static extern IndexBufferHandle CreateIndexBuffer(MemoryHandle memory);
+
+        [DllImport(DllName, EntryPoint = "bgfx_destroy_index_buffer", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void DestroyIndexBuffer(IndexBufferHandle handle);
+
+        [DllImport(DllName, EntryPoint = "bgfx_create_vertex_buffer", CallingConvention = CallingConvention.Cdecl)]
+        public static extern VertexBufferHandle CreateVertexBuffer(MemoryHandle memory, ref VertexDecl decl);
+
+        [DllImport(DllName, EntryPoint = "bgfx_destroy_vertex_buffer", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void DestroyVertexBuffer(VertexBufferHandle handle);
+    }
+
+    public struct IndexBufferHandle {
+        ushort idx;
+    }
+
+    public struct VertexBufferHandle {
+        ushort idx;
+    }
+
+    public struct MemoryHandle {
+        IntPtr ptr;
     }
 }

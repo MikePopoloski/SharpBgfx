@@ -30,7 +30,7 @@ static class Program {
 
             // write some debug text
             Bgfx.DebugTextClear(0, false);
-            Bgfx.DebugTextWrite(0, 1, 0x4f, "SharpBgfx/Samples/HelloWorld");
+            Bgfx.DebugTextWrite(0, 1, 0x4f, "SharpBgfx/Samples/00-HelloWorld");
             Bgfx.DebugTextWrite(0, 2, 0x6f, "Description: Initialization and debug text.");
 
             // advance to the next frame. Rendering thread will be kicked to

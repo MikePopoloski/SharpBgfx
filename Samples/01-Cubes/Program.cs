@@ -20,6 +20,11 @@ static class Program {
         // set view 0 clear state
         Bgfx.SetViewClear(0, ClearFlags.ColorBit | ClearFlags.DepthBit, 0x303030ff, 1.0f, 0);
 
+        // create vertex and index buffers
+        PosColorVertex.Init();
+        var vbh = Bgfx.CreateVertexBuffer(Memory.Copy(cubeVertices), ref PosColorVertex.Decl);
+        var ibh = Bgfx.CreateIndexBuffer(Memory.Copy(cubeIndices));
+
         // main loop
         while (sample.ProcessEvents(ResetFlags.Vsync)) {
             // set view 0 viewport
@@ -30,8 +35,9 @@ static class Program {
 
             // write some debug text
             Bgfx.DebugTextClear(0, false);
-            Bgfx.DebugTextWrite(0, 1, 0x4f, "SharpBgfx/Samples/HelloWorld");
-            Bgfx.DebugTextWrite(0, 2, 0x6f, "Description: Initialization and debug text.");
+            Bgfx.DebugTextWrite(0, 1, 0x4f, "SharpBgfx/Samples/01-Cubes");
+            Bgfx.DebugTextWrite(0, 2, 0x6f, "Description: Rendering simple static mesh.");
+            Bgfx.DebugTextWrite(0, 3, 0x6f, string.Format("Frame: {0} ms", 0.0f));
 
             // advance to the next frame. Rendering thread will be kicked to
             // process submitted rendering primitives.
@@ -40,5 +46,55 @@ static class Program {
 
         // clean up
         Bgfx.Shutdown();
+    }
+
+    static readonly PosColorVertex[] cubeVertices = {
+        new PosColorVertex(-1.0f,  1.0f,  1.0f, 0xff000000),
+        new PosColorVertex( 1.0f,  1.0f,  1.0f, 0xff0000ff),
+        new PosColorVertex(-1.0f, -1.0f,  1.0f, 0xff00ff00),
+        new PosColorVertex( 1.0f, -1.0f,  1.0f, 0xff00ffff),
+        new PosColorVertex(-1.0f,  1.0f, -1.0f, 0xffff0000),
+        new PosColorVertex( 1.0f,  1.0f, -1.0f, 0xffff00ff),
+        new PosColorVertex(-1.0f, -1.0f, -1.0f, 0xffffff00),
+        new PosColorVertex( 1.0f, -1.0f, -1.0f, 0xffffffff)
+    };
+
+    static readonly ushort[] cubeIndices = {
+        0, 1, 2, // 0
+        1, 3, 2,
+        4, 6, 5, // 2
+        5, 6, 7,
+        0, 2, 4, // 4
+        4, 2, 6,
+        1, 5, 3, // 6
+        5, 7, 3,
+        0, 4, 1, // 8
+        4, 5, 1,
+        2, 3, 6, // 10
+        6, 3, 7
+    };
+}
+
+struct PosColorVertex {
+    float x;
+    float y;
+    float z;
+    uint abgr;
+
+    public PosColorVertex (float x, float y, float z, uint abgr) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.abgr = abgr;
+    }
+
+    public static VertexDecl Decl;
+
+    public static void Init () {
+        Decl = new VertexDecl();
+        Bgfx.VertexDeclBegin(ref Decl, RendererType.Null);
+        Bgfx.VertexDeclAdd(ref Decl, VertexAttribute.Position, 3, VertexAttributeType.Float, false, false);
+        Bgfx.VertexDeclAdd(ref Decl, VertexAttribute.Color0, 4, VertexAttributeType.UInt8, true, false);
+        Bgfx.VertexDeclEnd(ref Decl);
     }
 }
