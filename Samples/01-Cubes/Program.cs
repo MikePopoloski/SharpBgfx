@@ -1,6 +1,7 @@
 ﻿using System;
 using Common;
 using SharpBgfx;
+using SlimMath;
 
 static class Program {
     static void Main () {
@@ -9,7 +10,7 @@ static class Program {
         sample.Run(RenderThread);
     }
 
-    static void RenderThread (Sample sample) {
+    static unsafe void RenderThread (Sample sample) {
         // initialize the renderer
         Bgfx.Init(RendererType.OpenGL, IntPtr.Zero, IntPtr.Zero);
         Bgfx.Reset(sample.WindowWidth, sample.WindowHeight, ResetFlags.Vsync);
@@ -32,6 +33,11 @@ static class Program {
         while (sample.ProcessEvents(ResetFlags.Vsync)) {
             // set view 0 viewport
             Bgfx.SetViewRect(0, 0, 0, (ushort)sample.WindowWidth, (ushort)sample.WindowHeight);
+
+            // view transforms
+            var viewMatrix = Matrix.LookAtLH(new Vector3(0.0f, 0.0f, -35.0f), Vector3.Zero, Vector3.UnitY);
+            var projMatrix = Matrix.PerspectiveFovLH(60.0f, (float)sample.WindowWidth / sample.WindowHeight, 0.1f, 100.0f);
+            Bgfx.SetViewTransform(0, &viewMatrix.M11, &projMatrix.M11);
 
             // dummy draw call to make sure view 0 is cleared if no other draw calls are submitted
             Bgfx.Submit(0, 0);
