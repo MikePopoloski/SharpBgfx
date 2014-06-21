@@ -49,6 +49,7 @@ static class Program {
                     Bgfx.SetProgram(program);
                     Bgfx.SetVertexBuffer(vbh, 0, -1);
                     Bgfx.SetIndexBuffer(ibh, 0, -1);
+                    Bgfx.SetRenderState(RenderState.Default, 0);
 
                     // submit primitives
                     Bgfx.Submit(0, 0);

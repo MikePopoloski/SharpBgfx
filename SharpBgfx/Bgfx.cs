@@ -27,10 +27,10 @@ namespace SharpBgfx {
         public static extern void SetDebugMarker (string marker);
 
         [DllImport(DllName, EntryPoint = "bgfx_dbg_text_clear", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void DebugTextClear(byte color, bool smallText);
+        public static extern void DebugTextClear (byte color, bool smallText);
 
         [DllImport(DllName, EntryPoint = "bgfx_dbg_text_printf", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void DebugTextWrite(ushort x, ushort y, byte color, string text);
+        public static extern void DebugTextWrite (ushort x, ushort y, byte color, string text);
 
         [DllImport(DllName, EntryPoint = "bgfx_frame", CallingConvention = CallingConvention.Cdecl)]
         public static extern int Frame ();
@@ -119,16 +119,16 @@ namespace SharpBgfx {
         public static extern void SaveScreenShot (string filePath);
 
         [DllImport(DllName, EntryPoint = "bgfx_create_index_buffer", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IndexBufferHandle CreateIndexBuffer(MemoryHandle memory);
+        public static extern IndexBufferHandle CreateIndexBuffer (MemoryHandle memory);
 
         [DllImport(DllName, EntryPoint = "bgfx_destroy_index_buffer", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void DestroyIndexBuffer(IndexBufferHandle handle);
+        public static extern void DestroyIndexBuffer (IndexBufferHandle handle);
 
         [DllImport(DllName, EntryPoint = "bgfx_create_vertex_buffer", CallingConvention = CallingConvention.Cdecl)]
-        public static extern VertexBufferHandle CreateVertexBuffer(MemoryHandle memory, ref VertexDecl decl);
+        public static extern VertexBufferHandle CreateVertexBuffer (MemoryHandle memory, ref VertexDecl decl);
 
         [DllImport(DllName, EntryPoint = "bgfx_destroy_vertex_buffer", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void DestroyVertexBuffer(VertexBufferHandle handle);
+        public static extern void DestroyVertexBuffer (VertexBufferHandle handle);
 
         [DllImport(DllName, EntryPoint = "bgfx_create_shader", CallingConvention = CallingConvention.Cdecl)]
         public static extern ShaderHandle CreateShader (MemoryHandle memory);
@@ -143,12 +143,15 @@ namespace SharpBgfx {
         public static extern void DestroyProgram (ProgramHandle handle);
 
         [DllImport(DllName, EntryPoint = "bgfx_set_program", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void SetProgram(ProgramHandle handle);
+        public static extern void SetProgram (ProgramHandle handle);
 
         [DllImport(DllName, EntryPoint = "bgfx_set_index_buffer", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void SetIndexBuffer(IndexBufferHandle handle, int firstIndex, int count);
+        public static extern void SetIndexBuffer (IndexBufferHandle handle, int firstIndex, int count);
 
         [DllImport(DllName, EntryPoint = "bgfx_set_vertex_buffer", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void SetVertexBuffer(VertexBufferHandle handle, int startVertex, int count);
+        public static extern void SetVertexBuffer (VertexBufferHandle handle, int startVertex, int count);
+
+        [DllImport(DllName, EntryPoint = "bgfx_set_state", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void SetRenderState (RenderState state, uint rgba);
     }
 }
