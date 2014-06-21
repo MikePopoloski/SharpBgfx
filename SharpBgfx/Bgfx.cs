@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security;
-using System.Linq;
 
 namespace SharpBgfx {
     [SuppressUnmanagedCodeSecurity]
@@ -129,17 +129,26 @@ namespace SharpBgfx {
 
         [DllImport(DllName, EntryPoint = "bgfx_destroy_vertex_buffer", CallingConvention = CallingConvention.Cdecl)]
         public static extern void DestroyVertexBuffer(VertexBufferHandle handle);
-    }
 
-    public struct IndexBufferHandle {
-        ushort idx;
-    }
+        [DllImport(DllName, EntryPoint = "bgfx_create_shader", CallingConvention = CallingConvention.Cdecl)]
+        public static extern ShaderHandle CreateShader (MemoryHandle memory);
 
-    public struct VertexBufferHandle {
-        ushort idx;
-    }
+        [DllImport(DllName, EntryPoint = "bgfx_destroy_shader", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void DestroyShader (ShaderHandle handle);
 
-    public struct MemoryHandle {
-        IntPtr ptr;
+        [DllImport(DllName, EntryPoint = "bgfx_create_program", CallingConvention = CallingConvention.Cdecl)]
+        public static extern ProgramHandle CreateProgram (ShaderHandle vertexShader, ShaderHandle fragmentShader, bool destroyShaders);
+
+        [DllImport(DllName, EntryPoint = "bgfx_destroy_program", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void DestroyProgram (ProgramHandle handle);
+
+        [DllImport(DllName, EntryPoint = "bgfx_set_program", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void SetProgram(ProgramHandle handle);
+
+        [DllImport(DllName, EntryPoint = "bgfx_set_index_buffer", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void SetIndexBuffer(IndexBufferHandle handle, int firstIndex, int count);
+
+        [DllImport(DllName, EntryPoint = "bgfx_set_vertex_buffer", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void SetVertexBuffer(VertexBufferHandle handle, int startVertex, int count);
     }
 }

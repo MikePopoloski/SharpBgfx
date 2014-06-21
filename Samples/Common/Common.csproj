@@ -39,6 +39,7 @@
   <ItemGroup>
     <Compile Include="EventQueue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ResourceLoader.cs" />
     <Compile Include="Sample.cs" />
   </ItemGroup>
   <ItemGroup>

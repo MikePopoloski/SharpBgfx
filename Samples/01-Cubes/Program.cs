@@ -25,6 +25,9 @@ static class Program {
         var vbh = Bgfx.CreateVertexBuffer(Memory.Copy(cubeVertices), ref PosColorVertex.Decl);
         var ibh = Bgfx.CreateIndexBuffer(Memory.Copy(cubeIndices));
 
+        // load shaders
+        var program = ResourceLoader.LoadProgram("vs_cubes", "fs_cubes");
+
         // main loop
         while (sample.ProcessEvents(ResetFlags.Vsync)) {
             // set view 0 viewport
@@ -38,6 +41,19 @@ static class Program {
             Bgfx.DebugTextWrite(0, 1, 0x4f, "SharpBgfx/Samples/01-Cubes");
             Bgfx.DebugTextWrite(0, 2, 0x6f, "Description: Rendering simple static mesh.");
             Bgfx.DebugTextWrite(0, 3, 0x6f, string.Format("Frame: {0} ms", 0.0f));
+
+            // submit 11x11 cubes
+            for (int y = 0; y < 11; y++) {
+                for (int x = 0; x < 11; x++) {
+                    // set pipeline states
+                    Bgfx.SetProgram(program);
+                    Bgfx.SetVertexBuffer(vbh, 0, -1);
+                    Bgfx.SetIndexBuffer(ibh, 0, -1);
+
+                    // submit primitives
+                    Bgfx.Submit(0, 0);
+                }
+            }
 
             // advance to the next frame. Rendering thread will be kicked to
             // process submitted rendering primitives.
