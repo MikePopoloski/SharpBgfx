@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 
 namespace Common {
-    public class EventQueue {
+    class EventQueue {
         ConcurrentQueue<Event> queue = new ConcurrentQueue<Event>();
 
         public void Post (Event ev) {
@@ -17,14 +17,14 @@ namespace Common {
         }
     }
 
-    public enum EventType {
+    enum EventType {
         Exit,
         Key,
         Mouse,
         Size
     }
 
-    public class Event {
+    class Event {
         public EventType Type {
             get;
             private set;
@@ -35,7 +35,7 @@ namespace Common {
         }
     }
 
-    public class SizeEvent : Event {
+    class SizeEvent : Event {
         public int Width {
             get;
             private set;

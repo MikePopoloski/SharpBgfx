@@ -4,7 +4,7 @@ using SharpBgfx;
 
 static class Program {
     static void Main () {
-        var sample = new Sample("Draw Stress Test", 1280, 720);
+        var sample = new Sample("Hello World", 1280, 720);
         sample.Run(RenderThread);
     }
 
