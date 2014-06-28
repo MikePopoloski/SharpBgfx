@@ -19,4 +19,8 @@ namespace SharpBgfx {
     [StructLayout(LayoutKind.Sequential, Size = 2)]
     public struct ProgramHandle {
     }
+
+    [StructLayout(LayoutKind.Sequential, Size = 2)]
+    public struct TextureHandle {
+    }
 }

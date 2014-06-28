@@ -33,12 +33,13 @@ namespace Common {
             return Bgfx.CreateProgram(vsh, fsh, true);
         }
 
-        public static Mesh Load (string fileName) {
+        public static Mesh LoadMesh (string fileName) {
+            var path = Path.Combine("Assets/meshes/", fileName);
             var groups = new List<MeshGroup>();
             var group = new MeshGroup();
             var decl = new VertexDecl();
 
-            using (var stream = new ByteStream(File.ReadAllBytes(fileName))) {
+            using (var stream = new ByteStream(File.ReadAllBytes(path))) {
                 while (stream.RemainingBytes > 0) {
                     var tag = stream.Read<uint>();
                     if (tag == ChunkTagVB) {

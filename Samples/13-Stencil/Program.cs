@@ -19,7 +19,7 @@ static class Program {
         Bgfx.SetDebugFlags(DebugFlags.DisplayText);
 
         // set view 0 clear state
-        Bgfx.SetViewClear(0, ClearFlags.ColorBit | ClearFlags.DepthBit, 0x303030ff, 1.0f, 0);
+        Bgfx.SetViewClear(0, ClearFlags.ColorBit | ClearFlags.DepthBit, 0x30303000, 1.0f, 0);
 
         // create vertex and index buffers
         PosColorVertex.Init();
@@ -27,7 +27,19 @@ static class Program {
         var ibh = Bgfx.CreateIndexBuffer(MemoryBuffer.FromArray(cubeIndices));
 
         // load shaders
-        var program = ResourceLoader.LoadProgram("vs_cubes", "fs_cubes");
+        var programTextureLightning = ResourceLoader.LoadProgram("vs_stencil_texture_lightning", "fs_stencil_texture_lightning");
+        var programColorLightning = ResourceLoader.LoadProgram("vs_stencil_color_lightning", "fs_stencil_color_lightning");
+        var programColorTexture = ResourceLoader.LoadProgram("vs_stencil_color_texture", "fs_stencil_color_texture");
+        var programColorBlack = ResourceLoader.LoadProgram("vs_stencil_color", "fs_stencil_color_black");
+        var programTexture = ResourceLoader.LoadProgram("vs_stencil_texture", "fs_stencil_texture");
+
+        // load meshes
+        var bunnyMesh = ResourceLoader.LoadMesh("bunny.bin");
+        var columnMesh = ResourceLoader.LoadMesh("column.bin");
+        var hplaneMesh = new Mesh(MemoryBuffer.FromArray(StaticMeshes.HorizontalPlane), PosNormalTexcoordVertex.Decl, StaticMeshes.PlaneIndices);
+        var vplaneMesh = new Mesh(MemoryBuffer.FromArray(StaticMeshes.VerticalPlane), PosNormalTexcoordVertex.Decl, StaticMeshes.PlaneIndices);
+
+
 
         // start the frame clock
         var clock = new Clock();
@@ -35,6 +47,20 @@ static class Program {
 
         // main loop
         while (sample.ProcessEvents(ResetFlags.Vsync)) {
+            // tick the clock
+            var elapsed = clock.Frame();
+            var time = clock.TotalTime();
+
+            // write some debug text
+            Bgfx.DebugTextClear(0, false);
+            Bgfx.DebugTextWrite(0, 1, 0x4f, "SharpBgfx/Samples/13-Stencil");
+            Bgfx.DebugTextWrite(0, 2, 0x6f, "Description: Stencil reflections.");
+            Bgfx.DebugTextWrite(0, 3, 0x6f, string.Format("Frame: {0:F3} ms", elapsed * 1000));
+
+            // clear the view
+
+
+
             // set view 0 viewport
             Bgfx.SetViewRect(0, 0, 0, (ushort)sample.WindowWidth, (ushort)sample.WindowHeight);
 
@@ -42,38 +68,6 @@ static class Program {
             var viewMatrix = Matrix.LookAtLH(new Vector3(0.0f, 0.0f, -35.0f), Vector3.Zero, Vector3.UnitY);
             var projMatrix = Matrix.PerspectiveFovLH((float)Math.PI / 3, (float)sample.WindowWidth / sample.WindowHeight, 0.1f, 100.0f);
             Bgfx.SetViewTransform(0, &viewMatrix.M11, &projMatrix.M11);
-
-            // dummy draw call to make sure view 0 is cleared if no other draw calls are submitted
-            Bgfx.Submit(0, 0);
-
-            // tick the clock
-            var elapsed = clock.Frame();
-            var time = clock.TotalTime();
-
-            // write some debug text
-            Bgfx.DebugTextClear(0, false);
-            Bgfx.DebugTextWrite(0, 1, 0x4f, "SharpBgfx/Samples/01-Cubes");
-            Bgfx.DebugTextWrite(0, 2, 0x6f, "Description: Rendering simple static mesh.");
-            Bgfx.DebugTextWrite(0, 3, 0x6f, string.Format("Frame: {0:F3} ms", elapsed * 1000));
-
-            // submit 11x11 cubes
-            for (int y = 0; y < 11; y++) {
-                for (int x = 0; x < 11; x++) {
-                    // model matrix
-                    var transform = Matrix.RotationYawPitchRoll(time + x * 0.21f, time + y * 0.37f, 0.0f);
-                    transform.TranslationVector = new Vector3(-15.0f + x * 3.0f, -15.0f + y * 3.0f, 0.0f);
-                    Bgfx.SetTransform(&transform.M11, 1);
-
-                    // set pipeline states
-                    Bgfx.SetProgram(program);
-                    Bgfx.SetVertexBuffer(vbh, 0, -1);
-                    Bgfx.SetIndexBuffer(ibh, 0, -1);
-                    Bgfx.SetRenderState(RenderState.Default, 0);
-
-                    // submit primitives
-                    Bgfx.Submit(0, 0);
-                }
-            }
 
             // advance to the next frame. Rendering thread will be kicked to
             // process submitted rendering primitives.
@@ -83,7 +77,6 @@ static class Program {
         // clean up
         Bgfx.DestroyIndexBuffer(ibh);
         Bgfx.DestroyVertexBuffer(vbh);
-        Bgfx.DestroyProgram(program);
         Bgfx.Shutdown();
     }
 
@@ -112,28 +105,4 @@ static class Program {
         2, 3, 6, // 10
         6, 3, 7
     };
-}
-
-struct PosColorVertex {
-    float x;
-    float y;
-    float z;
-    uint abgr;
-
-    public PosColorVertex (float x, float y, float z, uint abgr) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
-        this.abgr = abgr;
-    }
-
-    public static VertexDecl Decl;
-
-    public static void Init () {
-        Decl = new VertexDecl();
-        Bgfx.VertexDeclBegin(ref Decl, RendererType.Null);
-        Bgfx.VertexDeclAdd(ref Decl, VertexAttribute.Position, 3, VertexAttributeType.Float, false, false);
-        Bgfx.VertexDeclAdd(ref Decl, VertexAttribute.Color0, 4, VertexAttributeType.UInt8, true, false);
-        Bgfx.VertexDeclEnd(ref Decl);
-    }
 }
