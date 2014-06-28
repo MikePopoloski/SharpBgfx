@@ -27,8 +27,8 @@ static class Program {
 
         // create vertex and index buffers
         PosColorVertex.Init();
-        var vbh = Bgfx.CreateVertexBuffer(Memory.Copy(cubeVertices), ref PosColorVertex.Decl);
-        var ibh = Bgfx.CreateIndexBuffer(Memory.Copy(cubeIndices));
+        var vbh = Bgfx.CreateVertexBuffer(MemoryBuffer.FromArray(cubeVertices), PosColorVertex.Decl);
+        var ibh = Bgfx.CreateIndexBuffer(MemoryBuffer.FromArray(cubeIndices));
 
         // load shaders
         var program = ResourceLoader.LoadProgram("vs_cubes", "fs_cubes");

@@ -41,23 +41,6 @@ namespace SharpBgfx {
         [DllImport(DllName, EntryPoint = "bgfx_win_set_hwnd", CallingConvention = CallingConvention.Cdecl)]
         public static extern void SetWindowHandle (IntPtr hwnd);
 
-        [DllImport(DllName, EntryPoint = "bgfx_get_renderer_name", CallingConvention = CallingConvention.Cdecl)]
-        static extern sbyte* GetRendererNameInternal (RendererType rendererType);
-
-        public static string GetRendererName (RendererType rendererType) {
-            return new string(GetRendererNameInternal(rendererType));
-        }
-
-        [DllImport(DllName, EntryPoint = "bgfx_get_supported_renderers", CallingConvention = CallingConvention.Cdecl)]
-        static extern byte GetSupportedRenderers (RendererType[] types);
-
-        public static RendererType[] GetSupportedRenderers () {
-            var types = new RendererType[Enum.GetValues(typeof(RendererType)).Length];
-            var count = GetSupportedRenderers(types);
-
-            return types.Take(count).ToArray();
-        }
-
         [DllImport(DllName, EntryPoint = "bgfx_vertex_decl_begin", CallingConvention = CallingConvention.Cdecl)]
         public static extern void VertexDeclBegin (ref VertexDecl decl, RendererType renderer);
 
@@ -69,15 +52,6 @@ namespace SharpBgfx {
 
         [DllImport(DllName, EntryPoint = "bgfx_vertex_decl_end", CallingConvention = CallingConvention.Cdecl)]
         public static extern void VertexDeclEnd (ref VertexDecl decl);
-
-        [DllImport(DllName, EntryPoint = "bgfx_alloc", CallingConvention = CallingConvention.Cdecl)]
-        public static extern MemoryHandle Alloc (int size);
-
-        [DllImport(DllName, EntryPoint = "bgfx_copy", CallingConvention = CallingConvention.Cdecl)]
-        public static extern MemoryHandle Copy (IntPtr data, int size);
-
-        [DllImport(DllName, EntryPoint = "bgfx_make_ref", CallingConvention = CallingConvention.Cdecl)]
-        public static extern MemoryHandle MakeRef (IntPtr data, int size);
 
         [DllImport(DllName, EntryPoint = "bgfx_set_view_name", CallingConvention = CallingConvention.Cdecl)]
         public static extern void SetViewName (byte id, string name);
@@ -127,20 +101,11 @@ namespace SharpBgfx {
         [DllImport(DllName, EntryPoint = "bgfx_save_screen_shot", CallingConvention = CallingConvention.Cdecl)]
         public static extern void SaveScreenShot (string filePath);
 
-        [DllImport(DllName, EntryPoint = "bgfx_create_index_buffer", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IndexBufferHandle CreateIndexBuffer (MemoryHandle memory);
-
         [DllImport(DllName, EntryPoint = "bgfx_destroy_index_buffer", CallingConvention = CallingConvention.Cdecl)]
         public static extern void DestroyIndexBuffer (IndexBufferHandle handle);
 
-        [DllImport(DllName, EntryPoint = "bgfx_create_vertex_buffer", CallingConvention = CallingConvention.Cdecl)]
-        public static extern VertexBufferHandle CreateVertexBuffer (MemoryHandle memory, ref VertexDecl decl);
-
         [DllImport(DllName, EntryPoint = "bgfx_destroy_vertex_buffer", CallingConvention = CallingConvention.Cdecl)]
         public static extern void DestroyVertexBuffer (VertexBufferHandle handle);
-
-        [DllImport(DllName, EntryPoint = "bgfx_create_shader", CallingConvention = CallingConvention.Cdecl)]
-        public static extern ShaderHandle CreateShader (MemoryHandle memory);
 
         [DllImport(DllName, EntryPoint = "bgfx_destroy_shader", CallingConvention = CallingConvention.Cdecl)]
         public static extern void DestroyShader (ShaderHandle handle);
@@ -162,5 +127,51 @@ namespace SharpBgfx {
 
         [DllImport(DllName, EntryPoint = "bgfx_set_state", CallingConvention = CallingConvention.Cdecl)]
         public static extern void SetRenderState (RenderState state, uint rgba);
+
+        public static string GetRendererName (RendererType rendererType) {
+            return new string(GetRendererNameInternal(rendererType));
+        }
+
+        public static RendererType[] GetSupportedRenderers () {
+            var types = new RendererType[Enum.GetValues(typeof(RendererType)).Length];
+            var count = GetSupportedRenderers(types);
+
+            return types.Take(count).ToArray();
+        }
+
+        public static IndexBufferHandle CreateIndexBuffer (MemoryBuffer memory) {
+            return CreateIndexBuffer(memory.Native);
+        }
+
+        public static VertexBufferHandle CreateVertexBuffer (MemoryBuffer memory, VertexDecl decl) {
+            return CreateVertexBuffer(memory.Native, ref decl);
+        }
+
+        public static ShaderHandle CreateShader (MemoryBuffer memory) {
+            return CreateShader(memory.Native);
+        }
+
+        // **** methods below are internal, since they're exposed by a wrapper to make them more convenient for .NET callers ****
+
+        [DllImport(DllName, EntryPoint = "bgfx_alloc", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern GraphicsMemory* Alloc (int size);
+
+        [DllImport(DllName, EntryPoint = "bgfx_copy", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern GraphicsMemory* Copy (IntPtr data, int size);
+
+        [DllImport(DllName, EntryPoint = "bgfx_get_renderer_name", CallingConvention = CallingConvention.Cdecl)]
+        static extern sbyte* GetRendererNameInternal (RendererType rendererType);
+
+        [DllImport(DllName, EntryPoint = "bgfx_get_supported_renderers", CallingConvention = CallingConvention.Cdecl)]
+        static extern byte GetSupportedRenderers (RendererType[] types);
+
+        [DllImport(DllName, EntryPoint = "bgfx_create_index_buffer", CallingConvention = CallingConvention.Cdecl)]
+        static extern IndexBufferHandle CreateIndexBuffer (GraphicsMemory* memory);
+
+        [DllImport(DllName, EntryPoint = "bgfx_create_vertex_buffer", CallingConvention = CallingConvention.Cdecl)]
+        static extern VertexBufferHandle CreateVertexBuffer (GraphicsMemory* memory, ref VertexDecl decl);
+
+        [DllImport(DllName, EntryPoint = "bgfx_create_shader", CallingConvention = CallingConvention.Cdecl)]
+        static extern ShaderHandle CreateShader (GraphicsMemory* memory);
     }
 }

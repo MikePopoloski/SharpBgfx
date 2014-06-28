@@ -19,9 +19,4 @@ namespace SharpBgfx {
     [StructLayout(LayoutKind.Sequential, Size = 2)]
     public struct ProgramHandle {
     }
-
-    // pointer to bgfx_memory_t
-    public struct MemoryHandle {
-        public IntPtr Ptr;
-    }
 }

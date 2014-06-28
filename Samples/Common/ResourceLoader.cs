@@ -3,11 +3,6 @@ using SharpBgfx;
 
 namespace Common {
     public static class ResourceLoader {
-        static MemoryHandle LoadMemory (string fileName) {
-            var bytes = File.ReadAllBytes(fileName);
-            return Memory.Copy(bytes);
-        }
-
         static string GetShaderPath () {
             switch (Bgfx.GetCurrentRenderer()) {
                 case RendererType.Direct3D11:
@@ -26,7 +21,7 @@ namespace Common {
 
         public static ShaderHandle LoadShader (string name) {
             var path = Path.Combine(GetShaderPath(), name) + ".bin";
-            var mem = LoadMemory(path);
+            var mem = MemoryBuffer.FromArray(File.ReadAllBytes(path));
             return Bgfx.CreateShader(mem);
         }
 
