@@ -26,6 +26,11 @@ namespace SharpBgfx {
             readPtr = null;
         }
 
+        public void Skip (int count) {
+            CheckBounds(count);
+            readPtr += count;
+        }
+
         /// <summary>
         /// Reads memory from the stream.
         /// </summary>

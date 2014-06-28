@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using SharpBgfx;
 
 namespace Common {
@@ -31,5 +32,64 @@ namespace Common {
 
             return Bgfx.CreateProgram(vsh, fsh, true);
         }
+
+        public static Mesh Load (string fileName) {
+            var groups = new List<MeshGroup>();
+            var group = new MeshGroup();
+            var decl = new VertexDecl();
+
+            using (var stream = new ByteStream(File.ReadAllBytes(fileName))) {
+                while (stream.RemainingBytes > 0) {
+                    var tag = stream.Read<uint>();
+                    if (tag == ChunkTagVB) {
+                        // skip bounding volume info
+                        stream.Skip(BoundingVolumeSize);
+
+                        decl = stream.Read<VertexDecl>();
+
+                        var vertexCount = stream.Read<ushort>();
+                        var vertexData = stream.ReadRange<byte>(vertexCount * decl.Stride);
+                        group.VertexBuffer = Bgfx.CreateVertexBuffer(MemoryBuffer.FromArray(vertexData), decl);
+                    }
+                    else if (tag == ChunkTagIB) {
+                        var indexCount = stream.Read<int>();
+                        var indexData = stream.ReadRange<ushort>(indexCount);
+                        group.IndexBuffer = Bgfx.CreateIndexBuffer(MemoryBuffer.FromArray(indexData));
+                    }
+                    else if (tag == ChunkTagPri) {
+                        // skip material name
+                        var len = stream.Read<ushort>();
+                        stream.Skip(len);
+
+                        // read primitive data
+                        var count = stream.Read<ushort>();
+                        for (int i = 0; i < count; i++) {
+                            // skip name
+                            len = stream.Read<ushort>();
+                            stream.Skip(len);
+
+                            var prim = stream.Read<Primitive>();
+                            group.Primitives.Add(prim);
+
+                            stream.Skip(BoundingVolumeSize);
+                        }
+
+                        groups.Add(group);
+                        group = new MeshGroup();
+                    }
+                }
+            }
+
+            return new Mesh(decl, groups);
+        }
+
+        static uint MakeFourCC (char a, char b, char c, char d) {
+            return a | ((uint)b << 8) | ((uint)c << 16) | ((uint)d << 24);
+        }
+
+        const int BoundingVolumeSize = 104;
+        static readonly uint ChunkTagVB = MakeFourCC('V', 'B', ' ', '\0');
+        static readonly uint ChunkTagIB = MakeFourCC('I', 'B', ' ', '\0');
+        static readonly uint ChunkTagPri = MakeFourCC('P', 'R', 'I', '\0');
     }
 }
