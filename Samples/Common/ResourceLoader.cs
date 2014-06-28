@@ -33,6 +33,12 @@ namespace Common {
             return Bgfx.CreateProgram(vsh, fsh, true);
         }
 
+        public static TextureHandle LoadTexture (string name) {
+            var path = Path.Combine("Assets/textures/", name);
+            var mem = MemoryBuffer.FromArray(File.ReadAllBytes(path));
+            return Bgfx.CreateTexture(mem, TextureFlags.None, 0);
+        }
+
         public static Mesh LoadMesh (string fileName) {
             var path = Path.Combine("Assets/meshes/", fileName);
             var groups = new List<MeshGroup>();

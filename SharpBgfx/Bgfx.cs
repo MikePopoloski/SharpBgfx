@@ -151,6 +151,11 @@ namespace SharpBgfx {
             return CreateShader(memory.Native);
         }
 
+        public static TextureHandle CreateTexture (MemoryBuffer memory, TextureFlags flags, byte skip) {
+            TextureInfo info;
+            return CreateTexture(memory.Native, flags, skip, out info);
+        }
+
         // **** methods below are internal, since they're exposed by a wrapper to make them more convenient for .NET callers ****
 
         [DllImport(DllName, EntryPoint = "bgfx_alloc", CallingConvention = CallingConvention.Cdecl)]
@@ -173,5 +178,11 @@ namespace SharpBgfx {
 
         [DllImport(DllName, EntryPoint = "bgfx_create_shader", CallingConvention = CallingConvention.Cdecl)]
         static extern ShaderHandle CreateShader (GraphicsMemory* memory);
+
+        [DllImport(DllName, EntryPoint = "bgfx_calc_texture_size", CallingConvention = CallingConvention.Cdecl)]
+        static extern void CalcTextureSize(ref TextureInfo info, ushort width, ushort height, ushort depth, byte mipCount, TextureFormat format);
+
+        [DllImport(DllName, EntryPoint = "bgfx_create_texture", CallingConvention = CallingConvention.Cdecl)]
+        static extern TextureHandle CreateTexture(GraphicsMemory * memory, TextureFlags flags, byte skip, out TextureInfo info);
     }
 }

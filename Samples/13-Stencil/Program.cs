@@ -39,7 +39,10 @@ static class Program {
         var hplaneMesh = new Mesh(MemoryBuffer.FromArray(StaticMeshes.HorizontalPlane), PosNormalTexcoordVertex.Decl, StaticMeshes.PlaneIndices);
         var vplaneMesh = new Mesh(MemoryBuffer.FromArray(StaticMeshes.VerticalPlane), PosNormalTexcoordVertex.Decl, StaticMeshes.PlaneIndices);
 
-
+        // load textures
+        var figureTex = ResourceLoader.LoadTexture("figure-rgba.dds");
+        var flareTex = ResourceLoader.LoadTexture("flare.dds");
+        var fieldstoneTex = ResourceLoader.LoadTexture("fieldstone-rgba.dds");
 
         // start the frame clock
         var clock = new Clock();

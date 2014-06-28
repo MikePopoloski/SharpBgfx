@@ -34,6 +34,48 @@ namespace SharpBgfx {
         Float
     }
 
+    public enum TextureFormat {
+        BC1,
+        BC2,
+        BC3,
+        BC4,
+        BC5,
+        ETC1,
+        ETC2,
+        ETC2A,
+        ETC2A1,
+        PTC12,
+        PTC14,
+        PTC12A,
+        PTC14A,
+        PTC22,
+        PTC24,
+
+        Unknown,
+
+        R8,
+        R16,
+        R16F,
+        BGRA8,
+        RGBA16,
+        RGBA16F,
+        R5G6B5,
+        RGBA4,
+        RGB5A1,
+        RGB10A2,
+
+        UnknownDepth,
+
+        D16,
+        D24,
+        D24S8,
+        D32,
+        D16F,
+        D24F,
+        D32F,
+        D0S8
+    }
+
     [Flags]
     public enum ResetFlags {
         None = 0,
@@ -157,5 +199,35 @@ namespace SharpBgfx {
             DepthTestLess |
             CullClockwise |
             Multisampling
+    }
+
+    [Flags]
+    public enum TextureFlags {
+        None = 0x00000000,
+        MirrorU = 0x00000001,
+        ClampU = 0x00000002,
+        MirrorV = 0x00000004,
+        ClampV = 0x00000008,
+        MirrorW = 0x00000010,
+        ClampW = 0x00000020,
+        MinFilterPoint = 0x00000040,
+        MinFilterAnisotropic = 0x00000080,
+        MagFilterPoint = 0x00000100,
+        MagFilterAnisotropic = 0x00000200,
+        MipFilterPoint = 0x00000400,
+        RenderTarget = 0x00001000,
+        RenderTargetMultisampleX2 = 0x00002000,
+        RenderTargetMultisampleX4 = 0x00003000,
+        RenderTargetMultisampleX8 = 0x00004000,
+        RenderTargetMultisampleX16 = 0x00005000,
+        RenderTargetBufferOnly = 0x00008000,
+        CompareLess = 0x00010000,
+        CompareLessEqual = 0x00020000,
+        CompareEqual = 0x00030000,
+        CompareGreaterEqual = 0x00040000,
+        CompareGreater = 0x00050000,
+        CompareNotEqual = 0x00060000,
+        CompareNever = 0x00070000,
+        CompareAlways = 0x00080000,
     }
 }
