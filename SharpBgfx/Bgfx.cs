@@ -89,6 +89,9 @@ namespace SharpBgfx {
         [DllImport(DllName, EntryPoint = "bgfx_set_transform", CallingConvention = CallingConvention.Cdecl)]
         public static extern int SetTransform (float* matrix, ushort count);
 
+        [DllImport(DllName, EntryPoint = "bgfx_set_stencil", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void SetStencil (StencilFlags frontFace, StencilFlags backFace);
+
         [DllImport(DllName, EntryPoint = "bgfx_submit", CallingConvention = CallingConvention.Cdecl)]
         public static extern int Submit (byte id, int depth);
 
@@ -180,9 +183,9 @@ namespace SharpBgfx {
         static extern ShaderHandle CreateShader (GraphicsMemory* memory);
 
         [DllImport(DllName, EntryPoint = "bgfx_calc_texture_size", CallingConvention = CallingConvention.Cdecl)]
-        static extern void CalcTextureSize(ref TextureInfo info, ushort width, ushort height, ushort depth, byte mipCount, TextureFormat format);
+        static extern void CalcTextureSize (ref TextureInfo info, ushort width, ushort height, ushort depth, byte mipCount, TextureFormat format);
 
         [DllImport(DllName, EntryPoint = "bgfx_create_texture", CallingConvention = CallingConvention.Cdecl)]
-        static extern TextureHandle CreateTexture(GraphicsMemory * memory, TextureFlags flags, byte skip, out TextureInfo info);
+        static extern TextureHandle CreateTexture (GraphicsMemory* memory, TextureFlags flags, byte skip, out TextureInfo info);
     }
 }

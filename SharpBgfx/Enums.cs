@@ -230,4 +230,41 @@ namespace SharpBgfx {
         CompareNever = 0x00070000,
         CompareAlways = 0x00080000,
     }
+
+    [Flags]
+    public enum StencilFlags {
+        None = 0,
+        TestLess = 0x00010000,
+        TestLessEqual = 0x00020000,
+        TestEqual = 0x00030000,
+        TestGreaterEqual = 0x00040000,
+        TestGreater = 0x00050000,
+        TestNotEqual = 0x00060000,
+        TestNever = 0x00070000,
+        TestAlways = 0x00080000,
+        FailSZero = 0x00000000,
+        FailSKeep = 0x00100000,
+        FailSReplace = 0x00200000,
+        FailSIncrement = 0x00300000,
+        FailSIncrementSaturate = 0x00400000,
+        FailSDecrement = 0x00500000,
+        FailSDecrementSaturate = 0x00600000,
+        FailSInvert = 0x00700000,
+        FailZZero = 0x00000000,
+        FailZKeep = 0x01000000,
+        FailZReplace = 0x02000000,
+        FailZIncrement = 0x03000000,
+        FailZIncrementSaturate = 0x04000000,
+        FailZDecrement = 0x05000000,
+        FailZDecrementSaturate = 0x06000000,
+        FailZInvert = 0x07000000,
+        PassZZero = 0x00000000,
+        PassZKeep = 0x10000000,
+        PassZReplace = 0x20000000,
+        PassZIncrement = 0x30000000,
+        PassZIncrementSaturate = 0x40000000,
+        PassZDecrement = 0x50000000,
+        PassZDecrementSaturate = 0x60000000,
+        PassZInvert = 0x70000000
+    }
 }
