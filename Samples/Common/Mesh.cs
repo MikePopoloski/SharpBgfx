@@ -8,6 +8,10 @@ using SharpBgfx;
 using SlimMath;
 
 namespace Common {
+    public interface IUniformGroup {
+        void SubmitPerDrawUniforms();
+    }
+
     public class Mesh : IDisposable {
         VertexDecl vertexDecl;
         List<MeshGroup> groups;
@@ -26,8 +30,11 @@ namespace Common {
             this.groups = groups;
         }
 
-        public unsafe void Submit (byte viewId, ProgramHandle program, Matrix transform, RenderState state) {
+        public unsafe void Submit (byte viewId, ProgramHandle program, Matrix transform, RenderState state, IUniformGroup uniforms) {
             foreach (var group in groups) {
+                if (uniforms != null)
+                    uniforms.SubmitPerDrawUniforms();
+
                 Bgfx.SetTransform(&transform.M11, 1);
                 Bgfx.SetProgram(program);
                 Bgfx.SetIndexBuffer(group.IndexBuffer, 0, -1);

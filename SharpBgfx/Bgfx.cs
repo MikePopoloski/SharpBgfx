@@ -93,7 +93,7 @@ namespace SharpBgfx {
         public static extern void SetStencil (StencilFlags frontFace, StencilFlags backFace);
 
         [DllImport(DllName, EntryPoint = "bgfx_submit", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int Submit (byte id, int depth);
+        public static extern int Submit (byte id, int depth = 0);
 
         [DllImport(DllName, EntryPoint = "bgfx_submit_mask", CallingConvention = CallingConvention.Cdecl)]
         public static extern int SubmitMask (int viewMask, int depth);
@@ -130,6 +130,20 @@ namespace SharpBgfx {
 
         [DllImport(DllName, EntryPoint = "bgfx_set_state", CallingConvention = CallingConvention.Cdecl)]
         public static extern void SetRenderState (RenderState state, uint rgba);
+
+        [DllImport(DllName, EntryPoint = "bgfx_create_uniform", CallingConvention = CallingConvention.Cdecl)]
+        public static extern UniformHandle CreateUniform (string name, UniformType type, ushort arraySize = 1);
+
+        [DllImport(DllName, EntryPoint = "bgfx_destroy_uniform", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void DestroyUniform (UniformHandle handle);
+
+        [DllImport(DllName, EntryPoint = "bgfx_set_uniform", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void SetUniform (UniformHandle handle, void* value, ushort arraySize = 1);
+
+        [DllImport(DllName, EntryPoint = "bgfx_destroy_texture", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void DestroyTexture (TextureHandle handle);
+
+        // **** wrapper methods for convenience ****
 
         public static string GetRendererName (RendererType rendererType) {
             return new string(GetRendererNameInternal(rendererType));

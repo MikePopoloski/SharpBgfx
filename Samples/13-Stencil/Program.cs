@@ -18,14 +18,6 @@ static class Program {
         // enable debug text
         Bgfx.SetDebugFlags(DebugFlags.DisplayText);
 
-        // set view 0 clear state
-        Bgfx.SetViewClear(0, ClearFlags.ColorBit | ClearFlags.DepthBit, 0x30303000, 1.0f, 0);
-
-        // create vertex and index buffers
-        PosColorVertex.Init();
-        var vbh = Bgfx.CreateVertexBuffer(MemoryBuffer.FromArray(cubeVertices), PosColorVertex.Decl);
-        var ibh = Bgfx.CreateIndexBuffer(MemoryBuffer.FromArray(cubeIndices));
-
         // load shaders
         var programTextureLightning = ResourceLoader.LoadProgram("vs_stencil_texture_lightning", "fs_stencil_texture_lightning");
         var programColorLightning = ResourceLoader.LoadProgram("vs_stencil_color_lightning", "fs_stencil_color_lightning");
@@ -34,6 +26,7 @@ static class Program {
         var programTexture = ResourceLoader.LoadProgram("vs_stencil_texture", "fs_stencil_texture");
 
         // load meshes
+        PosNormalTexcoordVertex.Init();
         var bunnyMesh = ResourceLoader.LoadMesh("bunny.bin");
         var columnMesh = ResourceLoader.LoadMesh("column.bin");
         var hplaneMesh = new Mesh(MemoryBuffer.FromArray(StaticMeshes.HorizontalPlane), PosNormalTexcoordVertex.Decl, StaticMeshes.PlaneIndices);
@@ -43,6 +36,10 @@ static class Program {
         var figureTex = ResourceLoader.LoadTexture("figure-rgba.dds");
         var flareTex = ResourceLoader.LoadTexture("flare.dds");
         var fieldstoneTex = ResourceLoader.LoadTexture("fieldstone-rgba.dds");
+
+        // create uniforms
+        var uniforms = new Uniforms();
+        uniforms.SetConstUniforms();
 
         // start the frame clock
         var clock = new Clock();
@@ -61,16 +58,14 @@ static class Program {
             Bgfx.DebugTextWrite(0, 3, 0x6f, string.Format("Frame: {0:F3} ms", elapsed * 1000));
 
             // clear the view
+            ClearView(0, ClearFlags.ColorBit | ClearFlags.DepthBit | ClearFlags.StencilBit, sample.WindowWidth, sample.WindowHeight);
+            Bgfx.Submit(0);
 
+            // draw ground plane
+            //hplaneMesh.Submit(PassId0, programColorBlack, FloorTransform, GetRenderState(PrebuiltRenderState.CraftStencil));
 
-
-            // set view 0 viewport
-            Bgfx.SetViewRect(0, 0, 0, (ushort)sample.WindowWidth, (ushort)sample.WindowHeight);
-
-            // view transforms
-            var viewMatrix = Matrix.LookAtLH(new Vector3(0.0f, 0.0f, -35.0f), Vector3.Zero, Vector3.UnitY);
-            var projMatrix = Matrix.PerspectiveFovLH((float)Math.PI / 3, (float)sample.WindowWidth / sample.WindowHeight, 0.1f, 100.0f);
-            Bgfx.SetViewTransform(0, &viewMatrix.M11, &projMatrix.M11);
+            // clear depth from previous pass
+            //ClearView(PassId1, ClearFlags.DepthBit);
 
             // advance to the next frame. Rendering thread will be kicked to
             // process submitted rendering primitives.
@@ -78,34 +73,38 @@ static class Program {
         }
 
         // clean up
-        Bgfx.DestroyIndexBuffer(ibh);
-        Bgfx.DestroyVertexBuffer(vbh);
+        uniforms.Dispose();
+
+        bunnyMesh.Dispose();
+        columnMesh.Dispose();
+        hplaneMesh.Dispose();
+        vplaneMesh.Dispose();
+
+        Bgfx.DestroyTexture(figureTex);
+        Bgfx.DestroyTexture(fieldstoneTex);
+        Bgfx.DestroyTexture(flareTex);
+
+        Bgfx.DestroyProgram(programTextureLightning);
+        Bgfx.DestroyProgram(programColorLightning);
+        Bgfx.DestroyProgram(programColorTexture);
+        Bgfx.DestroyProgram(programColorBlack);
+        Bgfx.DestroyProgram(programTexture);
+
         Bgfx.Shutdown();
     }
 
-    static readonly PosColorVertex[] cubeVertices = {
-        new PosColorVertex(-1.0f,  1.0f,  1.0f, 0xff000000),
-        new PosColorVertex( 1.0f,  1.0f,  1.0f, 0xff0000ff),
-        new PosColorVertex(-1.0f, -1.0f,  1.0f, 0xff00ff00),
-        new PosColorVertex( 1.0f, -1.0f,  1.0f, 0xff00ffff),
-        new PosColorVertex(-1.0f,  1.0f, -1.0f, 0xffff0000),
-        new PosColorVertex( 1.0f,  1.0f, -1.0f, 0xffff00ff),
-        new PosColorVertex(-1.0f, -1.0f, -1.0f, 0xffffff00),
-        new PosColorVertex( 1.0f, -1.0f, -1.0f, 0xffffffff)
-    };
+    static void ClearView (byte pass, ClearFlags flags, int width, int height) {
+        Bgfx.SetViewClear(pass, flags, 0x30303000, 1.0f, 0);
+        Bgfx.SetViewRect(pass, 0, 0, (ushort)width, (ushort)height);
+    }
 
-    static readonly ushort[] cubeIndices = {
-        0, 1, 2, // 0
-        1, 3, 2,
-        4, 6, 5, // 2
-        5, 6, 7,
-        0, 2, 4, // 4
-        4, 2, 6,
-        1, 5, 3, // 6
-        5, 7, 3,
-        0, 4, 1, // 8
-        4, 5, 1,
-        2, 3, 6, // 10
-        6, 3, 7
-    };
+    static RenderState GetRenderState (PrebuiltRenderState selector) {
+        return RenderStateGroup.Groups[selector].State;
+    }
+
+    static readonly Matrix FloorTransform = Matrix.Scaling(20.0f);
+
+    const byte PassId0 = 1;
+    const byte PassId1 = 2;
+    const byte PassId2 = 3;
 }

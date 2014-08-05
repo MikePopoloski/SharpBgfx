@@ -76,6 +76,18 @@ namespace SharpBgfx {
         D0S8
     }
 
+    public enum UniformType {
+        Int,
+        Float,
+        Int1Array,
+        Float1Array,
+        Float2Array,
+        Float3Array,
+        Float4Array,
+        Matrix3x3Array,
+        Matrix4x4Array
+    }
+
     [Flags]
     public enum ResetFlags {
         None = 0,
