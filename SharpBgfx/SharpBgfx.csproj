@@ -38,14 +38,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bgfx.cs" />
+    <Compile Include="DynamicIndexBuffer.cs" />
+    <Compile Include="DynamicVertexBuffer.cs" />
     <Compile Include="Enums.cs" />
-    <Compile Include="Handles.cs" />
     <Compile Include="Helpers.cs" />
-    <Compile Include="MemoryBuffer.cs" />
-    <Compile Include="ByteStream.cs" />
+    <Compile Include="IndexBuffer.cs" />
+    <Compile Include="MemoryBlock.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RewriteStubs.cs" />
+    <Compile Include="Shader.cs" />
     <Compile Include="Structs.cs" />
+    <Compile Include="Texture.cs" />
+    <Compile Include="Uniform.cs" />
+    <Compile Include="VertexBuffer.cs" />
+    <Compile Include="VertexDeclaration.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\External\bgfx\bgfx.dll">
@@ -55,7 +61,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>$(SolutionDir)ILRewriter\bin\$(ConfigurationName)\ILRewriter.exe $(TargetPath)</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

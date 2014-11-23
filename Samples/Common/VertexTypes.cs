@@ -18,14 +18,14 @@ namespace Common {
             this.abgr = abgr;
         }
 
-        public static VertexDecl Decl;
+        public static VertexDeclaration Decl;
 
         public static void Init () {
-            Decl = new VertexDecl();
-            Bgfx.VertexDeclBegin(ref Decl, RendererType.Null);
-            Bgfx.VertexDeclAdd(ref Decl, VertexAttribute.Position, 3, VertexAttributeType.Float, false, false);
-            Bgfx.VertexDeclAdd(ref Decl, VertexAttribute.Color0, 4, VertexAttributeType.UInt8, true, false);
-            Bgfx.VertexDeclEnd(ref Decl);
+            Decl = new VertexDeclaration();
+            Decl.Begin()
+                .Add(VertexAttribute.Position, 3, VertexAttributeType.Float)
+                .Add(VertexAttribute.Color0, 4, VertexAttributeType.UInt8, true)
+                .End();
         }
     }
 
@@ -46,15 +46,15 @@ namespace Common {
             this.v = v;
         }
 
-        public static VertexDecl Decl;
+        public static VertexDeclaration Decl;
 
         public static void Init () {
-            Decl = new VertexDecl();
-            Bgfx.VertexDeclBegin(ref Decl, RendererType.Null);
-            Bgfx.VertexDeclAdd(ref Decl, VertexAttribute.Position, 3, VertexAttributeType.Float, false, false);
-            Bgfx.VertexDeclAdd(ref Decl, VertexAttribute.Normal, 4, VertexAttributeType.UInt8, true, true);
-            Bgfx.VertexDeclAdd(ref Decl, VertexAttribute.TexCoord0, 2, VertexAttributeType.Float, false, false);
-            Bgfx.VertexDeclEnd(ref Decl);
+            Decl = new VertexDeclaration();
+            Decl.Begin()
+                .Add(VertexAttribute.Position, 3, VertexAttributeType.Float)
+                .Add(VertexAttribute.Normal, 4, VertexAttributeType.UInt8, true, true)
+                .Add(VertexAttribute.TexCoord0, 2, VertexAttributeType.Float)
+                .End();
         }
     };
 }

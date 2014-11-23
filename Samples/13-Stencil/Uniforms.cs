@@ -8,14 +8,14 @@ using SlimMath;
 unsafe class Uniforms : IDisposable {
     const int MaxLights = 5;
 
-    UniformHandle parametersHandle;
-    UniformHandle ambientHandle;
-    UniformHandle diffuseHandle;
-    UniformHandle specularHandle;
-    UniformHandle colorHandle;
-    UniformHandle timeHandle;
-    UniformHandle lightPosRadiusHandle;
-    UniformHandle lightRgbInnerRHandle;
+    Uniform parametersHandle;
+    Uniform ambientHandle;
+    Uniform diffuseHandle;
+    Uniform specularHandle;
+    Uniform colorHandle;
+    Uniform timeHandle;
+    Uniform lightPosRadiusHandle;
+    Uniform lightRgbInnerRHandle;
 
     public bool AmbientPass {
         get;
@@ -43,14 +43,14 @@ unsafe class Uniforms : IDisposable {
     }
 
     public Uniforms () {
-        parametersHandle = Bgfx.CreateUniform("u_params", UniformType.Float4Array);
-        ambientHandle = Bgfx.CreateUniform("u_ambient", UniformType.Float4Array);
-        diffuseHandle = Bgfx.CreateUniform("u_diffuse", UniformType.Float4Array);
-        specularHandle = Bgfx.CreateUniform("u_specular_shininess", UniformType.Float4Array);
-        colorHandle = Bgfx.CreateUniform("u_color", UniformType.Float4Array);
-        timeHandle = Bgfx.CreateUniform("u_time", UniformType.Float);
-        lightPosRadiusHandle = Bgfx.CreateUniform("u_lightPosRadius", UniformType.Float4Array, MaxLights);
-        lightRgbInnerRHandle = Bgfx.CreateUniform("u_lightRgbInnerR", UniformType.Float4Array, MaxLights);
+        parametersHandle = new Uniform("u_params", UniformType.Float4Array);
+        ambientHandle = new Uniform("u_ambient", UniformType.Float4Array);
+        diffuseHandle = new Uniform("u_diffuse", UniformType.Float4Array);
+        specularHandle = new Uniform("u_specular_shininess", UniformType.Float4Array);
+        colorHandle = new Uniform("u_color", UniformType.Float4Array);
+        timeHandle = new Uniform("u_time", UniformType.Float);
+        lightPosRadiusHandle = new Uniform("u_lightPosRadius", UniformType.Float4Array, MaxLights);
+        lightRgbInnerRHandle = new Uniform("u_lightRgbInnerR", UniformType.Float4Array, MaxLights);
     }
 
     public void SetConstUniforms () {
@@ -80,13 +80,13 @@ unsafe class Uniforms : IDisposable {
     }
 
     public void Dispose () {
-        Bgfx.DestroyUniform(parametersHandle);
-        Bgfx.DestroyUniform(ambientHandle);
-        Bgfx.DestroyUniform(diffuseHandle);
-        Bgfx.DestroyUniform(specularHandle);
-        Bgfx.DestroyUniform(colorHandle);
-        Bgfx.DestroyUniform(timeHandle);
-        Bgfx.DestroyUniform(lightPosRadiusHandle);
-        Bgfx.DestroyUniform(lightRgbInnerRHandle);
+        parametersHandle.Dispose();
+        ambientHandle.Dispose();
+        diffuseHandle.Dispose();
+        specularHandle.Dispose();
+        colorHandle.Dispose();
+        timeHandle.Dispose();
+        lightPosRadiusHandle.Dispose();
+        lightRgbInnerRHandle.Dispose();
     }
 }

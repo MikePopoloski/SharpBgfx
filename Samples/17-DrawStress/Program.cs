@@ -16,7 +16,7 @@ static class Program {
 
     static unsafe void RenderThread (Sample sample) {
         // initialize the renderer
-        Bgfx.Init(RendererType.OpenGL, IntPtr.Zero, IntPtr.Zero);
+        Bgfx.Init(RendererBackend.OpenGL);
         Bgfx.Reset(sample.WindowWidth, sample.WindowHeight, ResetFlags.None);
 
         // enable debug text
@@ -27,8 +27,8 @@ static class Program {
 
         // create vertex and index buffers
         PosColorVertex.Init();
-        var vbh = Bgfx.CreateVertexBuffer(MemoryBuffer.FromArray(cubeVertices), PosColorVertex.Decl);
-        var ibh = Bgfx.CreateIndexBuffer(MemoryBuffer.FromArray(cubeIndices));
+        var vbh = new VertexBuffer(MemoryBlock.FromArray(cubeVertices), PosColorVertex.Decl);
+        var ibh = new IndexBuffer(MemoryBlock.FromArray(cubeIndices));
 
         // load shaders
         var program = ResourceLoader.LoadProgram("vs_cubes", "fs_cubes");
@@ -111,9 +111,9 @@ static class Program {
         }
 
         // clean up
-        Bgfx.DestroyIndexBuffer(ibh);
-        Bgfx.DestroyVertexBuffer(vbh);
-        Bgfx.DestroyProgram(program);
+        ibh.Dispose();
+        vbh.Dispose();
+        program.Dispose();
         Bgfx.Shutdown();
     }
 

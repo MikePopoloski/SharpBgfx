@@ -1,12 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30501.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpBgfx", "SharpBgfx\SharpBgfx.csproj", "{4DE918D2-89AB-433D-9F22-BE0407FF0E59}"
-	ProjectSection(ProjectDependencies) = postProject
-		{4D382D22-1187-40BC-A20A-3C523B5F65AE} = {4D382D22-1187-40BC-A20A-3C523B5F65AE}
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Samples\Common\Common.csproj", "{921FCA6C-C4FB-432C-90F5-2D38E8EEACB4}"
 EndProject
@@ -19,8 +16,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "17-DrawStress", "Samples\17-DrawStress\17-DrawStress.csproj", "{50AEDE2D-1B98-4E38-8299-9BAF02DCE2A5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "13-Stencil", "Samples\13-Stencil\13-Stencil.csproj", "{8CC1BD0C-B08A-4A0C-B8EF-68C2040F48E1}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ILRewriter", "ILRewriter\ILRewriter.csproj", "{4D382D22-1187-40BC-A20A-3C523B5F65AE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -52,10 +47,6 @@ Global
 		{8CC1BD0C-B08A-4A0C-B8EF-68C2040F48E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8CC1BD0C-B08A-4A0C-B8EF-68C2040F48E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8CC1BD0C-B08A-4A0C-B8EF-68C2040F48E1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4D382D22-1187-40BC-A20A-3C523B5F65AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4D382D22-1187-40BC-A20A-3C523B5F65AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4D382D22-1187-40BC-A20A-3C523B5F65AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4D382D22-1187-40BC-A20A-3C523B5F65AE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

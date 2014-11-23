@@ -11,7 +11,7 @@ static class Program {
 
     static void RenderThread (Sample sample) {
         // initialize the renderer
-        Bgfx.Init(RendererType.OpenGL, IntPtr.Zero, IntPtr.Zero);
+        Bgfx.Init(RendererBackend.OpenGL);
         Bgfx.Reset(sample.WindowWidth, sample.WindowHeight, ResetFlags.Vsync);
 
         // enable debug text

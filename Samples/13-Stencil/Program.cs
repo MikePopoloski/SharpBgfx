@@ -12,7 +12,7 @@ static class Program {
 
     static unsafe void RenderThread (Sample sample) {
         // initialize the renderer
-        Bgfx.Init(RendererType.OpenGL, IntPtr.Zero, IntPtr.Zero);
+        Bgfx.Init(RendererBackend.OpenGL);
         Bgfx.Reset(sample.WindowWidth, sample.WindowHeight, ResetFlags.Vsync);
 
         // enable debug text
@@ -27,10 +27,10 @@ static class Program {
 
         // load meshes
         PosNormalTexcoordVertex.Init();
-        var bunnyMesh = ResourceLoader.LoadMesh("bunny.bin");
-        var columnMesh = ResourceLoader.LoadMesh("column.bin");
-        var hplaneMesh = new Mesh(MemoryBuffer.FromArray(StaticMeshes.HorizontalPlane), PosNormalTexcoordVertex.Decl, StaticMeshes.PlaneIndices);
-        var vplaneMesh = new Mesh(MemoryBuffer.FromArray(StaticMeshes.VerticalPlane), PosNormalTexcoordVertex.Decl, StaticMeshes.PlaneIndices);
+        //var bunnyMesh = ResourceLoader.LoadMesh("bunny.bin");
+        //var columnMesh = ResourceLoader.LoadMesh("column.bin");
+        //var hplaneMesh = new Mesh(MemoryBuffer.FromArray(StaticMeshes.HorizontalPlane), PosNormalTexcoordVertex.Decl, StaticMeshes.PlaneIndices);
+        //var vplaneMesh = new Mesh(MemoryBuffer.FromArray(StaticMeshes.VerticalPlane), PosNormalTexcoordVertex.Decl, StaticMeshes.PlaneIndices);
 
         // load textures
         var figureTex = ResourceLoader.LoadTexture("figure-rgba.dds");
@@ -75,20 +75,20 @@ static class Program {
         // clean up
         uniforms.Dispose();
 
-        bunnyMesh.Dispose();
-        columnMesh.Dispose();
-        hplaneMesh.Dispose();
-        vplaneMesh.Dispose();
+        //bunnyMesh.Dispose();
+        //columnMesh.Dispose();
+        //hplaneMesh.Dispose();
+        //vplaneMesh.Dispose();
 
-        Bgfx.DestroyTexture(figureTex);
-        Bgfx.DestroyTexture(fieldstoneTex);
-        Bgfx.DestroyTexture(flareTex);
+        figureTex.Dispose();
+        fieldstoneTex.Dispose();
+        flareTex.Dispose();
 
-        Bgfx.DestroyProgram(programTextureLightning);
-        Bgfx.DestroyProgram(programColorLightning);
-        Bgfx.DestroyProgram(programColorTexture);
-        Bgfx.DestroyProgram(programColorBlack);
-        Bgfx.DestroyProgram(programTexture);
+        programTextureLightning.Dispose();
+        programColorLightning.Dispose();
+        programColorTexture.Dispose();
+        programColorBlack.Dispose();
+        programTexture.Dispose();
 
         Bgfx.Shutdown();
     }

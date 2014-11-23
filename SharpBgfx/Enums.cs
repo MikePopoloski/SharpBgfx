@@ -1,11 +1,11 @@
 ﻿using System;
 
 namespace SharpBgfx {
-    public enum RendererType {
+    public enum RendererBackend {
         Null,
         Direct3D9,
         Direct3D11,
-        OpenGLES,
+        OpenGLES = 4,
         OpenGL
     }
 
@@ -163,6 +163,12 @@ namespace SharpBgfx {
             TextureFormatD32 |
             TextureFormatD32F |
             TextureFormatD0S8
+    }
+
+    public enum TextureFormatSupport {
+        Unsupported,
+        Supported,
+        Emulated
     }
 
     [Flags]
