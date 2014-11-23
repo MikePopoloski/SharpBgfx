@@ -39,7 +39,7 @@ class RenderStateGroup {
             RenderState.DepthTestLess |
             RenderState.CullClockwise |
             RenderState.Multisampling |
-            RenderStates.BlendAlpha,
+            RenderState.BlendAlpha,
             uint.MaxValue,
             StencilFlags.TestEqual |
             StencilBits.ReferenceValue(1) |
@@ -53,7 +53,7 @@ class RenderStateGroup {
             RenderState.ColorWrite |
             RenderState.DepthWrite |
             RenderState.DepthTestLess |
-            RenderStates.BlendFunction(RenderState.BlendOne, RenderState.BlendSourceColor) |
+            RenderState.BlendFunction(RenderState.BlendOne, RenderState.BlendSourceColor) |
             RenderState.CullCounterclockwise |
             RenderState.Multisampling,
             uint.MaxValue,

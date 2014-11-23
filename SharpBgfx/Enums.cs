@@ -173,54 +173,6 @@ namespace SharpBgfx {
     }
 
     [Flags]
-    public enum RenderState : long {
-        None = 0,
-        ColorWrite = 0x0000000000000001,
-        AlphaWrite = 0x0000000000000002,
-        DepthWrite = 0x0000000000000004,
-        DepthTestLess = 0x0000000000000010,
-        DepthTestLessEqual = 0x0000000000000020,
-        DepthTestEqual = 0x0000000000000030,
-        DepthTestGreaterEqual = 0x0000000000000040,
-        DepthTestGreater = 0x0000000000000050,
-        DepthTestNotEqual = 0x0000000000000060,
-        DepthTestNever = 0x0000000000000070,
-        DepthTestAlways = 0x0000000000000080,
-        BlendZero = 0x0000000000001000,
-        BlendOne = 0x0000000000002000,
-        BlendSourceColor = 0x0000000000003000,
-        BlendInvSourceColor = 0x0000000000004000,
-        BlendSourceAlpha = 0x0000000000005000,
-        BlendInvSourceAlpha = 0x0000000000006000,
-        BlendDestAlpha = 0x0000000000007000,
-        BlendInvDestAlpha = 0x0000000000008000,
-        BlendDestColor = 0x0000000000009000,
-        BlendInvDestColor = 0x000000000000a000,
-        BlendSourceAlphaSaturate = 0x000000000000b000,
-        BlendFactor = 0x000000000000c000,
-        BlendInvFactor = 0x000000000000d000,
-        BlendEquationSub = 0x0000000010000000,
-        BlendEquationReverseSub = 0x0000000020000000,
-        BlendEquationMin = 0x0000000030000000,
-        BlendEquationMax = 0x0000000040000000,
-        BlendIndependent = 0x0000000400000000,
-        CullClockwise = 0x0000001000000000,
-        CullCounterclockwise = 0x0000002000000000,
-        PrimitiveLineStrip = 0x0001000000000000,
-        PrimitiveLines = 0x0002000000000000,
-        PrimitivePoints = 0x0003000000000000,
-        Multisampling = 0x1000000000000000,
-
-        Default =
-            ColorWrite |
-            AlphaWrite |
-            DepthWrite |
-            DepthTestLess |
-            CullClockwise |
-            Multisampling
-    }
-
-    [Flags]
     public enum TextureFlags {
         None = 0x00000000,
         MirrorU = 0x00000001,
