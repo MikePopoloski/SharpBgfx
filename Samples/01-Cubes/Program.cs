@@ -66,8 +66,8 @@ static class Program {
 
                     // set pipeline states
                     Bgfx.SetProgram(program);
-                    Bgfx.SetVertexBuffer(vbh, 0, -1);
-                    Bgfx.SetIndexBuffer(ibh, 0, -1);
+                    Bgfx.SetVertexBuffer(vbh);
+                    Bgfx.SetIndexBuffer(ibh);
                     Bgfx.SetRenderState(RenderState.Default, 0);
 
                     // submit primitives

@@ -13,6 +13,7 @@ namespace SharpBgfx {
         Position,
         Normal,
         Tangent,
+        Bitangent,
         Color0,
         Color1,
         Indices,
