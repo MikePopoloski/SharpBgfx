@@ -6,10 +6,12 @@ using System.Security;
 namespace SharpBgfx {
     [SuppressUnmanagedCodeSecurity]
     public unsafe static class Bgfx {
+#if DEBUG
+        internal const string DllName = "bgfx_debug.dll";
+#else
         internal const string DllName = "bgfx.dll";
+#endif
         const int RendererCount = 6;
-
-        #region Vertex Data
 
         [DllImport(DllName, EntryPoint = "bgfx_vertex_pack", CallingConvention = CallingConvention.Cdecl)]
         public static extern void VertexPack (float* input, bool inputNormalized, VertexAttribute attribute, ref VertexDeclaration decl, IntPtr data, int index = 0);
@@ -23,19 +25,11 @@ namespace SharpBgfx {
         [DllImport(DllName, EntryPoint = "bgfx_weld_vertices", CallingConvention = CallingConvention.Cdecl)]
         public static extern ushort WeldVertices (ushort* output, ref VertexDeclaration decl, IntPtr data, ushort num, float epsilon = 0.001f);
 
-        #endregion
-
-        #region Image Data
-
         [DllImport(DllName, EntryPoint = "bgfx_image_swizzle_bgra8", CallingConvention = CallingConvention.Cdecl)]
         public static extern void ImageSwizzleBgra8 (int width, int height, int pitch, IntPtr src, IntPtr dst);
 
         [DllImport(DllName, EntryPoint = "bgfx_image_rgba8_downsample_2x2", CallingConvention = CallingConvention.Cdecl)]
         public static extern void ImageRgba8Downsample2x2 (int width, int height, int pitch, IntPtr src, IntPtr dst);
-
-        #endregion
-
-        #region Renderer
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         static extern byte bgfx_get_supported_renderers (RendererBackend[] backends);
@@ -83,10 +77,6 @@ namespace SharpBgfx {
             return new string(bgfx_get_renderer_name(backend));
         }
 
-        #endregion
-
-        #region Debug
-
         [DllImport(DllName, EntryPoint = "bgfx_set_debug", CallingConvention = CallingConvention.Cdecl)]
         public static extern void SetDebugFlags (DebugFlags flags);
 
@@ -98,10 +88,6 @@ namespace SharpBgfx {
 
         [DllImport(DllName, EntryPoint = "bgfx_dbg_text_printf", CallingConvention = CallingConvention.Cdecl)]
         public static extern void DebugTextWrite (ushort x, ushort y, byte color, string text);
-
-        #endregion
-
-        #region Views
 
         [DllImport(DllName, EntryPoint = "bgfx_set_view_name", CallingConvention = CallingConvention.Cdecl)]
         public static extern void SetViewName (byte id, string name);
@@ -135,8 +121,6 @@ namespace SharpBgfx {
 
         [DllImport(DllName, EntryPoint = "bgfx_set_view_transform_mask", CallingConvention = CallingConvention.Cdecl)]
         public static extern void SetViewTransformMask (int viewMask, float* view, float* proj);
-
-        #endregion
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         static extern void bgfx_set_program (ushort handle);
