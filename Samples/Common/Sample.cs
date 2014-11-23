@@ -8,6 +8,7 @@ namespace Common {
     public class Sample {
         EventQueue eventQueue = new EventQueue();
         Form form;
+        Thread thread;
 
         public int WindowWidth {
             get;
@@ -29,18 +30,17 @@ namespace Common {
             };
 
             form.ClientSizeChanged += (o, e) => eventQueue.Post(new SizeEvent(windowWidth, windowHeight));
+            form.FormClosing += OnFormClosing;
             form.FormClosed += (o, e) => eventQueue.Post(new Event(EventType.Exit));
 
             Bgfx.SetWindowHandle(form.Handle);
         }
 
         public void Run (Action<Sample> renderThread) {
-            var thread = new Thread(() => renderThread(this));
+            thread = new Thread(() => renderThread(this));
             thread.Start();
 
             Application.Run(form);
-
-            thread.Join();
         }
 
         public bool ProcessEvents (ResetFlags resetFlags) {
@@ -65,6 +65,13 @@ namespace Common {
                 Bgfx.Reset(WindowWidth, WindowHeight, resetFlags);
 
             return true;
+        }
+
+        void OnFormClosing (object sender, FormClosingEventArgs e) {
+            // kill all rendering and shutdown before closing the
+            // window, or we'll get errors from the graphics driver
+            eventQueue.Post(new Event(EventType.Exit));
+            thread.Join();
         }
     }
 }
