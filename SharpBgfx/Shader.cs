@@ -1,14 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace SharpBgfx {
+    /// <summary>
+    /// Represents a single compiled shader component.
+    /// </summary>
     public unsafe struct Shader : IDisposable {
         Uniform[] uniforms;
         internal ushort handle;
 
+        /// <summary>
+        /// The set of uniforms exposed by the shader.
+        /// </summary>
         public Uniform[] Uniforms {
             get {
                 if (uniforms == null) {
@@ -21,11 +24,18 @@ namespace SharpBgfx {
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Shader"/> struct.
+        /// </summary>
+        /// <param name="memory">The compiled shader memory.</param>
         public Shader (MemoryBlock memory) {
             handle = bgfx_create_shader(memory.ptr);
             uniforms = null;
         }
 
+        /// <summary>
+        /// Releases the shader.
+        /// </summary>
         public void Dispose () {
             bgfx_destroy_shader(handle);
         }
@@ -37,6 +47,6 @@ namespace SharpBgfx {
         static extern ushort bgfx_get_shader_uniforms (ushort handle, Uniform[] uniforms, ushort max);
 
         [DllImport(Bgfx.DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_destroy_shader (ushort handle);
+        static extern void bgfx_destroy_shader (ushort handle);
     }
 }

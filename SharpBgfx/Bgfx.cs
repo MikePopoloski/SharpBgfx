@@ -40,6 +40,9 @@ namespace SharpBgfx {
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         static extern void bgfx_init (RendererBackend backend, IntPtr callbacks, IntPtr allocator);
 
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        static extern void bgfx_dbg_text_printf (ushort x, ushort y, byte color, string format, string args);
+
         [DllImport(DllName, EntryPoint = "bgfx_get_caps", CallingConvention = CallingConvention.Cdecl)]
         public static extern Caps* GetCaps ();
 
@@ -77,17 +80,46 @@ namespace SharpBgfx {
             return new string(bgfx_get_renderer_name(backend));
         }
 
+        /// <summary>
+        /// Enables debugging features.
+        /// </summary>
+        /// <param name="flags">The set of debug features to enable.</param>
         [DllImport(DllName, EntryPoint = "bgfx_set_debug", CallingConvention = CallingConvention.Cdecl)]
         public static extern void SetDebugFlags (DebugFlags flags);
 
         [DllImport(DllName, EntryPoint = "bgfx_set_marker", CallingConvention = CallingConvention.Cdecl)]
         public static extern void SetDebugMarker (string marker);
 
+        /// <summary>
+        /// Clears the debug text buffer.
+        /// </summary>
+        /// <param name="color">The color with which to clear the background.</param>
+        /// <param name="smallText"><c>true</c> to use a small font for debug output; <c>false</c> to use normal sized text.</param>
         [DllImport(DllName, EntryPoint = "bgfx_dbg_text_clear", CallingConvention = CallingConvention.Cdecl)]
         public static extern void DebugTextClear (byte color, bool smallText);
 
-        [DllImport(DllName, EntryPoint = "bgfx_dbg_text_printf", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void DebugTextWrite (ushort x, ushort y, byte color, string text);
+        /// <summary>
+        /// Writes debug text to the screen.
+        /// </summary>
+        /// <param name="x">The X position, in cells.</param>
+        /// <param name="y">The Y position, in cells.</param>
+        /// <param name="color">The color of the text.</param>
+        /// <param name="message">The message to write.</param>
+        public static void DebugTextWrite (int x, int y, byte color, string message) {
+            bgfx_dbg_text_printf((ushort)x, (ushort)y, color, "%s", message);
+        }
+
+        /// <summary>
+        /// Writes debug text to the screen.
+        /// </summary>
+        /// <param name="x">The X position, in cells.</param>
+        /// <param name="y">The Y position, in cells.</param>
+        /// <param name="color">The color of the text.</param>
+        /// <param name="format">The format of the message.</param>
+        /// <param name="args">The arguments with which to format the message.</param>
+        public static void DebugTextWrite (int x, int y, byte color, string format, params object[] args) {
+            bgfx_dbg_text_printf((ushort)x, (ushort)y, color, "%s", string.Format(format, args));
+        }
 
         [DllImport(DllName, EntryPoint = "bgfx_set_view_name", CallingConvention = CallingConvention.Cdecl)]
         public static extern void SetViewName (byte id, string name);
