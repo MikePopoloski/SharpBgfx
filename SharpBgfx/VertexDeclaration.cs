@@ -8,6 +8,13 @@ namespace SharpBgfx {
         internal Data data;
 
         /// <summary>
+        /// The stride of a single vertex using this layout.
+        /// </summary>
+        public int Stride {
+            get { return data.Stride; }
+        }
+
+        /// <summary>
         /// Starts a stream of vertex attribute additions to the declaration.
         /// </summary>
         /// <param name="backend">The rendering backend with which to associate the attributes.</param>
@@ -48,6 +55,26 @@ namespace SharpBgfx {
         /// </summary>
         public void End () {
             bgfx_vertex_decl_end(ref data);
+        }
+
+        /// <summary>
+        /// Gets the byte offset of a particular attribute in the declaration.
+        /// </summary>
+        /// <param name="attribute">The attribute for which to get the offset.</param>
+        /// <returns>The offset of the attribute, in bytes.</returns>
+        public unsafe int GetOffset (VertexAttribute attribute) {
+            fixed (Data* ptr = &data)
+                return ptr->Offset[(int)attribute];
+        }
+
+        /// <summary>
+        /// Determines whether the declaration contains the given attribute.
+        /// </summary>
+        /// <param name="attribute">The attribute to check/</param>
+        /// <returns><c>true</c> if the declaration contains the attribute; otherwise, <c>false</c>.</returns>
+        public unsafe bool HasAttribute (VertexAttribute attribute) {
+            fixed (Data* ptr = &data)
+                return ptr->Attributes[(int)attribute] != 0xff;
         }
 
         [DllImport(Bgfx.DllName, CallingConvention = CallingConvention.Cdecl)]

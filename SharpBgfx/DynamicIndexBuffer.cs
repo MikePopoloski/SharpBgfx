@@ -7,7 +7,7 @@ namespace SharpBgfx {
     /// </summary>
     /// <remarks>Indices are always 16-bits.</remarks>
     public unsafe struct DynamicIndexBuffer : IDisposable {
-        ushort handle;
+        internal ushort handle;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DynamicIndexBuffer"/> struct.

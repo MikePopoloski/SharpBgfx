@@ -544,7 +544,7 @@ namespace SharpBgfx {
     /// Specifies various capabilities supported by the rendering device.
     /// </summary>
     [Flags]
-    public enum CapsFlags : long {
+    public enum DeviceFeatures : long {
         /// <summary>
         /// No extra features supported.
         /// </summary>
@@ -606,9 +606,23 @@ namespace SharpBgfx {
         SwapChain = 0x400
     }
 
+    /// <summary>
+    /// Indicates the level of support for a specific texture format.
+    /// </summary>
     public enum TextureFormatSupport {
+        /// <summary>
+        /// The format is unsupported.
+        /// </summary>
         Unsupported,
+
+        /// <summary>
+        /// The format is fully supported.
+        /// </summary>
         Supported,
+
+        /// <summary>
+        /// The format is supported through library emulation.
+        /// </summary>
         Emulated
     }
 
