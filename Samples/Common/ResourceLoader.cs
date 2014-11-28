@@ -36,7 +36,7 @@ namespace Common {
         public static Texture LoadTexture (string name) {
             var path = Path.Combine("Assets/textures/", name);
             var mem = MemoryBlock.FromArray(File.ReadAllBytes(path));
-            return new Texture(mem, TextureFlags.None, 0);
+            return Texture.FromFile(mem, TextureFlags.None, 0);
         }
 
         //public static Mesh LoadMesh (string fileName) {

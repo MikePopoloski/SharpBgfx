@@ -454,22 +454,22 @@ namespace SharpBgfx {
         /// <summary>
         /// Enable 2x multisampling.
         /// </summary>
-        MSAA_X2 = 0x10,
+        MSAA2x = 0x10,
 
         /// <summary>
         /// Enable 4x multisampling.
         /// </summary>
-        MSAA_X4 = 0x20,
+        MSAA4x = 0x20,
 
         /// <summary>
         /// Enable 8x multisampling.
         /// </summary>
-        MSAA_X8 = 0x30,
+        MSAA8x = 0x30,
 
         /// <summary>
         /// Enable 16x multisampling.
         /// </summary>
-        MSAA_X16 = 0x40,
+        MSAA16x = 0x40,
 
         /// <summary>
         /// Enable v-sync.

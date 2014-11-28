@@ -188,7 +188,7 @@ namespace SharpBgfx {
         /// <param name="color">The color with which to clear the background.</param>
         /// <param name="smallText"><c>true</c> to use a small font for debug output; <c>false</c> to use normal sized text.</param>
         [DllImport(DllName, EntryPoint = "bgfx_dbg_text_clear", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void DebugTextClear (byte color, bool smallText);
+        public static extern void DebugTextClear (byte color, [MarshalAs(UnmanagedType.U1)] bool smallText);
 
         /// <summary>
         /// Writes debug text to the screen.
@@ -379,9 +379,6 @@ namespace SharpBgfx {
         public static extern void SetRenderState (RenderState state, uint rgba = 0);
 
         // **** methods below are internal, since they're exposed by a wrapper to make them more convenient for .NET callers ****
-
-        [DllImport(DllName, EntryPoint = "bgfx_calc_texture_size", CallingConvention = CallingConvention.Cdecl)]
-        static extern void CalcTextureSize (ref TextureInfo info, ushort width, ushort height, ushort depth, byte mipCount, TextureFormat format);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         static extern void bgfx_vertex_pack (float* input, bool inputNormalized, VertexAttribute attribute, ref VertexDeclaration.Data decl, IntPtr data, int index);
