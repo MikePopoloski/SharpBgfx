@@ -453,9 +453,6 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="cacheIndex">The index of the cached scissor rectangle, or -1 to unset.</param>
         public static void SetScissor (int cacheIndex = -1) {
-            if (cacheIndex == -1)
-                cacheIndex = ushort.MaxValue;
-
             NativeMethods.bgfx_set_scissor_cached((ushort)cacheIndex);
         }
 
@@ -533,8 +530,6 @@ namespace SharpBgfx {
         /// <param name="instanceData">The instance data.</param>
         /// <param name="count">The number of entries to pull from the buffer.</param>
         public static void SetInstanceDataBuffer (InstanceDataBuffer instanceData, int count = -1) {
-            if (count == -1)
-                count = ushort.MaxValue;
             NativeMethods.bgfx_set_instance_data_buffer(instanceData.ptr, (ushort)count);
         }
 
@@ -680,7 +675,7 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="state">The set of states to set.</param>
         public static void SetRenderState (RenderState state) {
-            NativeMethods.bgfx_set_state(state, 0);
+            NativeMethods.bgfx_set_state((ulong)state, 0);
         }
 
         /// <summary>
@@ -689,7 +684,24 @@ namespace SharpBgfx {
         /// <param name="state">The set of states to set.</param>
         /// <param name="color">The color used for "factor" blending modes.</param>
         public static void SetRenderState (RenderState state, Color4 color) {
-            NativeMethods.bgfx_set_state(state, color.ToRgba());
+            NativeMethods.bgfx_set_state((ulong)state, color.ToRgba());
+        }
+
+        /// <summary>
+        /// Sets stencil test state.
+        /// </summary>
+        /// <param name="frontFace">The stencil state to use for front faces.</param>
+        public static void SetStencil (StencilFlags frontFace) {
+            SetStencil(frontFace, StencilFlags.None);
+        }
+
+        /// <summary>
+        /// Sets stencil test state.
+        /// </summary>
+        /// <param name="frontFace">The stencil state to use for front faces.</param>
+        /// <param name="backFace">The stencil state to use for back faces.</param>
+        public static void SetStencil (StencilFlags frontFace, StencilFlags backFace) {
+            NativeMethods.bgfx_set_stencil((uint)frontFace, (uint)backFace);
         }
 
         const int RendererCount = 6;

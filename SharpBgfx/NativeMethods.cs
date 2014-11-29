@@ -189,7 +189,7 @@ namespace SharpBgfx {
         public static extern int bgfx_set_transform (float* matrix, ushort count);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_set_stencil (StencilFlags frontFace, StencilFlags backFace);
+        public static extern void bgfx_set_stencil (uint frontFace, uint backFace);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int bgfx_submit (byte id, int depth);
@@ -225,7 +225,7 @@ namespace SharpBgfx {
         public static extern void bgfx_save_screen_shot ([MarshalAs(UnmanagedType.LPStr)] string filePath);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_set_state (RenderState state, int rgba);
+        public static extern void bgfx_set_state (ulong state, int rgba);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_vertex_pack (float* input, [MarshalAs(UnmanagedType.U1)] bool inputNormalized, VertexAttributeUsage attribute, ref VertexLayout.Data decl, IntPtr data, int index);

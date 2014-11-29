@@ -25,8 +25,8 @@ class RenderStateGroup {
             RenderState.ColorWrite,
             uint.MaxValue,
             StencilFlags.TestAlways |
-            StencilBits.ReferenceValue(1) |
-            StencilBits.ReadMask(0xff) |
+            StencilFlags.ReferenceValue(1) |
+            StencilFlags.ReadMask(0xff) |
             StencilFlags.FailSReplace |
             StencilFlags.FailZReplace |
             StencilFlags.PassZReplace,
@@ -42,8 +42,8 @@ class RenderStateGroup {
             RenderState.BlendAlpha,
             uint.MaxValue,
             StencilFlags.TestEqual |
-            StencilBits.ReferenceValue(1) |
-            StencilBits.ReadMask(1) |
+            StencilFlags.ReferenceValue(1) |
+            StencilFlags.ReadMask(1) |
             StencilFlags.FailSKeep |
             StencilFlags.FailZKeep |
             StencilFlags.PassZKeep,

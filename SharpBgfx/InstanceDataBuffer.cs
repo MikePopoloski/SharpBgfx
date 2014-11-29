@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SharpBgfx {
     public unsafe struct InstanceDataBuffer {
@@ -16,6 +12,11 @@ namespace SharpBgfx {
             ptr = NativeMethods.bgfx_alloc_instance_data_buffer(count, (ushort)stride);
         }
 
+        public static bool CheckAvailableSpace (int count, int stride) {
+            return NativeMethods.bgfx_check_avail_instance_data_buffer(count, (ushort)stride);
+        }
+
+#pragma warning disable 649
         internal struct NativeStruct {
             public IntPtr data;
             public int size;
@@ -24,5 +25,6 @@ namespace SharpBgfx {
             public ushort num;
             public ushort handle;
         }
+#pragma warning restore 649
     }
 }
