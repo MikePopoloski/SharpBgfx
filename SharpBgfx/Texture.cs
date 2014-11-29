@@ -137,6 +137,18 @@ namespace SharpBgfx {
         /// </summary>
         public void Dispose () => NativeMethods.bgfx_destroy_texture(handle);
 
+        public void Update2D (int mipLevel, int x, int y, int width, int height, MemoryBlock memory, int pitch) {
+            NativeMethods.bgfx_update_texture_2d(handle, (byte)mipLevel, (ushort)x, (ushort)y, (ushort)width, (ushort)height, memory.ptr, (ushort)pitch);
+        }
+
+        public void Update3D (int mipLevel, int x, int y, int z, int width, int height, int depth, MemoryBlock memory) {
+            NativeMethods.bgfx_update_texture_3d(handle, (byte)mipLevel, (ushort)x, (ushort)y, (ushort)z, (ushort)width, (ushort)height, (ushort)depth, memory.ptr);
+        }
+
+        public void UpdateCube (CubeMapFace face, int mipLevel, int x, int y, int width, int height, MemoryBlock memory, int pitch) {
+            NativeMethods.bgfx_update_texture_cube(handle, face, (byte)mipLevel, (ushort)x, (ushort)y, (ushort)width, (ushort)height, memory.ptr, (ushort)pitch);
+        }
+
         /// <summary>
         /// Determines whether the specified object is equal to this instance.
         /// </summary>

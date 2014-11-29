@@ -786,4 +786,39 @@ namespace SharpBgfx {
         /// </summary>
         ReadWrite
     }
+
+    /// <summary>
+    /// Addresses a particular face of a cube map.
+    /// </summary>
+    public enum CubeMapFace : byte {
+        /// <summary>
+        /// The right face.
+        /// </summary>
+        Right,
+
+        /// <summary>
+        /// The left face.
+        /// </summary>
+        Left,
+
+        /// <summary>
+        /// The top face.
+        /// </summary>
+        Top,
+
+        /// <summary>
+        /// The bottom face.
+        /// </summary>
+        Bottom,
+
+        /// <summary>
+        /// The front face.
+        /// </summary>
+        Front,
+
+        /// <summary>
+        /// The back face.
+        /// </summary>
+        Back
+    }
 }
