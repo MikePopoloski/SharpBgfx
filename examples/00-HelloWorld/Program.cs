@@ -18,18 +18,18 @@ static class Program {
         Bgfx.SetDebugFeatures(DebugFeatures.DisplayText);
 
         // set view 0 clear state
-        Bgfx.SetViewClear(0, ClearTargets.ColorBit | ClearTargets.DepthBit, 0x303030ff, 1.0f, 0);
+        Bgfx.SetViewClear(0, ClearTargets.ColorBit | ClearTargets.DepthBit, 0x303030ff);
 
         // main loop
         while (sample.ProcessEvents(ResetFlags.Vsync)) {
             // set view 0 viewport
-            Bgfx.SetViewRect(0, 0, 0, (ushort)sample.WindowWidth, (ushort)sample.WindowHeight);
+            Bgfx.SetViewRect(0, 0, 0, sample.WindowWidth, sample.WindowHeight);
 
             // dummy draw call to make sure view 0 is cleared if no other draw calls are submitted
-            Bgfx.Submit(0, 0);
+            Bgfx.Submit(0);
 
             // write some debug text
-            Bgfx.DebugTextClear(0, false);
+            Bgfx.DebugTextClear();
             Bgfx.DebugTextWrite(0, 1, 0x4f, "SharpBgfx/Samples/00-HelloWorld");
             Bgfx.DebugTextWrite(0, 2, 0x6f, "Description: Initialization and debug text.");
 

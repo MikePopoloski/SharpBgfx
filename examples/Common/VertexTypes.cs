@@ -18,11 +18,11 @@ namespace Common {
             this.abgr = abgr;
         }
 
-        public static VertexLayout Decl;
+        public static VertexLayout Layout;
 
         public static void Init () {
-            Decl = new VertexLayout();
-            Decl.Begin()
+            Layout = new VertexLayout();
+            Layout.Begin()
                 .Add(VertexAttributeUsage.Position, 3, VertexAttributeType.Float)
                 .Add(VertexAttributeUsage.Color0, 4, VertexAttributeType.UInt8, true)
                 .End();
@@ -46,11 +46,11 @@ namespace Common {
             this.v = v;
         }
 
-        public static VertexLayout Decl;
+        public static VertexLayout Layout;
 
         public static void Init () {
-            Decl = new VertexLayout();
-            Decl.Begin()
+            Layout = new VertexLayout();
+            Layout.Begin()
                 .Add(VertexAttributeUsage.Position, 3, VertexAttributeType.Float)
                 .Add(VertexAttributeUsage.Normal, 4, VertexAttributeType.UInt8, true, true)
                 .Add(VertexAttributeUsage.TexCoord0, 2, VertexAttributeType.Float)

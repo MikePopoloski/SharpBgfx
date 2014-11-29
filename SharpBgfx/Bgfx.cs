@@ -236,7 +236,7 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="color">The color with which to clear the background.</param>
         /// <param name="smallText"><c>true</c> to use a small font for debug output; <c>false</c> to use normal sized text.</param>
-        public static void DebugTextClear (byte color, bool smallText) {
+        public static void DebugTextClear (byte color = 0, bool smallText = false) {
             NativeMethods.bgfx_dbg_text_clear(color, smallText);
         }
 
