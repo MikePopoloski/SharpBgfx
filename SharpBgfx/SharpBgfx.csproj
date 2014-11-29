@@ -22,7 +22,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <CodeAnalysisRuleSet>analysis.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>Analysis\analysis.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -44,7 +44,7 @@
     <Compile Include="DynamicIndexBuffer.cs" />
     <Compile Include="DynamicVertexBuffer.cs" />
     <Compile Include="Enums.cs" />
-    <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="Analysis\GlobalSuppressions.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="IndexBuffer.cs" />
     <Compile Include="MemoryBlock.cs" />
@@ -62,10 +62,10 @@
       <Link>bgfx.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <CodeAnalysisDictionary Include="CustomDictionary.xml" />
+    <CodeAnalysisDictionary Include="Analysis\CustomDictionary.xml" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="analysis.ruleset" />
+    <None Include="Analysis\analysis.ruleset" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
