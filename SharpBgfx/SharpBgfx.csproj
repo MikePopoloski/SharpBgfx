@@ -53,6 +53,7 @@
     <Compile Include="Analysis\GlobalSuppressions.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="IndexBuffer.cs" />
+    <Compile Include="KnownColors.cs" />
     <Compile Include="MemoryBlock.cs" />
     <Compile Include="NativeMethods.cs" />
     <Compile Include="Program.cs" />

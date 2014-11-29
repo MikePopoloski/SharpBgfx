@@ -270,8 +270,8 @@ namespace SharpBgfx {
         /// Initializes a new instance of the <see cref="RenderState"/> struct.
         /// </summary>
         /// <param name="value">The integer value of the state.</param>
-        public RenderState (ulong value) {
-            this.value = value;
+        public RenderState (long value) {
+            this.value = (ulong)value;
         }
 
         public static RenderState AlphaRef (byte alpha) => (((ulong)alpha) << AlphaRefShift) & AlphaRefMask;
@@ -304,8 +304,10 @@ namespace SharpBgfx {
 
         public static bool operator !=(RenderState left, RenderState right) => !left.Equals(right);
 
-        public static implicit operator RenderState (ulong value) => new RenderState(value);
+        [CLSCompliant(false)]
+        public static implicit operator RenderState (ulong value) => new RenderState((long)value);
 
+        [CLSCompliant(false)]
         public static explicit operator ulong (RenderState state) => state.value;
 
         public static RenderState operator |(RenderState left, RenderState right) => left.value | right.value;

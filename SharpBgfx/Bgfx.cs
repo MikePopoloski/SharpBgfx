@@ -297,6 +297,7 @@ namespace SharpBgfx {
         /// <param name="id">The index of the view.</param>
         /// <param name="view">The 4x4 view transform matrix.</param>
         /// <param name="proj">The 4x4 projection transform matrix.</param>
+        [CLSCompliant(false)]
         public static void SetViewTransform (byte id, float* view, float* proj) {
             NativeMethods.bgfx_set_view_transform(id, view, proj);
         }
@@ -305,6 +306,7 @@ namespace SharpBgfx {
             return NativeMethods.bgfx_set_transform((float*)&matrix, (ushort)count);
         }
 
+        [CLSCompliant(false)]
         public static int SetTransform (float* matrix, int count) {
             return NativeMethods.bgfx_set_transform(matrix, (ushort)count);
         }

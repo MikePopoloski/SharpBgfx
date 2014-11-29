@@ -54,7 +54,7 @@ unsafe class Uniforms : IDisposable {
     }
 
     public void SetConstUniforms () {
-        var color = new Color4(0.02f, 0.02f, 0.02f, 0.0f);
+        var color = new Vector4(0.02f, 0.02f, 0.02f, 0.0f);
         var shininess = new Vector4(1.0f, 1.0f, 1.0f, 10.0f);
 
         Bgfx.SetUniform(ambientHandle, &color);
