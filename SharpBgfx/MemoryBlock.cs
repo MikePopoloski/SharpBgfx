@@ -27,7 +27,7 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="size">The size of the block, in bytes.</param>
         public MemoryBlock (int size) {
-            ptr = bgfx_alloc(size);
+            ptr = NativeMethods.bgfx_alloc(size);
         }
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace SharpBgfx {
         /// <param name="data">A pointer to the initial data to copy into the new block.</param>
         /// <param name="size">The size of the block, in bytes.</param>
         public MemoryBlock (IntPtr data, int size) {
-            ptr = bgfx_copy(data, size);
+            ptr = NativeMethods.bgfx_copy(data, size);
         }
 
         /// <summary>
@@ -62,11 +62,5 @@ namespace SharpBgfx {
             public int Size;
         }
 #pragma warning restore 649
-
-        [DllImport(Bgfx.DllName, CallingConvention = CallingConvention.Cdecl)]
-        static extern DataPtr* bgfx_alloc (int size);
-
-        [DllImport(Bgfx.DllName, CallingConvention = CallingConvention.Cdecl)]
-        static extern DataPtr* bgfx_copy (IntPtr data, int size);
     }
 }

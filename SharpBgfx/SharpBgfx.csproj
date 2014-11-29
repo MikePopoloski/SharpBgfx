@@ -48,6 +48,7 @@
     <Compile Include="Helpers.cs" />
     <Compile Include="IndexBuffer.cs" />
     <Compile Include="MemoryBlock.cs" />
+    <Compile Include="NativeMethods.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RenderState.cs" />
@@ -63,6 +64,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <CodeAnalysisDictionary Include="Analysis\CustomDictionary.xml" />
+    <Content Include="..\external\bgfx\bgfx_debug.dll">
+      <Link>bgfx_debug.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <None Include="Analysis\analysis.ruleset" />

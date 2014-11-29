@@ -20,7 +20,7 @@ namespace SharpBgfx {
         /// <param name="backend">The rendering backend with which to associate the attributes.</param>
         /// <returns>This instance, for use in a fluent API.</returns>
         public VertexDeclaration Begin (RendererBackend backend = RendererBackend.Null) {
-            bgfx_vertex_decl_begin(ref data, backend);
+            NativeMethods.bgfx_vertex_decl_begin(ref data, backend);
             return this;
         }
 
@@ -36,7 +36,7 @@ namespace SharpBgfx {
         /// This instance, for use in a fluent API.
         /// </returns>
         public VertexDeclaration Add (VertexAttribute attribute, int count, VertexAttributeType type, bool normalized = false, bool asInt = false) {
-            bgfx_vertex_decl_add(ref data, attribute, (byte)count, type, normalized, asInt);
+            NativeMethods.bgfx_vertex_decl_add(ref data, attribute, (byte)count, type, normalized, asInt);
             return this;
         }
 
@@ -46,7 +46,7 @@ namespace SharpBgfx {
         /// <param name="count">The number of bytes to skip.</param>
         /// <returns>This instance, for use in a fluent API.</returns>
         public VertexDeclaration Skip (int count) {
-            bgfx_vertex_decl_skip(ref data, (byte)count);
+            NativeMethods.bgfx_vertex_decl_skip(ref data, (byte)count);
             return this;
         }
 
@@ -54,7 +54,7 @@ namespace SharpBgfx {
         /// Marks the end of the vertex stream.
         /// </summary>
         public void End () {
-            bgfx_vertex_decl_end(ref data);
+            NativeMethods.bgfx_vertex_decl_end(ref data);
         }
 
         /// <summary>
@@ -76,18 +76,6 @@ namespace SharpBgfx {
             fixed (Data* ptr = &data)
                 return ptr->Attributes[(int)attribute] != 0xff;
         }
-
-        [DllImport(Bgfx.DllName, CallingConvention = CallingConvention.Cdecl)]
-        static extern void bgfx_vertex_decl_begin (ref Data decl, RendererBackend backend);
-
-        [DllImport(Bgfx.DllName, CallingConvention = CallingConvention.Cdecl)]
-        static extern void bgfx_vertex_decl_add (ref Data decl, VertexAttribute attribute, byte count, VertexAttributeType type, bool normalized, bool asInt);
-
-        [DllImport(Bgfx.DllName, CallingConvention = CallingConvention.Cdecl)]
-        static extern void bgfx_vertex_decl_skip (ref Data decl, byte count);
-
-        [DllImport(Bgfx.DllName, CallingConvention = CallingConvention.Cdecl)]
-        static extern void bgfx_vertex_decl_end (ref Data decl);
 
         internal unsafe struct Data {
             const int MaxAttribCount = 16;

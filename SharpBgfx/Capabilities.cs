@@ -43,7 +43,7 @@ namespace SharpBgfx {
         }
 
         internal Capabilities () {
-            data = bgfx_get_caps();
+            data = NativeMethods.bgfx_get_caps();
         }
 
         /// <summary>
@@ -56,7 +56,7 @@ namespace SharpBgfx {
         }
 
 #pragma warning disable 649
-        unsafe struct Caps {
+        internal unsafe struct Caps {
             const int TextureFormatCount = 48;
 
             public RendererBackend Backend;
@@ -68,8 +68,5 @@ namespace SharpBgfx {
             public fixed byte Formats[TextureFormatCount];
         }
 #pragma warning restore 649
-
-        [DllImport(Bgfx.DllName, CallingConvention = CallingConvention.Cdecl)]
-        static extern Caps* bgfx_get_caps ();
     }
 }

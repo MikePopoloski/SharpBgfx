@@ -15,9 +15,9 @@ namespace SharpBgfx {
         public Uniform[] Uniforms {
             get {
                 if (uniforms == null) {
-                    var count = bgfx_get_shader_uniforms(handle, null, 0);
+                    var count = NativeMethods.bgfx_get_shader_uniforms(handle, null, 0);
                     uniforms = new Uniform[count];
-                    bgfx_get_shader_uniforms(handle, uniforms, count);
+                    NativeMethods.bgfx_get_shader_uniforms(handle, uniforms, count);
                 }
 
                 return uniforms;
@@ -29,7 +29,7 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="memory">The compiled shader memory.</param>
         public Shader (MemoryBlock memory) {
-            handle = bgfx_create_shader(memory.ptr);
+            handle = NativeMethods.bgfx_create_shader(memory.ptr);
             uniforms = null;
         }
 
@@ -37,16 +37,7 @@ namespace SharpBgfx {
         /// Releases the shader.
         /// </summary>
         public void Dispose () {
-            bgfx_destroy_shader(handle);
+            NativeMethods.bgfx_destroy_shader(handle);
         }
-
-        [DllImport(Bgfx.DllName, CallingConvention = CallingConvention.Cdecl)]
-        static extern ushort bgfx_create_shader (MemoryBlock.DataPtr* memory);
-
-        [DllImport(Bgfx.DllName, CallingConvention = CallingConvention.Cdecl)]
-        static extern ushort bgfx_get_shader_uniforms (ushort handle, Uniform[] uniforms, ushort max);
-
-        [DllImport(Bgfx.DllName, CallingConvention = CallingConvention.Cdecl)]
-        static extern void bgfx_destroy_shader (ushort handle);
     }
 }

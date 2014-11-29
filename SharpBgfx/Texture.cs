@@ -70,7 +70,7 @@ namespace SharpBgfx {
         /// </remarks>
         public static Texture FromFile (MemoryBlock memory, TextureFlags flags = TextureFlags.None, int skipMips = 0) {
             TextureInfo info;
-            var handle = bgfx_create_texture(memory.ptr, flags, (byte)skipMips, out info);
+            var handle = NativeMethods.bgfx_create_texture(memory.ptr, flags, (byte)skipMips, out info);
 
             return new Texture(handle, ref info);
         }
@@ -89,9 +89,9 @@ namespace SharpBgfx {
         /// </returns>
         public static Texture Create2D (int width, int height, int mipCount, TextureFormat format, TextureFlags flags = TextureFlags.None, MemoryBlock? memory = null) {
             var info = new TextureInfo();
-            bgfx_calc_texture_size(ref info, (ushort)width, (ushort)height, 1, (byte)mipCount, format);
+            NativeMethods.bgfx_calc_texture_size(ref info, (ushort)width, (ushort)height, 1, (byte)mipCount, format);
 
-            var handle = bgfx_create_texture_2d(info.Width, info.Height, info.MipCount, format, flags, memory == null ? null : memory.Value.ptr);
+            var handle = NativeMethods.bgfx_create_texture_2d(info.Width, info.Height, info.MipCount, format, flags, memory == null ? null : memory.Value.ptr);
             return new Texture(handle, ref info);
         }
 
@@ -108,9 +108,9 @@ namespace SharpBgfx {
         /// <returns>The newly created texture handle.</returns>
         public static Texture Create3D (int width, int height, int depth, int mipCount, TextureFormat format, TextureFlags flags = TextureFlags.None, MemoryBlock? memory = null) {
             var info = new TextureInfo();
-            bgfx_calc_texture_size(ref info, (ushort)width, (ushort)height, (ushort)depth, (byte)mipCount, format);
+            NativeMethods.bgfx_calc_texture_size(ref info, (ushort)width, (ushort)height, (ushort)depth, (byte)mipCount, format);
 
-            var handle = bgfx_create_texture_3d(info.Width, info.Height, info.Depth, info.MipCount, format, flags, memory == null ? null : memory.Value.ptr);
+            var handle = NativeMethods.bgfx_create_texture_3d(info.Width, info.Height, info.Depth, info.MipCount, format, flags, memory == null ? null : memory.Value.ptr);
             return new Texture(handle, ref info);
         }
 
@@ -127,36 +127,18 @@ namespace SharpBgfx {
         /// </returns>
         public static Texture CreateCube (int size, int mipCount, TextureFormat format, TextureFlags flags = TextureFlags.None, MemoryBlock? memory = null) {
             var info = new TextureInfo();
-            bgfx_calc_texture_size(ref info, (ushort)size, (ushort)size, 1, (byte)mipCount, format);
+            NativeMethods.bgfx_calc_texture_size(ref info, (ushort)size, (ushort)size, 1, (byte)mipCount, format);
 
-            var handle = bgfx_create_texture_cube(info.Width, info.MipCount, format, flags, memory == null ? null : memory.Value.ptr);
+            var handle = NativeMethods.bgfx_create_texture_cube(info.Width, info.MipCount, format, flags, memory == null ? null : memory.Value.ptr);
             return new Texture(handle, ref info);
         }
 
         /// <summary>
         /// Releases the texture.
         /// </summary>
-        public void Dispose () => bgfx_destroy_texture(handle);
+        public void Dispose () => NativeMethods.bgfx_destroy_texture(handle);
 
-        [DllImport(Bgfx.DllName, CallingConvention = CallingConvention.Cdecl)]
-        static extern ushort bgfx_create_texture (MemoryBlock.DataPtr* mem, TextureFlags flags, byte skip, out TextureInfo info);
-
-        [DllImport(Bgfx.DllName, CallingConvention = CallingConvention.Cdecl)]
-        static extern ushort bgfx_create_texture_2d (ushort width, ushort _height, byte numMips, TextureFormat format, TextureFlags flags, MemoryBlock.DataPtr* mem);
-
-        [DllImport(Bgfx.DllName, CallingConvention = CallingConvention.Cdecl)]
-        static extern ushort bgfx_create_texture_3d (ushort width, ushort _height, ushort _depth, byte numMips, TextureFormat format, TextureFlags flags, MemoryBlock.DataPtr* mem);
-
-        [DllImport(Bgfx.DllName, CallingConvention = CallingConvention.Cdecl)]
-        static extern ushort bgfx_create_texture_cube (ushort size, byte numMips, TextureFormat format, TextureFlags flags, MemoryBlock.DataPtr* mem);
-
-        [DllImport(Bgfx.DllName, CallingConvention = CallingConvention.Cdecl)]
-        static extern void bgfx_destroy_texture (ushort handle);
-
-        [DllImport(Bgfx.DllName, CallingConvention = CallingConvention.Cdecl)]
-        static extern void bgfx_calc_texture_size (ref TextureInfo info, ushort width, ushort height, ushort depth, byte mipCount, TextureFormat format);
-
-        struct TextureInfo {
+        internal struct TextureInfo {
             public TextureFormat Format;
             public int StorageSize;
             public ushort Width;
