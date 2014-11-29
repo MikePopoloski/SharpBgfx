@@ -153,7 +153,7 @@ namespace SharpBgfx {
         public static extern void bgfx_set_view_scissor (byte id, ushort x, ushort y, ushort width, ushort height);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_set_view_clear (byte id, ClearFlags flags, uint rgba, float depth, byte stencil);
+        public static extern void bgfx_set_view_clear (byte id, ClearFlags flags, int rgba, float depth, byte stencil);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_view_seq (byte id, bool enabled);
@@ -165,7 +165,7 @@ namespace SharpBgfx {
         public static extern void bgfx_save_screen_shot ([MarshalAs(UnmanagedType.LPStr)] string filePath);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_set_state (RenderState state, uint rgba);
+        public static extern void bgfx_set_state (RenderState state, int rgba);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_vertex_pack (float* input, bool inputNormalized, VertexAttribute attribute, ref VertexDeclaration.Data decl, IntPtr data, int index);

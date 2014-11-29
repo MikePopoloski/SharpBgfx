@@ -268,8 +268,8 @@ namespace SharpBgfx {
         /// <param name="rgba">The color to clear the backbuffer.</param>
         /// <param name="depth">The value to fill the depth buffer.</param>
         /// <param name="stencil">The value to fill the stencil buffer.</param>
-        public static void SetViewClear (byte id, ClearFlags flags, uint rgba = 0x000000ff, float depth = 1.0f, byte stencil = 0) {
-            NativeMethods.bgfx_set_view_clear(id, flags, rgba, depth, stencil);
+        public static void SetViewClear (byte id, ClearFlags flags, Color4 color, float depth = 1.0f, byte stencil = 0) {
+            NativeMethods.bgfx_set_view_clear(id, flags, color.ToRgba(), depth, stencil);
         }
 
         /// <summary>
@@ -419,9 +419,17 @@ namespace SharpBgfx {
         /// Set rendering states used to draw primitives.
         /// </summary>
         /// <param name="state">The set of states to set.</param>
-        /// <param name="rgba">The color used for "factor" blending modes.</param>
-        public static void SetRenderState (RenderState state, uint rgba = 0) {
-            NativeMethods.bgfx_set_state(state, rgba);
+        public static void SetRenderState (RenderState state) {
+            NativeMethods.bgfx_set_state(state, 0);
+        }
+
+        /// <summary>
+        /// Set rendering states used to draw primitives.
+        /// </summary>
+        /// <param name="state">The set of states to set.</param>
+        /// <param name="color">The color used for "factor" blending modes.</param>
+        public static void SetRenderState (RenderState state, Color4 color) {
+            NativeMethods.bgfx_set_state(state, color.ToRgba());
         }
 
         const int RendererCount = 6;
