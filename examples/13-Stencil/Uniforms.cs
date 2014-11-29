@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using SharpBgfx;
-using SlimMath;
 
 unsafe class Uniforms : IDisposable {
     const int MaxLights = 5;

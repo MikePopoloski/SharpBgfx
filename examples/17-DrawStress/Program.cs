@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Numerics;
 using Common;
 using SharpBgfx;
-using SlimMath;
 
 static class Program {
     const float Step = 0.6f;
@@ -47,8 +47,8 @@ static class Program {
             Bgfx.SetViewRect(0, 0, 0, (ushort)sample.WindowWidth, (ushort)sample.WindowHeight);
 
             // view transforms
-            var viewMatrix = Matrix.LookAtLH(new Vector3(0.0f, 0.0f, -35.0f), Vector3.Zero, Vector3.UnitY);
-            var projMatrix = Matrix.PerspectiveFovLH((float)Math.PI / 3, (float)sample.WindowWidth / sample.WindowHeight, 0.1f, 100.0f);
+            var viewMatrix = Matrix4x4.CreateLookAt(new Vector3(0.0f, 0.0f, -35.0f), Vector3.Zero, Vector3.UnitY);
+            var projMatrix = Matrix4x4.CreatePerspectiveFieldOfView((float)Math.PI / 3, (float)sample.WindowWidth / sample.WindowHeight, 0.1f, 100.0f);
             Bgfx.SetViewTransform(0, &viewMatrix.M11, &projMatrix.M11);
 
             // dummy draw call to make sure view 0 is cleared if no other draw calls are submitted
@@ -89,8 +89,10 @@ static class Program {
                 for (int y = 0; y < cubeDim; y++) {
                     for (int x = 0; x < cubeDim; x++) {
                         // model matrix
-                        var transform = Matrix.RotationYawPitchRoll(time + x * 0.21f, time + y * 0.37f, time + y * 0.13f);
-                        transform.TranslationVector = initial + new Vector3(x * Step, y * Step, z * Step);
+                        var transform = Matrix4x4.CreateFromYawPitchRoll(time + x * 0.21f, time + y * 0.37f, time + y * 0.13f);
+                        transform.M41 = initial.X + x * Step;
+                        transform.M42 = initial.Y + y * Step;
+                        transform.M43 = initial.Z + z * Step;
                         Bgfx.SetTransform(&transform.M11, 1);
 
                         // set pipeline states

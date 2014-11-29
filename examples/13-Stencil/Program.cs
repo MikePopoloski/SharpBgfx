@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Numerics;
 using Common;
 using SharpBgfx;
-using SlimMath;
 
 static class Program {
     static void Main () {
@@ -101,8 +101,8 @@ static class Program {
     static RenderState GetRenderState (PrebuiltRenderState selector) {
         return RenderStateGroup.Groups[selector].State;
     }
-
-    static readonly Matrix FloorTransform = Matrix.Scaling(20.0f);
+    
+    static readonly Matrix4x4 FloorTransform = Matrix4x4.CreateScale(20.0f);
 
     const byte PassId0 = 1;
     const byte PassId1 = 2;
