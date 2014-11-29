@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Numerics;
 
 namespace SharpBgfx {
     public unsafe static class Bgfx {
@@ -12,8 +13,8 @@ namespace SharpBgfx {
         /// <param name="declaration">The vertex declaration describing the layout of the vertex stream.</param>
         /// <param name="data">The pointer to the vertex data stream.</param>
         /// <param name="index">The index of the vertex within the stream.</param>
-        public static void VertexPack (float* input, bool inputNormalized, VertexAttribute attribute, VertexDeclaration declaration, IntPtr data, int index = 0) {
-            NativeMethods.bgfx_vertex_pack(input, inputNormalized, attribute, ref declaration.data, data, index);
+        public static void VertexPack (Vector4 input, bool inputNormalized, VertexAttribute attribute, VertexDeclaration declaration, IntPtr data, int index = 0) {
+            NativeMethods.bgfx_vertex_pack((float*)&input, inputNormalized, attribute, ref declaration.data, data, index);
         }
 
         /// <summary>
@@ -24,8 +25,11 @@ namespace SharpBgfx {
         /// <param name="decl">The vertex declaration describing the layout of the vertex stream.</param>
         /// <param name="data">A pointer to the vertex data stream.</param>
         /// <param name="index">The index of the vertex within the stream.</param>
-        public static void VertexUnpack (float* output, VertexAttribute attribute, VertexDeclaration decl, IntPtr data, int index = 0) {
-            NativeMethods.bgfx_vertex_unpack(output, attribute, ref decl.data, data, index);
+        public static Vector4 VertexUnpack (VertexAttribute attribute, VertexDeclaration decl, IntPtr data, int index = 0) {
+            Vector4 output;
+            NativeMethods.bgfx_vertex_unpack((float*)&output, attribute, ref decl.data, data, index);
+
+            return output;
         }
 
         /// <summary>
