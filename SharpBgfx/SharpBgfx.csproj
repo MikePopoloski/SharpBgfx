@@ -54,6 +54,7 @@
     <Compile Include="FrameBuffer.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="IndexBuffer.cs" />
+    <Compile Include="InstanceDataBuffer.cs" />
     <Compile Include="KnownColors.cs" />
     <Compile Include="MemoryBlock.cs" />
     <Compile Include="NativeMethods.cs" />
@@ -62,6 +63,8 @@
     <Compile Include="RenderState.cs" />
     <Compile Include="Shader.cs" />
     <Compile Include="Texture.cs" />
+    <Compile Include="TransientIndexBuffer.cs" />
+    <Compile Include="TransientVertexBuffer.cs" />
     <Compile Include="Uniform.cs" />
     <Compile Include="VertexBuffer.cs" />
     <Compile Include="VertexDeclaration.cs" />

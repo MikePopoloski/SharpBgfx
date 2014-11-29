@@ -6,6 +6,32 @@ using System.Numerics;
 namespace SharpBgfx {
     public unsafe static class Bgfx {
         /// <summary>
+        /// Checks for available space to allocate transient index and vertex buffers.
+        /// </summary>
+        /// <param name="vertexCount">The number of vertices to allocate.</param>
+        /// <param name="layout">The layout of each vertex.</param>
+        /// <param name="indexCount">The number of indices to allocate.</param>
+        /// <returns><c>true</c> if there is sufficient space for both vertex and index buffers.</returns>
+        public static bool CheckAvailableTransientBufferSpace (int vertexCount, VertexLayout layout, int indexCount) {
+            return NativeMethods.bgfx_check_avail_transient_buffers(vertexCount, ref layout.data, indexCount);
+        }
+
+        /// <summary>
+        /// Attempts to allocate both a transient vertex buffer and index buffer.
+        /// </summary>
+        /// <param name="vertexCount">The number of vertices to allocate.</param>
+        /// <param name="layout">The layout of each vertex.</param>
+        /// <param name="indexCount">The number of indices to allocate.</param>
+        /// <param name="vertexBuffer">Returns the allocated transient vertex buffer.</param>
+        /// <param name="indexBuffer">Returns the allocated transient index buffer.</param>
+        /// <returns><c>true</c> if both space requirements are satisfied and the buffers were allocated.</returns>
+        public static bool AllocateTransientBuffers (int vertexCount, VertexLayout layout, int indexCount, out TransientVertexBuffer vertexBuffer, out TransientIndexBuffer indexBuffer) {
+            vertexBuffer = new TransientVertexBuffer();
+            indexBuffer = new TransientIndexBuffer();
+            return NativeMethods.bgfx_alloc_transient_buffers(ref vertexBuffer.tvb, ref layout.data, (ushort)vertexCount, ref indexBuffer.tib, (ushort)indexCount);
+        }
+
+        /// <summary>
         /// Packs a vector into vertex stream format.
         /// </summary>
         /// <param name="input">The vector to pack.</param>
@@ -479,6 +505,37 @@ namespace SharpBgfx {
         /// <param name="count">The number of vertices to pull from the buffer.</param>
         public static void SetVertexBuffer (DynamicVertexBuffer vertexBuffer, int firstVertex = 0, int count = -1) {
             NativeMethods.bgfx_set_dynamic_vertex_buffer(vertexBuffer.handle, firstVertex, count);
+        }
+
+        /// <summary>
+        /// Sets the index buffer to use for drawing primitives.
+        /// </summary>
+        /// <param name="indexBuffer">The index buffer to set.</param>
+        /// <param name="firstIndex">The first index in the buffer to use.</param>
+        /// <param name="count">The number of indices to pull from the buffer.</param>
+        public static void SetIndexBuffer (TransientIndexBuffer indexBuffer, int firstIndex = 0, int count = -1) {
+            NativeMethods.bgfx_set_transient_index_buffer(ref indexBuffer.tib, firstIndex, count);
+        }
+
+        /// <summary>
+        /// Sets the vertex buffer to use for drawing primitives.
+        /// </summary>
+        /// <param name="vertexBuffer">The vertex buffer to set.</param>
+        /// <param name="firstVertex">The index of the first vertex to use.</param>
+        /// <param name="count">The number of vertices to pull from the buffer.</param>
+        public static void SetVertexBuffer (TransientVertexBuffer vertexBuffer, int firstVertex = 0, int count = -1) {
+            NativeMethods.bgfx_set_transient_vertex_buffer(ref vertexBuffer.tvb, firstVertex, count);
+        }
+
+        /// <summary>
+        /// Sets instance data to use for drawing primitives.
+        /// </summary>
+        /// <param name="instanceData">The instance data.</param>
+        /// <param name="count">The number of entries to pull from the buffer.</param>
+        public static void SetInstanceDataBuffer (InstanceDataBuffer instanceData, int count = -1) {
+            if (count == -1)
+                count = ushort.MaxValue;
+            NativeMethods.bgfx_set_instance_data_buffer(instanceData.ptr, (ushort)count);
         }
 
         /// <summary>

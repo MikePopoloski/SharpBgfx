@@ -6,6 +6,30 @@ namespace SharpBgfx {
     [SuppressUnmanagedCodeSecurity]
     unsafe static class NativeMethods {
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool bgfx_check_avail_transient_index_buffer (int num);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool bgfx_check_avail_transient_vertex_buffer (int num, ref VertexLayout.Data decl);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool bgfx_check_avail_instance_data_buffer (int num, ushort stride);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool bgfx_check_avail_transient_buffers (int numVertices, ref VertexLayout.Data decl, int numIndices);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_alloc_transient_index_buffer (ref TransientIndexBuffer.NativeStruct tib, int num);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_alloc_transient_vertex_buffer(ref TransientVertexBuffer.NativeStruct tvb, int num, ref VertexLayout.Data decl);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool bgfx_alloc_transient_buffers (ref TransientVertexBuffer.NativeStruct tvb, ref VertexLayout.Data decl, ushort numVertices, ref TransientIndexBuffer.NativeStruct tib, ushort numIndices);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern InstanceDataBuffer.NativeStruct* bgfx_alloc_instance_data_buffer (int num, ushort stride);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_dispatch (byte id, ushort program, ushort numX, ushort numY, ushort numZ);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
@@ -253,6 +277,15 @@ namespace SharpBgfx {
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_scissor_cached (ushort cache);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_set_transient_vertex_buffer (ref TransientVertexBuffer.NativeStruct tvb, int startVertex, int numVertices);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_set_transient_index_buffer (ref TransientIndexBuffer.NativeStruct tib, int startIndex, int numIndices);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_set_instance_data_buffer (InstanceDataBuffer.NativeStruct* idb, ushort num);
 
 #if DEBUG
         const string DllName = "bgfx_debug.dll";
