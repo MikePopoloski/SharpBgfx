@@ -15,15 +15,19 @@ namespace SharpBgfx {
         public static extern void bgfx_update_texture_cube (ushort handle, CubeMapFace side, byte mip, ushort x, ushort y, ushort width, ushort height, MemoryBlock.DataPtr* memory, ushort pitch);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [return: MarshalAs(UnmanagedType.U1)]
         public static extern bool bgfx_check_avail_transient_index_buffer (int num);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [return: MarshalAs(UnmanagedType.U1)]
         public static extern bool bgfx_check_avail_transient_vertex_buffer (int num, ref VertexLayout.Data decl);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [return: MarshalAs(UnmanagedType.U1)]
         public static extern bool bgfx_check_avail_instance_data_buffer (int num, ushort stride);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [return: MarshalAs(UnmanagedType.U1)]
         public static extern bool bgfx_check_avail_transient_buffers (int numVertices, ref VertexLayout.Data decl, int numIndices);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
@@ -33,6 +37,7 @@ namespace SharpBgfx {
         public static extern void bgfx_alloc_transient_vertex_buffer(ref TransientVertexBuffer.NativeStruct tvb, int num, ref VertexLayout.Data decl);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [return: MarshalAs(UnmanagedType.U1)]
         public static extern bool bgfx_alloc_transient_buffers (ref TransientVertexBuffer.NativeStruct tvb, ref VertexLayout.Data decl, ushort numVertices, ref TransientIndexBuffer.NativeStruct tib, ushort numIndices);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
