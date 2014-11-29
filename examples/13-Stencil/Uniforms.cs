@@ -63,7 +63,7 @@ unsafe class Uniforms : IDisposable {
     }
 
     public void SetPerFrameUniforms (float time) {
-        Bgfx.SetUniform(timeHandle, &time);
+        Bgfx.SetUniform(timeHandle, time);
     }
 
     public void SetPerDrawUniforms () {

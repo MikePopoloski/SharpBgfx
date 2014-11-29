@@ -20,11 +20,11 @@ namespace SharpBgfx {
         /// <summary>
         /// Unpack a vector from a vertex stream.
         /// </summary>
-        /// <param name="output">A pointer to the location that will receive the output vector.</param>
         /// <param name="attribute">The usage of the vertex attribute.</param>
         /// <param name="decl">The vertex declaration describing the layout of the vertex stream.</param>
         /// <param name="data">A pointer to the vertex data stream.</param>
         /// <param name="index">The index of the vertex within the stream.</param>
+        /// <returns>The unpacked vector.</returns>
         public static Vector4 VertexUnpack (VertexAttribute attribute, VertexDeclaration decl, IntPtr data, int index = 0) {
             Vector4 output;
             NativeMethods.bgfx_vertex_unpack((float*)&output, attribute, ref decl.data, data, index);
@@ -241,8 +241,8 @@ namespace SharpBgfx {
         /// <param name="y">The Y coordinate of the viewport.</param>
         /// <param name="width">The width of the viewport, in pixels.</param>
         /// <param name="height">The height of the viewport, in pixels.</param>
-        public static void SetViewRect (byte id, ushort x, ushort y, ushort width, ushort height) {
-            NativeMethods.bgfx_set_view_rect(id, x, y, width, height);
+        public static void SetViewRect (byte id, int x, int y, int width, int height) {
+            NativeMethods.bgfx_set_view_rect(id, (ushort)x, (ushort)y, (ushort)width, (ushort)height);
         }
 
         /// <summary>
@@ -256,8 +256,8 @@ namespace SharpBgfx {
         /// <remarks>
         /// Set all values to zero to disable the scissor test.
         /// </remarks>
-        public static void SetViewScissor (byte id, ushort x, ushort y, ushort width, ushort height) {
-            NativeMethods.bgfx_set_view_scissor(id, x, y, width, height);
+        public static void SetViewScissor (byte id, int x, int y, int width, int height) {
+            NativeMethods.bgfx_set_view_scissor(id, (ushort)x, (ushort)y, (ushort)width, (ushort)height);
         }
 
         /// <summary>
@@ -287,12 +287,26 @@ namespace SharpBgfx {
         /// <param name="id">The index of the view.</param>
         /// <param name="view">The 4x4 view transform matrix.</param>
         /// <param name="proj">The 4x4 projection transform matrix.</param>
+        public static void SetViewTransform (byte id, Matrix4x4 view, Matrix4x4 proj) {
+            NativeMethods.bgfx_set_view_transform(id, (float*)&view, (float*)&proj);
+        }
+
+        /// <summary>
+        /// Sets the view and projection transforms for the given rendering view.
+        /// </summary>
+        /// <param name="id">The index of the view.</param>
+        /// <param name="view">The 4x4 view transform matrix.</param>
+        /// <param name="proj">The 4x4 projection transform matrix.</param>
         public static void SetViewTransform (byte id, float* view, float* proj) {
             NativeMethods.bgfx_set_view_transform(id, view, proj);
         }
 
-        public static int SetTransform (float* matrix, ushort count) {
-            return NativeMethods.bgfx_set_transform(matrix, count);
+        public static int SetTransform (Matrix4x4 matrix, int count) {
+            return NativeMethods.bgfx_set_transform((float*)&matrix, (ushort)count);
+        }
+
+        public static int SetTransform (float* matrix, int count) {
+            return NativeMethods.bgfx_set_transform(matrix, (ushort)count);
         }
 
         /// <summary>
@@ -349,8 +363,19 @@ namespace SharpBgfx {
         /// <param name="uniform">The uniform to set.</param>
         /// <param name="value">A pointer to the uniform's data.</param>
         /// <param name="arraySize">The size of the data array, if the uniform is an array.</param>
+        public static void SetUniform (Uniform uniform, float value, int arraySize = 1) {
+            NativeMethods.bgfx_set_uniform(uniform.handle, &value, (ushort)arraySize);
+        }
+
+        /// <summary>
+        /// Sets the value of a uniform parameter.
+        /// </summary>
+        /// <param name="uniform">The uniform to set.</param>
+        /// <param name="value">A pointer to the uniform's data.</param>
+        /// <param name="arraySize">The size of the data array, if the uniform is an array.</param>
+        [CLSCompliant(false)]
         public static void SetUniform (Uniform uniform, void* value, int arraySize = 1) {
-            SetUniform(uniform, new IntPtr(value), arraySize);
+            NativeMethods.bgfx_set_uniform(uniform.handle, value, (ushort)arraySize);
         }
 
         /// <summary>
