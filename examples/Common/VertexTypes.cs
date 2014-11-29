@@ -18,13 +18,13 @@ namespace Common {
             this.abgr = abgr;
         }
 
-        public static VertexDeclaration Decl;
+        public static VertexLayout Decl;
 
         public static void Init () {
-            Decl = new VertexDeclaration();
+            Decl = new VertexLayout();
             Decl.Begin()
-                .Add(VertexAttribute.Position, 3, VertexAttributeType.Float)
-                .Add(VertexAttribute.Color0, 4, VertexAttributeType.UInt8, true)
+                .Add(VertexAttributeUsage.Position, 3, VertexAttributeType.Float)
+                .Add(VertexAttributeUsage.Color0, 4, VertexAttributeType.UInt8, true)
                 .End();
         }
     }
@@ -46,14 +46,14 @@ namespace Common {
             this.v = v;
         }
 
-        public static VertexDeclaration Decl;
+        public static VertexLayout Decl;
 
         public static void Init () {
-            Decl = new VertexDeclaration();
+            Decl = new VertexLayout();
             Decl.Begin()
-                .Add(VertexAttribute.Position, 3, VertexAttributeType.Float)
-                .Add(VertexAttribute.Normal, 4, VertexAttributeType.UInt8, true, true)
-                .Add(VertexAttribute.TexCoord0, 2, VertexAttributeType.Float)
+                .Add(VertexAttributeUsage.Position, 3, VertexAttributeType.Float)
+                .Add(VertexAttributeUsage.Normal, 4, VertexAttributeType.UInt8, true, true)
+                .Add(VertexAttributeUsage.TexCoord0, 2, VertexAttributeType.Float)
                 .End();
         }
     };

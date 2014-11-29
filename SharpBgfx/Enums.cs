@@ -34,7 +34,7 @@ namespace SharpBgfx {
     /// <summary>
     /// Specifies vertex attribute usages.
     /// </summary>
-    public enum VertexAttribute {
+    public enum VertexAttributeUsage {
         /// <summary>
         /// Position data.
         /// </summary>
@@ -486,7 +486,7 @@ namespace SharpBgfx {
     /// Specifies various debug options.
     /// </summary>
     [Flags]
-    public enum DebugFlags {
+    public enum DebugFeatures {
         /// <summary>
         /// Don't enable any debugging features.
         /// </summary>
@@ -518,7 +518,7 @@ namespace SharpBgfx {
     /// Specifies flags for clearing surfaces.
     /// </summary>
     [Flags]
-    public enum ClearFlags : byte {
+    public enum ClearTargets : byte {
         /// <summary>
         /// Don't clear anything.
         /// </summary>
@@ -556,9 +556,14 @@ namespace SharpBgfx {
         TextureCompareLessEqual = 0x1,
 
         /// <summary>
+        /// Device supports other texture cmoparison modes.
+        /// </summary>
+        TextureCompareExtended = 0x2,
+
+        /// <summary>
         /// Device supports all texture comparison modes.
         /// </summary>
-        TextureCompareAll = 0x3,
+        TextureCompareAll = TextureCompareLessEqual | TextureCompareExtended,
 
         /// <summary>
         /// Device supports 3D textures.

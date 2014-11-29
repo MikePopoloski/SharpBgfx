@@ -16,7 +16,7 @@ static class Program {
         Bgfx.Reset(sample.WindowWidth, sample.WindowHeight, ResetFlags.Vsync);
 
         // enable debug text
-        Bgfx.SetDebugFlags(DebugFlags.DisplayText);
+        Bgfx.SetDebugFeatures(DebugFeatures.DisplayText);
 
         // load shaders
         var programTextureLightning = ResourceLoader.LoadProgram("vs_stencil_texture_lightning", "fs_stencil_texture_lightning");
@@ -58,7 +58,7 @@ static class Program {
             Bgfx.DebugTextWrite(0, 3, 0x6f, string.Format("Frame: {0:F3} ms", elapsed * 1000));
 
             // clear the view
-            ClearView(0, ClearFlags.ColorBit | ClearFlags.DepthBit | ClearFlags.StencilBit, sample.WindowWidth, sample.WindowHeight);
+            ClearView(0, ClearTargets.ColorBit | ClearTargets.DepthBit | ClearTargets.StencilBit, sample.WindowWidth, sample.WindowHeight);
             Bgfx.Submit(0);
 
             // draw ground plane
@@ -93,7 +93,7 @@ static class Program {
         Bgfx.Shutdown();
     }
 
-    static void ClearView (byte pass, ClearFlags flags, int width, int height) {
+    static void ClearView (byte pass, ClearTargets flags, int width, int height) {
         Bgfx.SetViewClear(pass, flags, 0x30303000, 1.0f, 0);
         Bgfx.SetViewRect(pass, 0, 0, (ushort)width, (ushort)height);
     }

@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace SharpBgfx {
     /// <summary>
     /// Represents a loaded texture.
     /// </summary>
-    public unsafe sealed class Texture : IDisposable {
+    public unsafe sealed class Texture : IDisposable, IEquatable<Texture> {
         ushort handle;
 
         /// <summary>
@@ -137,6 +136,69 @@ namespace SharpBgfx {
         /// Releases the texture.
         /// </summary>
         public void Dispose () => NativeMethods.bgfx_destroy_texture(handle);
+
+        /// <summary>
+        /// Determines whether the specified object is equal to this instance.
+        /// </summary>
+        /// <param name="other">The object to compare with this instance.</param>
+        /// <returns><c>true</c> if the specified object is equal to this instance; otherwise, <c>false</c>.</returns>
+        public bool Equals (Texture other) {
+            if (ReferenceEquals(other, null))
+                return false;
+
+            if (ReferenceEquals(other, this))
+                return true;
+
+            return handle == other.handle;
+        }
+
+        /// <summary>
+        /// Determines whether the specified <see cref="System.Object" /> is equal to this instance.
+        /// </summary>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool Equals (object obj) {
+            return Equals(obj as Texture);
+        }
+
+        /// <summary>
+        /// Returns a hash code for this instance.
+        /// </summary>
+        /// <returns>
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// </returns>
+        public override int GetHashCode () {
+            return handle.GetHashCode();
+        }
+
+        /// <summary>
+        /// Implements the equality operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator ==(Texture left, Texture right) {
+            if (ReferenceEquals(left, null))
+                return ReferenceEquals(right, null);
+
+            return left.Equals(right);
+        }
+
+        /// <summary>
+        /// Implements the inequality operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// <c>true</c> if the two objects are not equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator !=(Texture left, Texture right) {
+            return !(left == right);
+        }
 
         internal struct TextureInfo {
             public TextureFormat Format;

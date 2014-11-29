@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
 using System.Numerics;
 
@@ -10,24 +11,24 @@ namespace SharpBgfx {
         /// <param name="input">The vector to pack.</param>
         /// <param name="inputNormalized"><c>true</c> if the input vector is normalized.</param>
         /// <param name="attribute">The attribute usage of the vector data.</param>
-        /// <param name="declaration">The vertex declaration describing the layout of the vertex stream.</param>
+        /// <param name="layout">The layout of the vertex stream.</param>
         /// <param name="data">The pointer to the vertex data stream.</param>
         /// <param name="index">The index of the vertex within the stream.</param>
-        public static void VertexPack (Vector4 input, bool inputNormalized, VertexAttribute attribute, VertexDeclaration declaration, IntPtr data, int index = 0) {
-            NativeMethods.bgfx_vertex_pack((float*)&input, inputNormalized, attribute, ref declaration.data, data, index);
+        public static void VertexPack (Vector4 input, bool inputNormalized, VertexAttributeUsage attribute, VertexLayout layout, IntPtr data, int index = 0) {
+            NativeMethods.bgfx_vertex_pack((float*)&input, inputNormalized, attribute, ref layout.data, data, index);
         }
 
         /// <summary>
         /// Unpack a vector from a vertex stream.
         /// </summary>
         /// <param name="attribute">The usage of the vertex attribute.</param>
-        /// <param name="decl">The vertex declaration describing the layout of the vertex stream.</param>
+        /// <param name="layout">The layout of the vertex stream.</param>
         /// <param name="data">A pointer to the vertex data stream.</param>
         /// <param name="index">The index of the vertex within the stream.</param>
         /// <returns>The unpacked vector.</returns>
-        public static Vector4 VertexUnpack (VertexAttribute attribute, VertexDeclaration decl, IntPtr data, int index = 0) {
+        public static Vector4 VertexUnpack (VertexAttributeUsage attribute, VertexLayout layout, IntPtr data, int index = 0) {
             Vector4 output;
-            NativeMethods.bgfx_vertex_unpack((float*)&output, attribute, ref decl.data, data, index);
+            NativeMethods.bgfx_vertex_unpack((float*)&output, attribute, ref layout.data, data, index);
 
             return output;
         }
@@ -35,26 +36,26 @@ namespace SharpBgfx {
         /// <summary>
         /// Converts a stream of vertex data from one format to another.
         /// </summary>
-        /// <param name="destDecl">The destination format.</param>
-        /// <param name="destData">A pointer to the output location.</param>
-        /// <param name="srcDecl">The source format.</param>
-        /// <param name="srcData">A pointer to the source vertex data to convert.</param>
+        /// <param name="destinationLayout">The destination format.</param>
+        /// <param name="destinationData">A pointer to the output location.</param>
+        /// <param name="sourceLayout">The source format.</param>
+        /// <param name="sourceData">A pointer to the source vertex data to convert.</param>
         /// <param name="count">The number of vertices to convert.</param>
-        public static void VertexConvert (VertexDeclaration destDecl, IntPtr destData, VertexDeclaration srcDecl, IntPtr srcData, int count = 1) {
-            NativeMethods.bgfx_vertex_convert(ref destDecl.data, destData, ref srcDecl.data, srcData, count);
+        public static void VertexConvert (VertexLayout destinationLayout, IntPtr destinationData, VertexLayout sourceLayout, IntPtr sourceData, int count = 1) {
+            NativeMethods.bgfx_vertex_convert(ref destinationLayout.data, destinationData, ref sourceLayout.data, sourceData, count);
         }
 
         /// <summary>
         /// Welds vertices that are close together.
         /// </summary>
         /// <param name="output">Pointer to an output remapping table for welded vertices. The size of the buffer must match the number of vertices.</param>
-        /// <param name="decl">The layout of the vertex stream.</param>
+        /// <param name="layout">The layout of the vertex stream.</param>
         /// <param name="data">A pointer to the vertex data stream.</param>
         /// <param name="count">The number of vertices in the stream.</param>
         /// <param name="epsilon">The tolerance for welding vertex positions.</param>
         /// <returns>The number of unique vertices after welding.</returns>
-        public static int WeldVertices (ushort* output, VertexDeclaration decl, IntPtr data, int count, float epsilon = 0.001f) {
-            return NativeMethods.bgfx_weld_vertices(output, ref decl.data, data, (ushort)count, epsilon);
+        public static int WeldVertices (ushort* output, VertexLayout layout, IntPtr data, int count, float epsilon = 0.001f) {
+            return NativeMethods.bgfx_weld_vertices(output, ref layout.data, data, (ushort)count, epsilon);
         }
 
         /// <summary>
@@ -63,13 +64,13 @@ namespace SharpBgfx {
         /// <param name="width">The width of the image.</param>
         /// <param name="height">The height of the image.</param>
         /// <param name="pitch">The pitch of the image (in bytes).</param>
-        /// <param name="src">The source image data.</param>
-        /// <param name="dst">The destination image data.</param>
+        /// <param name="source">The source image data.</param>
+        /// <param name="destination">The destination image data.</param>
         /// <remarks>
         /// This method can operate in-place on the image (i.e. src == dst).
         /// </remarks>
-        public static void ImageSwizzleBgra8 (int width, int height, int pitch, IntPtr src, IntPtr dst) {
-            NativeMethods.bgfx_image_swizzle_bgra8(width, height, pitch, src, dst);
+        public static void ImageSwizzleBgra8 (int width, int height, int pitch, IntPtr source, IntPtr destination) {
+            NativeMethods.bgfx_image_swizzle_bgra8(width, height, pitch, source, destination);
         }
 
         /// <summary>
@@ -78,21 +79,21 @@ namespace SharpBgfx {
         /// <param name="width">The width of the image.</param>
         /// <param name="height">The height of the image.</param>
         /// <param name="pitch">The pitch of the image (in bytes).</param>
-        /// <param name="src">The source image data.</param>
-        /// <param name="dst">The destination image data.</param>
+        /// <param name="source">The source image data.</param>
+        /// <param name="destination">The destination image data.</param>
         /// <remarks>
         /// This method can operate in-place on the image (i.e. src == dst).
         /// </remarks>
-        public static void ImageRgba8Downsample2x2 (int width, int height, int pitch, IntPtr src, IntPtr dst) {
-            NativeMethods.bgfx_image_rgba8_downsample_2x2(width, height, pitch, src, dst);
+        public static void ImageRgba8Downsample2x2 (int width, int height, int pitch, IntPtr source, IntPtr destination) {
+            NativeMethods.bgfx_image_rgba8_downsample_2x2(width, height, pitch, source, destination);
         }
 
         /// <summary>
         /// Sets the handle of the main rendering window.
         /// </summary>
-        /// <param name="hwnd">The handle of the native OS window.</param>
-        public static void SetWindowHandle (IntPtr hwnd) {
-            NativeMethods.bgfx_win_set_hwnd(hwnd);
+        /// <param name="windowHandle">The handle of the native OS window.</param>
+        public static void SetWindowHandle (IntPtr windowHandle) {
+            NativeMethods.bgfx_win_set_hwnd(windowHandle);
         }
 
         /// <summary>
@@ -124,7 +125,7 @@ namespace SharpBgfx {
         /// <param name="width">The width of the main window.</param>
         /// <param name="height">The height of the main window.</param>
         /// <param name="flags">Flags used to configure rendering output.</param>
-        public static void Reset (int width, int height, ResetFlags flags) {
+        public static void Reset (int width, int height, ResetFlags flags = ResetFlags.None) {
             NativeMethods.bgfx_reset(width, height, flags);
         }
 
@@ -179,9 +180,9 @@ namespace SharpBgfx {
         /// <summary>
         /// Enables debugging features.
         /// </summary>
-        /// <param name="flags">The set of debug features to enable.</param>
-        public static void SetDebugFlags (DebugFlags flags) {
-            NativeMethods.bgfx_set_debug(flags);
+        /// <param name="features">The set of debug features to enable.</param>
+        public static void SetDebugFeatures (DebugFeatures features) {
+            NativeMethods.bgfx_set_debug(features);
         }
 
         /// <summary>
@@ -221,7 +222,7 @@ namespace SharpBgfx {
         /// <param name="format">The format of the message.</param>
         /// <param name="args">The arguments with which to format the message.</param>
         public static void DebugTextWrite (int x, int y, byte color, string format, params object[] args) {
-            NativeMethods.bgfx_dbg_text_printf((ushort)x, (ushort)y, color, "%s", string.Format(format, args));
+            NativeMethods.bgfx_dbg_text_printf((ushort)x, (ushort)y, color, "%s", string.Format(CultureInfo.CurrentCulture, format, args));
         }
 
         /// <summary>
@@ -264,12 +265,12 @@ namespace SharpBgfx {
         /// Sets view clear flags.
         /// </summary>
         /// <param name="id">The index of the view.</param>
-        /// <param name="flags">Flags that control how the viewport is cleared.</param>
+        /// <param name="targets">The target surfaces that should be cleared.</param>
         /// <param name="rgba">The color to clear the backbuffer.</param>
         /// <param name="depth">The value to fill the depth buffer.</param>
         /// <param name="stencil">The value to fill the stencil buffer.</param>
-        public static void SetViewClear (byte id, ClearFlags flags, Color4 color, float depth = 1.0f, byte stencil = 0) {
-            NativeMethods.bgfx_set_view_clear(id, flags, color.ToRgba(), depth, stencil);
+        public static void SetViewClear (byte id, ClearTargets targets, Color4 color, float depth = 1.0f, byte stencil = 0) {
+            NativeMethods.bgfx_set_view_clear(id, targets, color.ToRgba(), depth, stencil);
         }
 
         /// <summary>
@@ -286,9 +287,9 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="id">The index of the view.</param>
         /// <param name="view">The 4x4 view transform matrix.</param>
-        /// <param name="proj">The 4x4 projection transform matrix.</param>
-        public static void SetViewTransform (byte id, Matrix4x4 view, Matrix4x4 proj) {
-            NativeMethods.bgfx_set_view_transform(id, (float*)&view, (float*)&proj);
+        /// <param name="projection">The 4x4 projection transform matrix.</param>
+        public static void SetViewTransform (byte id, Matrix4x4 view, Matrix4x4 projection) {
+            NativeMethods.bgfx_set_view_transform(id, (float*)&view, (float*)&projection);
         }
 
         /// <summary>
@@ -296,10 +297,10 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="id">The index of the view.</param>
         /// <param name="view">The 4x4 view transform matrix.</param>
-        /// <param name="proj">The 4x4 projection transform matrix.</param>
+        /// <param name="projection">The 4x4 projection transform matrix.</param>
         [CLSCompliant(false)]
-        public static void SetViewTransform (byte id, float* view, float* proj) {
-            NativeMethods.bgfx_set_view_transform(id, view, proj);
+        public static void SetViewTransform (byte id, float* view, float* projection) {
+            NativeMethods.bgfx_set_view_transform(id, view, projection);
         }
 
         public static int SetTransform (Matrix4x4 matrix, int count) {

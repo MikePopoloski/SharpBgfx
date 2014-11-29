@@ -6,7 +6,7 @@ namespace SharpBgfx {
     [SuppressUnmanagedCodeSecurity]
     unsafe static class NativeMethods {
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern ushort bgfx_create_program (ushort vsh, ushort fsh, bool destroyShaders);
+        public static extern ushort bgfx_create_program (ushort vsh, ushort fsh, [MarshalAs(UnmanagedType.U1)] bool destroyShaders);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_destroy_program (ushort handle);
@@ -15,19 +15,19 @@ namespace SharpBgfx {
         public static extern Capabilities.Caps* bgfx_get_caps ();
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_vertex_decl_begin (ref VertexDeclaration.Data decl, RendererBackend backend);
+        public static extern void bgfx_vertex_decl_begin (ref VertexLayout.Data decl, RendererBackend backend);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_vertex_decl_add (ref VertexDeclaration.Data decl, VertexAttribute attribute, byte count, VertexAttributeType type, bool normalized, bool asInt);
+        public static extern void bgfx_vertex_decl_add (ref VertexLayout.Data decl, VertexAttributeUsage attribute, byte count, VertexAttributeType type, [MarshalAs(UnmanagedType.U1)] bool normalized, [MarshalAs(UnmanagedType.U1)] bool asInt);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_vertex_decl_skip (ref VertexDeclaration.Data decl, byte count);
+        public static extern void bgfx_vertex_decl_skip (ref VertexLayout.Data decl, byte count);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_vertex_decl_end (ref VertexDeclaration.Data decl);
+        public static extern void bgfx_vertex_decl_end (ref VertexLayout.Data decl);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern ushort bgfx_create_vertex_buffer (MemoryBlock.DataPtr* memory, ref VertexDeclaration.Data decl);
+        public static extern ushort bgfx_create_vertex_buffer (MemoryBlock.DataPtr* memory, ref VertexLayout.Data decl);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_destroy_vertex_buffer (ushort handle);
@@ -90,10 +90,10 @@ namespace SharpBgfx {
         public static extern void bgfx_destroy_dynamic_index_buffer (ushort handle);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern ushort bgfx_create_dynamic_vertex_buffer (ushort indexCount, ref VertexDeclaration.Data decl);
+        public static extern ushort bgfx_create_dynamic_vertex_buffer (ushort indexCount, ref VertexLayout.Data decl);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern ushort bgfx_create_dynamic_vertex_buffer_mem (MemoryBlock.DataPtr* memory, ref VertexDeclaration.Data decl);
+        public static extern ushort bgfx_create_dynamic_vertex_buffer_mem (MemoryBlock.DataPtr* memory, ref VertexLayout.Data decl);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_update_dynamic_vertex_buffer (ushort handle, MemoryBlock.DataPtr* memory);
@@ -123,7 +123,7 @@ namespace SharpBgfx {
         public static extern int bgfx_frame ();
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_set_debug (DebugFlags flags);
+        public static extern void bgfx_set_debug (DebugFeatures flags);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_marker ([MarshalAs(UnmanagedType.LPStr)] string marker);
@@ -153,10 +153,10 @@ namespace SharpBgfx {
         public static extern void bgfx_set_view_scissor (byte id, ushort x, ushort y, ushort width, ushort height);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_set_view_clear (byte id, ClearFlags flags, int rgba, float depth, byte stencil);
+        public static extern void bgfx_set_view_clear (byte id, ClearTargets flags, int rgba, float depth, byte stencil);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_set_view_seq (byte id, bool enabled);
+        public static extern void bgfx_set_view_seq (byte id, [MarshalAs(UnmanagedType.U1)] bool enabled);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_view_transform (byte id, float* view, float* proj);
@@ -168,16 +168,16 @@ namespace SharpBgfx {
         public static extern void bgfx_set_state (RenderState state, int rgba);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_vertex_pack (float* input, bool inputNormalized, VertexAttribute attribute, ref VertexDeclaration.Data decl, IntPtr data, int index);
+        public static extern void bgfx_vertex_pack (float* input, [MarshalAs(UnmanagedType.U1)] bool inputNormalized, VertexAttributeUsage attribute, ref VertexLayout.Data decl, IntPtr data, int index);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_vertex_unpack (float* output, VertexAttribute attribute, ref VertexDeclaration.Data decl, IntPtr data, int index);
+        public static extern void bgfx_vertex_unpack (float* output, VertexAttributeUsage attribute, ref VertexLayout.Data decl, IntPtr data, int index);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_vertex_convert (ref VertexDeclaration.Data destDecl, IntPtr destData, ref VertexDeclaration.Data srcDecl, IntPtr srcData, int num);
+        public static extern void bgfx_vertex_convert (ref VertexLayout.Data destDecl, IntPtr destData, ref VertexLayout.Data srcDecl, IntPtr srcData, int num);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern ushort bgfx_weld_vertices (ushort* output, ref VertexDeclaration.Data decl, IntPtr data, ushort num, float epsilon);
+        public static extern ushort bgfx_weld_vertices (ushort* output, ref VertexLayout.Data decl, IntPtr data, ushort num, float epsilon);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern byte bgfx_get_supported_renderers (RendererBackend[] backends);

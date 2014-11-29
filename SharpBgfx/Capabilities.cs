@@ -1,6 +1,4 @@
-﻿using System.Runtime.InteropServices;
-
-namespace SharpBgfx {
+﻿namespace SharpBgfx {
     /// <summary>
     /// Contains information about the capabilities of the rendering device.
     /// </summary>

@@ -61,6 +61,11 @@
       <Word>Bitangent</Word>
       <Word>Framebuffer</Word>
       <Word>Coord</Word>
+      <Word>Downsample</Word>
+      <Word>Fullscreen</Word>
+      <Word>Vsync</Word>
+      <Word>Shaders</Word>
+      <Word>Mips</Word>
     </Recognized>
     <Deprecated>
       <Term PreferredAlternate=""></Term>

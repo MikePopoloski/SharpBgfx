@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace SharpBgfx {
     /// <summary>
@@ -93,7 +90,7 @@ namespace SharpBgfx {
         /// <summary>
         /// Use one minus the source pixel color as an input to a blend equation.
         /// </summary>
-        public static readonly RenderState BlendInvSourceColor = 0x0000000000004000;
+        public static readonly RenderState BlendInverseSourceColor = 0x0000000000004000;
 
         /// <summary>
         /// Use the source pixel alpha as an input to a blend equation.
@@ -103,27 +100,27 @@ namespace SharpBgfx {
         /// <summary>
         /// Use one minus the source pixel alpha as an input to a blend equation.
         /// </summary>
-        public static readonly RenderState BlendInvSourceAlpha = 0x0000000000006000;
+        public static readonly RenderState BlendInverseSourceAlpha = 0x0000000000006000;
 
         /// <summary>
         /// Use the destination pixel alpha as an input to a blend equation.
         /// </summary>
-        public static readonly RenderState BlendDestAlpha = 0x0000000000007000;
+        public static readonly RenderState BlendDestinationAlpha = 0x0000000000007000;
 
         /// <summary>
         /// Use one minus the destination pixel alpha as an input to a blend equation.
         /// </summary>
-        public static readonly RenderState BlendInvDestAlpha = 0x0000000000008000;
+        public static readonly RenderState BlendInverseDestinationAlpha = 0x0000000000008000;
 
         /// <summary>
         /// Use the destination pixel color as an input to a blend equation.
         /// </summary>
-        public static readonly RenderState BlendDestColor = 0x0000000000009000;
+        public static readonly RenderState BlendDestinationColor = 0x0000000000009000;
 
         /// <summary>
         /// Use one minus the destination pixel color as an input to a blend equation.
         /// </summary>
-        public static readonly RenderState BlendInvDestColor = 0x000000000000a000;
+        public static readonly RenderState BlendInverseDestinationColor = 0x000000000000a000;
 
         /// <summary>
         /// Use the source pixel alpha (saturated) as an input to a blend equation.
@@ -138,7 +135,7 @@ namespace SharpBgfx {
         /// <summary>
         /// Use one minus an application supplied blending factor as an input to a blend equation.
         /// </summary>
-        public static readonly RenderState BlendInvFactor = 0x000000000000d000;
+        public static readonly RenderState BlendInverseFactor = 0x000000000000d000;
 
         /// <summary>
         /// Blend equation: A + B
@@ -234,7 +231,7 @@ namespace SharpBgfx {
         /// <summary>
         /// Predefined blend effect: alpha blending.
         /// </summary>
-        public static readonly RenderState BlendAlpha = BlendFunction(RenderState.BlendSourceAlpha, RenderState.BlendInvSourceAlpha);
+        public static readonly RenderState BlendAlpha = BlendFunction(RenderState.BlendSourceAlpha, RenderState.BlendInverseSourceAlpha);
 
         /// <summary>
         /// Predefined blend effect: "darken" blending.
@@ -249,22 +246,22 @@ namespace SharpBgfx {
         /// <summary>
         /// Predefined blend effect: multiplicative blending.
         /// </summary>
-        public static readonly RenderState BlendMultiply = BlendFunction(RenderState.BlendDestColor, RenderState.BlendZero);
+        public static readonly RenderState BlendMultiply = BlendFunction(RenderState.BlendDestinationColor, RenderState.BlendZero);
 
         /// <summary>
         /// Predefined blend effect: normal blending based on alpha.
         /// </summary>
-        public static readonly RenderState BlendNormal = BlendFunction(RenderState.BlendOne, RenderState.BlendInvSourceAlpha);
+        public static readonly RenderState BlendNormal = BlendFunction(RenderState.BlendOne, RenderState.BlendInverseSourceAlpha);
 
         /// <summary>
         /// Predefined blend effect: "screen" blending.
         /// </summary>
-        public static readonly RenderState BlendScreen = BlendFunction(RenderState.BlendOne, RenderState.BlendInvSourceColor);
+        public static readonly RenderState BlendScreen = BlendFunction(RenderState.BlendOne, RenderState.BlendInverseSourceColor);
 
         /// <summary>
         /// Predefined blend effect: "linear burn" blending.
         /// </summary>
-        public static readonly RenderState BlendLinearBurn = BlendFunction(RenderState.BlendDestColor, RenderState.BlendInvDestColor) | BlendEquation(RenderState.BlendEquationSub);
+        public static readonly RenderState BlendLinearBurn = BlendFunction(RenderState.BlendDestinationColor, RenderState.BlendInverseDestinationColor) | BlendEquation(RenderState.BlendEquationSub);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RenderState"/> struct.

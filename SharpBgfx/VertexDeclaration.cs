@@ -1,10 +1,8 @@
-﻿using System.Runtime.InteropServices;
-
-namespace SharpBgfx {
+﻿namespace SharpBgfx {
     /// <summary>
     /// Describes the layout of data in a vertex stream.
     /// </summary>
-    public sealed class VertexDeclaration {
+    public sealed class VertexLayout {
         internal Data data;
 
         /// <summary>
@@ -15,17 +13,17 @@ namespace SharpBgfx {
         }
 
         /// <summary>
-        /// Starts a stream of vertex attribute additions to the declaration.
+        /// Starts a stream of vertex attribute additions to the layout.
         /// </summary>
         /// <param name="backend">The rendering backend with which to associate the attributes.</param>
         /// <returns>This instance, for use in a fluent API.</returns>
-        public VertexDeclaration Begin (RendererBackend backend = RendererBackend.Null) {
+        public VertexLayout Begin (RendererBackend backend = RendererBackend.Null) {
             NativeMethods.bgfx_vertex_decl_begin(ref data, backend);
             return this;
         }
 
         /// <summary>
-        /// Starts a stream of vertex attribute additions to the declaration.
+        /// Starts a stream of vertex attribute additions to the layout.
         /// </summary>
         /// <param name="attribute">The kind of attribute to add.</param>
         /// <param name="count">The number of elements in the attribute (1, 2, 3, or 4).</param>
@@ -35,7 +33,7 @@ namespace SharpBgfx {
         /// <returns>
         /// This instance, for use in a fluent API.
         /// </returns>
-        public VertexDeclaration Add (VertexAttribute attribute, int count, VertexAttributeType type, bool normalized = false, bool asInt = false) {
+        public VertexLayout Add (VertexAttributeUsage attribute, int count, VertexAttributeType type, bool normalized = false, bool asInt = false) {
             NativeMethods.bgfx_vertex_decl_add(ref data, attribute, (byte)count, type, normalized, asInt);
             return this;
         }
@@ -45,7 +43,7 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="count">The number of bytes to skip.</param>
         /// <returns>This instance, for use in a fluent API.</returns>
-        public VertexDeclaration Skip (int count) {
+        public VertexLayout Skip (int count) {
             NativeMethods.bgfx_vertex_decl_skip(ref data, (byte)count);
             return this;
         }
@@ -58,21 +56,21 @@ namespace SharpBgfx {
         }
 
         /// <summary>
-        /// Gets the byte offset of a particular attribute in the declaration.
+        /// Gets the byte offset of a particular attribute in the layout.
         /// </summary>
         /// <param name="attribute">The attribute for which to get the offset.</param>
         /// <returns>The offset of the attribute, in bytes.</returns>
-        public unsafe int GetOffset (VertexAttribute attribute) {
+        public unsafe int GetOffset (VertexAttributeUsage attribute) {
             fixed (Data* ptr = &data)
                 return ptr->Offset[(int)attribute];
         }
 
         /// <summary>
-        /// Determines whether the declaration contains the given attribute.
+        /// Determines whether the layout contains the given attribute.
         /// </summary>
         /// <param name="attribute">The attribute to check/</param>
-        /// <returns><c>true</c> if the declaration contains the attribute; otherwise, <c>false</c>.</returns>
-        public unsafe bool HasAttribute (VertexAttribute attribute) {
+        /// <returns><c>true</c> if the layout contains the attribute; otherwise, <c>false</c>.</returns>
+        public unsafe bool HasAttribute (VertexAttributeUsage attribute) {
             fixed (Data* ptr = &data)
                 return ptr->Attributes[(int)attribute] != 0xff;
         }

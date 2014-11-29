@@ -15,10 +15,10 @@ static class Program {
         Bgfx.Reset(sample.WindowWidth, sample.WindowHeight, ResetFlags.Vsync);
 
         // enable debug text
-        Bgfx.SetDebugFlags(DebugFlags.DisplayText);
+        Bgfx.SetDebugFeatures(DebugFeatures.DisplayText);
 
         // set view 0 clear state
-        Bgfx.SetViewClear(0, ClearFlags.ColorBit | ClearFlags.DepthBit, 0x303030ff, 1.0f, 0);
+        Bgfx.SetViewClear(0, ClearTargets.ColorBit | ClearTargets.DepthBit, 0x303030ff, 1.0f, 0);
 
         // main loop
         while (sample.ProcessEvents(ResetFlags.Vsync)) {
