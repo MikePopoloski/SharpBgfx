@@ -51,7 +51,6 @@
     <Compile Include="DynamicVertexBuffer.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="Analysis\GlobalSuppressions.cs" />
-    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="IndexBuffer.cs" />
     <Compile Include="KnownColors.cs" />
