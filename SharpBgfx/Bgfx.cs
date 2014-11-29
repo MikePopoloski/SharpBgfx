@@ -4,6 +4,9 @@ using System.Linq;
 using System.Numerics;
 
 namespace SharpBgfx {
+    /// <summary>
+    /// Managed interface to the bgfx graphics library.
+    /// </summary>
     public unsafe static class Bgfx {
         /// <summary>
         /// Checks for available space to allocate transient index and vertex buffers.
@@ -301,7 +304,7 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="id">The index of the view.</param>
         /// <param name="targets">The target surfaces that should be cleared.</param>
-        /// <param name="rgba">The color to clear the backbuffer.</param>
+        /// <param name="color">The clear color.</param>
         /// <param name="depth">The value to fill the depth buffer.</param>
         /// <param name="stencil">The value to fill the stencil buffer.</param>
         public static void SetViewClear (byte id, ClearTargets targets, Color4 color, float depth = 1.0f, byte stencil = 0) {
@@ -601,7 +604,8 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="textureUnit">The texture unit to set.</param>
         /// <param name="sampler">The sampler uniform.</param>
-        /// <param name="texture">The texture to set.</param>
+        /// <param name="frameBuffer">The frame buffer.</param>
+        /// <param name="attachment">The index of the attachment to set.</param>
         /// <param name="flags">Sampling flags that override the default flags in the texture itself.</param>
         public static void SetTexture (byte textureUnit, Uniform sampler, FrameBuffer frameBuffer, byte attachment, TextureFlags flags) {
             NativeMethods.bgfx_set_texture_from_frame_buffer(textureUnit, sampler.handle, frameBuffer.handle, attachment, (uint)flags);

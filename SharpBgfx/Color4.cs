@@ -30,7 +30,7 @@ namespace SharpBgfx {
         public byte Alpha;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SlimMath.Color4"/> struct.
+        /// Initializes a new instance of the <see cref="Color4"/> struct.
         /// </summary>
         /// <param name="rgba">A packed RGBA integer containing all four color components.</param>
         public Color4 (int rgba) {
@@ -41,7 +41,7 @@ namespace SharpBgfx {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SlimMath.Color4"/> struct.
+        /// Initializes a new instance of the <see cref="Color4"/> struct.
         /// </summary>
         /// <param name="red">The red component of the color.</param>
         /// <param name="green">The green component of the color.</param>
@@ -51,7 +51,7 @@ namespace SharpBgfx {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SlimMath.Color4" /> struct.
+        /// Initializes a new instance of the <see cref="Color4" /> struct.
         /// </summary>
         /// <param name="red">The red component of the color.</param>
         /// <param name="green">The green component of the color.</param>
@@ -296,7 +296,7 @@ namespace SharpBgfx {
         public static bool operator !=(Color4 left, Color4 right) => !left.Equals(right);
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="System.Int32"/> to <see cref="SlimMath.Color4"/>.
+        /// Performs an explicit conversion from <see cref="System.Int32"/> to <see cref="Color4"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
@@ -366,11 +366,11 @@ namespace SharpBgfx {
         public override int GetHashCode () => Alpha.GetHashCode() + Red.GetHashCode() + Green.GetHashCode() + Blue.GetHashCode();
 
         /// <summary>
-        /// Determines whether the specified <see cref="SlimMath.Color4"/> is equal to this instance.
+        /// Determines whether the specified <see cref="Color4"/> is equal to this instance.
         /// </summary>
-        /// <param name="other">The <see cref="SlimMath.Color4"/> to compare with this instance.</param>
+        /// <param name="other">The <see cref="Color4"/> to compare with this instance.</param>
         /// <returns>
-        /// <c>true</c> if the specified <see cref="SlimMath.Color4"/> is equal to this instance; otherwise, <c>false</c>.
+        /// <c>true</c> if the specified <see cref="Color4"/> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
         public bool Equals (Color4 other) {
             return

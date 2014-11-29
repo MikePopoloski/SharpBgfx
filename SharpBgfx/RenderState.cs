@@ -271,24 +271,83 @@ namespace SharpBgfx {
             this.value = (ulong)value;
         }
 
+        /// <summary>
+        /// Encodes an alpha reference value in a render state.
+        /// </summary>
+        /// <param name="alpha">The alpha reference value.</param>
+        /// <returns>The encoded render state.</returns>
         public static RenderState AlphaRef (byte alpha) => (((ulong)alpha) << AlphaRefShift) & AlphaRefMask;
 
+        /// <summary>
+        /// Encodes a point size value in a render state.
+        /// </summary>
+        /// <param name="size">The point size.</param>
+        /// <returns>The encoded render state.</returns>
         public static RenderState PointSize (byte size) => (((ulong)size) << PointSizeShift) & PointSizeMask;
 
+        /// <summary>
+        /// Builds a render state for a blend function.
+        /// </summary>
+        /// <param name="source">The source blend operation.</param>
+        /// <param name="destination">The destination blend operation.</param>
+        /// <returns>The render state for the blend function.</returns>
         public static RenderState BlendFunction (RenderState source, RenderState destination) => BlendFunction(source, destination, source, destination);
 
+        /// <summary>
+        /// Builds a render state for a blend function.
+        /// </summary>
+        /// <param name="sourceColor">The source color blend operation.</param>
+        /// <param name="destinationColor">The destination color blend operation.</param>
+        /// <param name="sourceAlpha">The source alpha blend operation.</param>
+        /// <param name="destinationAlpha">The destination alpha blend operation.</param>
+        /// <returns>
+        /// The render state for the blend function.
+        /// </returns>
         public static RenderState BlendFunction (RenderState sourceColor, RenderState destinationColor, RenderState sourceAlpha, RenderState destinationAlpha) {
             return (sourceColor | (destinationColor << 4)) | ((sourceAlpha | (destinationAlpha << 4)) << 8);
         }
 
+        /// <summary>
+        /// Builds a render state for a blend equation.
+        /// </summary>
+        /// <param name="equation">The equation.</param>
+        /// <returns>
+        /// The render state for the blend equation.
+        /// </returns>
         public static RenderState BlendEquation (RenderState equation) => BlendEquation(equation, equation);
 
+        /// <summary>
+        /// Builds a render state for a blend equation.
+        /// </summary>
+        /// <param name="sourceEquation">The source equation.</param>
+        /// <param name="alphaEquation">The alpha equation.</param>
+        /// <returns>
+        /// The render state for the blend equation.
+        /// </returns>
         public static RenderState BlendEquation (RenderState sourceEquation, RenderState alphaEquation) => sourceEquation | (alphaEquation << 3);
 
+        /// <summary>
+        /// Returns a hash code for this instance.
+        /// </summary>
+        /// <returns>
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// </returns>
         public override int GetHashCode () => value.GetHashCode();
 
+        /// <summary>
+        /// Determines whether the specific value is equal to this instance.
+        /// </summary>
+        /// <param name="other">The value to compare with this instance.</param>
+        /// <returns><c>true</c> if the value is equal to this instance; otherwise, <c>false</c>.</returns>
         public bool Equals (RenderState other) => value == other.value;
 
+        /// <summary>
+        /// Determines whether the specified <see cref="System.Object" /> is equal to this instance.
+        /// </summary>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
+        /// </returns>
         public override bool Equals (object obj) {
             var state = obj as RenderState?;
             if (state == null)
@@ -297,24 +356,87 @@ namespace SharpBgfx {
             return Equals(state);
         }
 
+        /// <summary>
+        /// Implements the equality operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
+        /// </returns>
         public static bool operator ==(RenderState left, RenderState right) => left.Equals(right);
 
+        /// <summary>
+        /// Implements the inequality operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// <c>true</c> if the two objects are not equal; otherwise, <c>false</c>.
+        /// </returns>
         public static bool operator !=(RenderState left, RenderState right) => !left.Equals(right);
 
+        /// <summary>
+        /// Performs an implicit conversion from ulong.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
         [CLSCompliant(false)]
         public static implicit operator RenderState (ulong value) => new RenderState((long)value);
 
+        /// <summary>
+        /// Performs an explicit conversion to ulong.
+        /// </summary>
+        /// <param name="state">The value to convert.</param>
         [CLSCompliant(false)]
         public static explicit operator ulong (RenderState state) => state.value;
 
+        /// <summary>
+        /// Implements the bitwise-or operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
         public static RenderState operator |(RenderState left, RenderState right) => left.value | right.value;
 
+        /// <summary>
+        /// Implements the bitwise-and operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
         public static RenderState operator &(RenderState left, RenderState right) => left.value & right.value;
 
+        /// <summary>
+        /// Implements the bitwise-complement operator.
+        /// </summary>
+        /// <param name="state">The operand.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
         public static RenderState operator ~(RenderState state) => ~state.value;
 
+        /// <summary>
+        /// Implements the left shift operator.
+        /// </summary>
+        /// <param name="state">The value to shift.</param>
+        /// <param name="amount">The amount to shift.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
         public static RenderState operator <<(RenderState state, int amount) => state.value << amount;
 
+        /// <summary>
+        /// Implements the right shift operator.
+        /// </summary>
+        /// <param name="state">The value to shift.</param>
+        /// <param name="amount">The amount to shift.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
         public static RenderState operator >>(RenderState state, int amount) => state.value >> amount;
     }
 }

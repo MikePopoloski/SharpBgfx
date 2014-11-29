@@ -137,14 +137,46 @@ namespace SharpBgfx {
         /// </summary>
         public void Dispose () => NativeMethods.bgfx_destroy_texture(handle);
 
+        /// <summary>
+        /// Updates the data in a 2D texture.
+        /// </summary>
+        /// <param name="mipLevel">The mip level.</param>
+        /// <param name="x">The X coordinate of the rectangle to update.</param>
+        /// <param name="y">The Y coordinate of the rectangle to update.</param>
+        /// <param name="width">The width of the rectangle to update.</param>
+        /// <param name="height">The height of the rectangle to update.</param>
+        /// <param name="memory">The new image data.</param>
+        /// <param name="pitch">The pitch of the image data.</param>
         public void Update2D (int mipLevel, int x, int y, int width, int height, MemoryBlock memory, int pitch) {
             NativeMethods.bgfx_update_texture_2d(handle, (byte)mipLevel, (ushort)x, (ushort)y, (ushort)width, (ushort)height, memory.ptr, (ushort)pitch);
         }
 
+        /// <summary>
+        /// Updates the data in a 3D texture.
+        /// </summary>
+        /// <param name="mipLevel">The mip level.</param>
+        /// <param name="x">The X coordinate of the volume to update.</param>
+        /// <param name="y">The Y coordinate of the volume to update.</param>
+        /// <param name="z">The Z coordinate of the volume to update.</param>
+        /// <param name="width">The width of the volume to update.</param>
+        /// <param name="height">The height of the volume to update.</param>
+        /// <param name="depth">The depth of the volume to update.</param>
+        /// <param name="memory">The new image data.</param>
         public void Update3D (int mipLevel, int x, int y, int z, int width, int height, int depth, MemoryBlock memory) {
             NativeMethods.bgfx_update_texture_3d(handle, (byte)mipLevel, (ushort)x, (ushort)y, (ushort)z, (ushort)width, (ushort)height, (ushort)depth, memory.ptr);
         }
 
+        /// <summary>
+        /// Updates the data in a cube texture.
+        /// </summary>
+        /// <param name="face">The cube map face to update.</param>
+        /// <param name="mipLevel">The mip level.</param>
+        /// <param name="x">The X coordinate of the rectangle to update.</param>
+        /// <param name="y">The Y coordinate of the rectangle to update.</param>
+        /// <param name="width">The width of the rectangle to update.</param>
+        /// <param name="height">The height of the rectangle to update.</param>
+        /// <param name="memory">The new image data.</param>
+        /// <param name="pitch">The pitch of the image data.</param>
         public void UpdateCube (CubeMapFace face, int mipLevel, int x, int y, int width, int height, MemoryBlock memory, int pitch) {
             NativeMethods.bgfx_update_texture_cube(handle, face, (byte)mipLevel, (ushort)x, (ushort)y, (ushort)width, (ushort)height, memory.ptr, (ushort)pitch);
         }

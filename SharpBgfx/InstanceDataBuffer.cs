@@ -1,17 +1,37 @@
 ﻿using System;
 
 namespace SharpBgfx {
+    /// <summary>
+    /// Maintains a data buffer that contains instancing data.
+    /// </summary>
     public unsafe struct InstanceDataBuffer : IEquatable<InstanceDataBuffer> {
         internal NativeStruct* ptr;
 
+        /// <summary>
+        /// A pointer that can be filled with instance data.
+        /// </summary>
         public IntPtr Data => ptr->data;
 
-        public int Count => ptr->size;
+        /// <summary>
+        /// The size of the data buffer.
+        /// </summary>
+        public int Size => ptr->size;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InstanceDataBuffer" /> struct.
+        /// </summary>
+        /// <param name="count">The number of elements in the buffer.</param>
+        /// <param name="stride">The stride of each element.</param>
         public InstanceDataBuffer (int count, int stride) {
             ptr = NativeMethods.bgfx_alloc_instance_data_buffer(count, (ushort)stride);
         }
 
+        /// <summary>
+        /// Checks for available space to allocate an instance buffer.
+        /// </summary>
+        /// <param name="count">The number of elements to allocate.</param>
+        /// <param name="stride">The stride of each element.</param>
+        /// <returns><c>true</c> if there is space available to allocate the buffer.</returns>
         public static bool CheckAvailableSpace (int count, int stride) {
             return NativeMethods.bgfx_check_avail_instance_data_buffer(count, (ushort)stride);
         }
