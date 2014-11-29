@@ -6,6 +6,36 @@ namespace SharpBgfx {
     [SuppressUnmanagedCodeSecurity]
     unsafe static class NativeMethods {
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_dispatch (byte id, ushort program, ushort numX, ushort numY, ushort numZ);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_set_texture (byte stage, ushort sampler, ushort texture, uint flags);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_set_texture_from_frame_buffer (byte stage, ushort sampler, ushort frameBuffer, byte attachment, uint flags);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_set_image (byte stage, ushort sampler, ushort texture, byte mip, TextureFormat format, ComputeBufferAccess access);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_set_image_from_frame_buffer (byte stage, ushort sampler, ushort frameBuffer, byte attachment, TextureFormat format, ComputeBufferAccess access);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern ushort bgfx_create_frame_buffer (ushort width, ushort height, TextureFormat format, TextureFlags flags);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern ushort bgfx_create_frame_buffer_from_handles (byte count, ushort* handles, [MarshalAs(UnmanagedType.U1)] bool destroyTextures);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern ushort bgfx_create_frame_buffer_from_nwh (IntPtr nwh, ushort width, ushort height, TextureFormat depthFormat);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_destroy_frame_buffer (ushort handle);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_set_view_frame_buffer (byte id, ushort handle);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern ushort bgfx_create_program (ushort vsh, ushort fsh, [MarshalAs(UnmanagedType.U1)] bool destroyShaders);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
@@ -156,6 +186,12 @@ namespace SharpBgfx {
         public static extern void bgfx_set_view_clear (byte id, ClearTargets flags, int rgba, float depth, byte stencil);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_set_view_clear_mrt (byte id, ClearTargets flags, float depth, byte stencil, byte rt0, byte rt1, byte rt2, byte rt3, byte rt4, byte rt5, byte rt6, byte rt7);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_set_clear_color (byte index, float* color);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_view_seq (byte id, [MarshalAs(UnmanagedType.U1)] bool enabled);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
@@ -192,9 +228,6 @@ namespace SharpBgfx {
         public static extern void bgfx_dbg_text_printf (ushort x, ushort y, byte color, [MarshalAs(UnmanagedType.LPStr)] string format, [MarshalAs(UnmanagedType.LPStr)] string args);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_set_view_transform (byte id, float* view, float* proj, byte flags, IntPtr projR);
-
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_program (ushort handle);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
@@ -211,6 +244,15 @@ namespace SharpBgfx {
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_uniform (ushort handle, void* value, ushort arraySize);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_set_transform_cached (int cache, ushort num);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern ushort bgfx_set_scissor (ushort x, ushort y, ushort width, ushort height);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_set_scissor_cached (ushort cache);
 
 #if DEBUG
         const string DllName = "bgfx_debug.dll";

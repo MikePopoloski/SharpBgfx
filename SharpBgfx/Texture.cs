@@ -5,7 +5,7 @@ namespace SharpBgfx {
     /// Represents a loaded texture.
     /// </summary>
     public unsafe sealed class Texture : IDisposable, IEquatable<Texture> {
-        ushort handle;
+        internal ushort handle;
 
         /// <summary>
         /// The width of the texture.

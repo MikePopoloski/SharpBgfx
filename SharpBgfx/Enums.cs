@@ -720,6 +720,10 @@ namespace SharpBgfx {
         /// The render target texture support 16x multisampling.
         /// </summary>
         RenderTargetMultisample16x = 0x00005000,
+
+        /// <summary>
+        /// The texture is only usable as a render target, not as a shader resource.
+        /// </summary>
         RenderTargetBufferOnly = 0x00008000,
 
         /// <summary>
@@ -761,6 +765,26 @@ namespace SharpBgfx {
         /// Always compare two textures as equal.
         /// </summary>
         CompareAlways = 0x00080000,
+    }
+
+    /// <summary>
+    /// Describes access rights for a compute buffer.
+    /// </summary>
+    public enum ComputeBufferAccess {
+        /// <summary>
+        /// The buffer can only be read.
+        /// </summary>
+        Read,
+
+        /// <summary>
+        /// The buffer can only be written to.
+        /// </summary>
+        Write,
+
+        /// <summary>
+        /// The buffer can be read and written.
+        /// </summary>
+        ReadWrite
     }
 
     [Flags]
