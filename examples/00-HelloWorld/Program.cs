@@ -18,7 +18,7 @@ static class Program {
         Bgfx.SetDebugFeatures(DebugFeatures.DisplayText);
 
         // set view 0 clear state
-        Bgfx.SetViewClear(0, ClearTargets.ColorBit | ClearTargets.DepthBit, 0x303030ff);
+        Bgfx.SetViewClear(0, ClearTargets.Color | ClearTargets.Depth, 0x303030ff);
 
         // main loop
         while (sample.ProcessEvents(ResetFlags.Vsync)) {

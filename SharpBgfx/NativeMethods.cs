@@ -265,7 +265,10 @@ namespace SharpBgfx {
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_dbg_text_printf (ushort x, ushort y, byte color, [MarshalAs(UnmanagedType.LPStr)] string format, [MarshalAs(UnmanagedType.LPStr)] string args);
 
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+		[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+		public static extern void bgfx_dbg_text_image (ushort x, ushort y, ushort width, ushort height, IntPtr data, ushort pitch);
+
+		[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_program (ushort handle);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
@@ -301,10 +304,10 @@ namespace SharpBgfx {
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_instance_data_buffer (InstanceDataBuffer.NativeStruct* idb, ushort num);
 
-#if DEBUG
-        const string DllName = "bgfx_debug.dll";
-#else
+//#if DEBUG
+//        const string DllName = "bgfx_debug.dll";
+//#else
         const string DllName = "bgfx.dll";
-#endif
+//#endif
     }
 }

@@ -476,10 +476,15 @@ namespace SharpBgfx {
         /// </summary>
         Vsync = 0x80,
 
+		/// <summary>
+		/// Use the maximum anisotropic filtering level available.
+		/// </summary>
+		MaxAnisotropy = 0x100,
+
         /// <summary>
         /// Begin screen capture.
         /// </summary>
-        Capture = 0x100
+        Capture = 0x200
     }
 
     /// <summary>
@@ -518,7 +523,7 @@ namespace SharpBgfx {
     /// Specifies flags for clearing surfaces.
     /// </summary>
     [Flags]
-    public enum ClearTargets : byte {
+    public enum ClearTargets : short {
         /// <summary>
         /// Don't clear anything.
         /// </summary>
@@ -527,18 +532,68 @@ namespace SharpBgfx {
         /// <summary>
         /// Clear the color channels.
         /// </summary>
-        ColorBit = 0x1,
+        Color = 0x1,
 
         /// <summary>
         /// Clear the depth buffer.
         /// </summary>
-        DepthBit = 0x2,
+        Depth = 0x2,
 
         /// <summary>
         /// Clear the stencil buffer.
         /// </summary>
-        StencilBit = 0x4
-    }
+        Stencil = 0x4,
+
+		/// <summary>
+		/// Discard the first color framebuffer.
+		/// </summary>
+		DiscardColor0 = 0x8,
+
+		/// <summary>
+		/// Discard the second color framebuffer.
+		/// </summary>
+		DiscardColor1 = 0x10,
+
+		/// <summary>
+		/// Discard the third color framebuffer.
+		/// </summary>
+		DiscardColor2 = 0x20,
+
+		/// <summary>
+		/// Discard the fourth color framebuffer.
+		/// </summary>
+		DiscardColor3 = 0x40,
+
+		/// <summary>
+		/// Discard the fifth color framebuffer.
+		/// </summary>
+		DiscardColor4 = 0x80,
+
+		/// <summary>
+		/// Discard the sixth color framebuffer.
+		/// </summary>
+		DiscardColor5 = 0x100,
+
+		/// <summary>
+		/// Discard the seventh color framebuffer.
+		/// </summary>
+		DiscardColor6 = 0x200,
+
+		/// <summary>
+		/// Discard the eighth color framebuffer.
+		/// </summary>
+		DiscardColor7 = 0x400,
+
+		/// <summary>
+		/// Discard the depth buffer.
+		/// </summary>
+		DiscardDepth = 0x800,
+
+		/// <summary>
+		/// Discard the stencil buffer.
+		/// </summary>
+		DiscardStencil = 0x1000,
+	}
 
     /// <summary>
     /// Specifies various capabilities supported by the rendering device.

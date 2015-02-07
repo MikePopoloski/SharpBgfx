@@ -58,7 +58,7 @@ static class Program {
             Bgfx.DebugTextWrite(0, 3, 0x6f, string.Format("Frame: {0:F3} ms", elapsed * 1000));
 
             // clear the view
-            ClearView(0, ClearTargets.ColorBit | ClearTargets.DepthBit | ClearTargets.StencilBit, sample.WindowWidth, sample.WindowHeight);
+            ClearView(0, ClearTargets.Color | ClearTargets.Depth | ClearTargets.Stencil, sample.WindowWidth, sample.WindowHeight);
             Bgfx.Submit(0);
 
             // draw ground plane

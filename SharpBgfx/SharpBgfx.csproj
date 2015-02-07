@@ -77,10 +77,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <CodeAnalysisDictionary Include="Analysis\CustomDictionary.xml" />
-    <Content Include="..\external\bgfx\bgfx_debug.dll">
-      <Link>bgfx_debug.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <None Include="Analysis\analysis.ruleset" />

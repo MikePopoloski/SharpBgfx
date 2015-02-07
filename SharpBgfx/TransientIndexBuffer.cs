@@ -41,8 +41,8 @@ namespace SharpBgfx {
         internal struct NativeStruct {
             public IntPtr data;
             public int size;
-            public ushort handle;
             public int startIndex;
-        }
+			public ushort handle;
+		}
     }
 }
