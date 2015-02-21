@@ -29,9 +29,7 @@ namespace SharpBgfx {
 		/// <param name="indexBuffer">Returns the allocated transient index buffer.</param>
 		/// <returns><c>true</c> if both space requirements are satisfied and the buffers were allocated.</returns>
 		public static bool AllocateTransientBuffers (int vertexCount, VertexLayout layout, int indexCount, out TransientVertexBuffer vertexBuffer, out TransientIndexBuffer indexBuffer) {
-			vertexBuffer = new TransientVertexBuffer();
-			indexBuffer = new TransientIndexBuffer();
-			return NativeMethods.bgfx_alloc_transient_buffers(ref vertexBuffer.tvb, ref layout.data, (ushort)vertexCount, ref indexBuffer.tib, (ushort)indexCount);
+			return NativeMethods.bgfx_alloc_transient_buffers(out vertexBuffer, ref layout.data, (ushort)vertexCount, out indexBuffer, (ushort)indexCount);
 		}
 
 		/// <summary>
@@ -527,7 +525,7 @@ namespace SharpBgfx {
 		/// <param name="firstIndex">The first index in the buffer to use.</param>
 		/// <param name="count">The number of indices to pull from the buffer.</param>
 		public static void SetIndexBuffer (TransientIndexBuffer indexBuffer, int firstIndex = 0, int count = -1) {
-			NativeMethods.bgfx_set_transient_index_buffer(ref indexBuffer.tib, firstIndex, count);
+			NativeMethods.bgfx_set_transient_index_buffer(ref indexBuffer, firstIndex, count);
 		}
 
 		/// <summary>
@@ -537,7 +535,7 @@ namespace SharpBgfx {
 		/// <param name="firstVertex">The index of the first vertex to use.</param>
 		/// <param name="count">The number of vertices to pull from the buffer.</param>
 		public static void SetVertexBuffer (TransientVertexBuffer vertexBuffer, int firstVertex = 0, int count = -1) {
-			NativeMethods.bgfx_set_transient_vertex_buffer(ref vertexBuffer.tvb, firstVertex, count);
+			NativeMethods.bgfx_set_transient_vertex_buffer(ref vertexBuffer, firstVertex, count);
 		}
 
 		/// <summary>

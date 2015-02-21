@@ -40,7 +40,8 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Numerics.Vectors">
+    <Reference Include="System.Numerics.Vectors, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\external\System.Numerics.Vectors\System.Numerics.Vectors.dll</HintPath>
     </Reference>
   </ItemGroup>
@@ -69,7 +70,7 @@
     <Compile Include="TransientVertexBuffer.cs" />
     <Compile Include="Uniform.cs" />
     <Compile Include="VertexBuffer.cs" />
-    <Compile Include="VertexDeclaration.cs" />
+    <Compile Include="VertexLayout.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\External\bgfx\bgfx.dll">

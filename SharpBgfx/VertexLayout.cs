@@ -1,16 +1,16 @@
 ﻿namespace SharpBgfx {
-    /// <summary>
-    /// Describes the layout of data in a vertex stream.
-    /// </summary>
-    public sealed class VertexLayout {
-        internal Data data;
+	/// <summary>
+	/// Describes the layout of data in a vertex stream.
+	/// </summary>
+	public sealed class VertexLayout {
+		internal Data data;
 
-        /// <summary>
-        /// The stride of a single vertex using this layout.
-        /// </summary>
-        public int Stride {
-            get { return data.Stride; }
-        }
+		/// <summary>
+		/// The stride of a single vertex using this layout.
+		/// </summary>
+		public int Stride {
+			get { return data.Stride; }
+		}
 
         /// <summary>
         /// Starts a stream of vertex attribute additions to the layout.
@@ -48,11 +48,13 @@
             return this;
         }
 
-        /// <summary>
-        /// Marks the end of the vertex stream.
-        /// </summary>
-        public void End () {
+		/// <summary>
+		/// Marks the end of the vertex stream.
+		/// </summary>
+		/// <returns>This instance, for use in a fluent API.</returns>
+		public VertexLayout End () {
             NativeMethods.bgfx_vertex_decl_end(ref data);
+			return this;
         }
 
         /// <summary>
