@@ -158,7 +158,7 @@ namespace SharpBgfx {
         public static extern void bgfx_destroy_dynamic_index_buffer (ushort handle);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern ushort bgfx_create_dynamic_vertex_buffer (ushort indexCount, ref VertexLayout.Data decl, byte flags);
+        public static extern ushort bgfx_create_dynamic_vertex_buffer (int vertexCount, ref VertexLayout.Data decl, byte flags);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern ushort bgfx_create_dynamic_vertex_buffer_mem (MemoryBlock.DataPtr* memory, ref VertexLayout.Data decl);

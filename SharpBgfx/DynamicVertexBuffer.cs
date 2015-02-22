@@ -13,7 +13,7 @@ namespace SharpBgfx {
         /// <param name="vertexCount">The number of vertices that fit in the buffer.</param>
         /// <param name="layout">The layout of the vertex data.</param>
         public DynamicVertexBuffer (int vertexCount, VertexLayout layout) {
-            handle = NativeMethods.bgfx_create_dynamic_vertex_buffer((ushort)vertexCount, ref layout.data, 0);
+            handle = NativeMethods.bgfx_create_dynamic_vertex_buffer(vertexCount, ref layout.data, 0);
         }
 
         /// <summary>

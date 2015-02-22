@@ -20,10 +20,15 @@ namespace SharpBgfx {
         /// </summary>
         Direct3D11,
 
-        /// <summary>
-        /// OpenGL ES
-        /// </summary>
-        OpenGLES = 4,
+		/// <summary>
+		/// Direct3D 12
+		/// </summary>
+		Direct3D12,
+
+		/// <summary>
+		/// OpenGL ES
+		/// </summary>
+		OpenGLES,
 
         /// <summary>
         /// OpenGL
