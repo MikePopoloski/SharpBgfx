@@ -1253,52 +1253,6 @@
             Allows the generic Vector'T struct to contain an explicit field layout.
             </summary>
         </member>
-        <member name="T:System.Numerics.Strings">
-            <summary>
-              A strongly-typed resource class, for looking up localized strings, etc.
-            </summary>
-        </member>
-        <member name="P:System.Numerics.Strings.ResourceManager">
-            <summary>
-              Returns the cached ResourceManager instance used by this class.
-            </summary>
-        </member>
-        <member name="P:System.Numerics.Strings.Culture">
-            <summary>
-              Overrides the current thread's CurrentUICulture property for all
-              resource lookups using this strongly typed resource class.
-            </summary>
-        </member>
-        <member name="P:System.Numerics.Strings.Arg_ArgumentOutOfRangeException">
-            <summary>
-              Looks up a localized string similar to Index was out of bounds:.
-            </summary>
-        </member>
-        <member name="P:System.Numerics.Strings.Arg_ElementsInSourceIsGreaterThanDestination">
-            <summary>
-              Looks up a localized string similar to Number of elements in source vector is greater than the destination array.
-            </summary>
-        </member>
-        <member name="P:System.Numerics.Strings.Arg_MultiDimArrayNotSupported">
-            <summary>
-              Looks up a localized string similar to Only one-dimensional arrays are supported.
-            </summary>
-        </member>
-        <member name="P:System.Numerics.Strings.Arg_RegisterLengthOfRangeException">
-            <summary>
-              Looks up a localized string similar to length must be less than.
-            </summary>
-        </member>
-        <member name="P:System.Numerics.Strings.Arg_TypeNotSupported">
-            <summary>
-              Looks up a localized string similar to Specified type is not supported.
-            </summary>
-        </member>
-        <member name="P:System.Numerics.Strings.Reflection_MethodNotSupported">
-            <summary>
-              Looks up a localized string similar to Vector&lt;T&gt;.Count cannot be called via reflection when intrinsics are enabled..
-            </summary>
-        </member>
         <member name="T:System.Numerics.Vector`1">
             <summary>
             A structure that represents a single Vector. The count of this Vector is fixed but CPU register dependent.
@@ -3318,11 +3272,6 @@
             </summary>
             <param name="value">The source vector</param>
             <returns>The reinterpreted vector.</returns>
-        </member>
-        <member name="T:System.Numerics.SR">
-            <summary>
-            A static class that encapsulates methods to perform operations on resources file (.resx)
-            </summary>
         </member>
     </members>
 </doc>
