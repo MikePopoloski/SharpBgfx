@@ -27,6 +27,13 @@
         }
 
         /// <summary>
+        /// The maximum number of render views supported.
+        /// </summary>
+        public int MaxViews {
+            get { return data->MaxViews; }
+        }
+
+        /// <summary>
         /// The maximum number of draw calls in a single frame.
         /// </summary>
         public int MaxDrawCalls {
@@ -60,6 +67,7 @@
             public RendererBackend Backend;
             public DeviceFeatures Supported;
             public ushort MaxTextureSize;
+            public ushort MaxViews;
             public ushort MaxDrawCalls;
             public byte MaxFramebufferAttachements;
 

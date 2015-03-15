@@ -301,6 +301,11 @@ namespace SharpBgfx {
         BGRA8,
 
         /// <summary>
+        /// 8-bit RGBA color.
+        /// </summary>
+        RGBA8,
+
+        /// <summary>
         /// 16-bit RGBA color.
         /// </summary>
         RGBA16,
@@ -678,17 +683,22 @@ namespace SharpBgfx {
         /// <summary>
         /// The format is unsupported.
         /// </summary>
-        Unsupported,
+        Unsupported = 0x0,
 
         /// <summary>
         /// The format is fully supported.
         /// </summary>
-        Supported,
+        Supported = 0x1,
 
         /// <summary>
         /// The format is supported through library emulation.
         /// </summary>
-        Emulated
+        Emulated = 0x2,
+
+        /// <summary>
+        /// The format is supported for vertex texturing.
+        /// </summary>
+        Vertex = 0x4
     }
 
     /// <summary>
