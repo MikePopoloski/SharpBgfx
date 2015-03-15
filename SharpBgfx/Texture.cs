@@ -23,6 +23,11 @@ namespace SharpBgfx {
         public int Depth { get; }
 
         /// <summary>
+        /// Indicates whether the texture is a cubemap.
+        /// </summary>
+        public bool IsCubeMap { get; }
+
+        /// <summary>
         /// The number of mip levels in the texture.
         /// </summary>
         public int MipLevels { get; }
@@ -52,6 +57,7 @@ namespace SharpBgfx {
             BitsPerPixel = info.BitsPerPixel;
             SizeInBytes = info.StorageSize;
             Format = info.Format;
+            IsCubeMap = info.IsCubeMap;
         }
 
         /// <summary>
@@ -88,7 +94,7 @@ namespace SharpBgfx {
         /// </returns>
         public static Texture Create2D (int width, int height, int mipCount, TextureFormat format, TextureFlags flags = TextureFlags.None, MemoryBlock? memory = null) {
             var info = new TextureInfo();
-            NativeMethods.bgfx_calc_texture_size(ref info, (ushort)width, (ushort)height, 1, (byte)mipCount, format);
+            NativeMethods.bgfx_calc_texture_size(ref info, (ushort)width, (ushort)height, 1, false, (byte)mipCount, format);
 
             var handle = NativeMethods.bgfx_create_texture_2d(info.Width, info.Height, info.MipCount, format, flags, memory == null ? null : memory.Value.ptr);
             return new Texture(handle, ref info);
@@ -107,7 +113,7 @@ namespace SharpBgfx {
         /// <returns>The newly created texture handle.</returns>
         public static Texture Create3D (int width, int height, int depth, int mipCount, TextureFormat format, TextureFlags flags = TextureFlags.None, MemoryBlock? memory = null) {
             var info = new TextureInfo();
-            NativeMethods.bgfx_calc_texture_size(ref info, (ushort)width, (ushort)height, (ushort)depth, (byte)mipCount, format);
+            NativeMethods.bgfx_calc_texture_size(ref info, (ushort)width, (ushort)height, (ushort)depth, false, (byte)mipCount, format);
 
             var handle = NativeMethods.bgfx_create_texture_3d(info.Width, info.Height, info.Depth, info.MipCount, format, flags, memory == null ? null : memory.Value.ptr);
             return new Texture(handle, ref info);
@@ -126,7 +132,7 @@ namespace SharpBgfx {
         /// </returns>
         public static Texture CreateCube (int size, int mipCount, TextureFormat format, TextureFlags flags = TextureFlags.None, MemoryBlock? memory = null) {
             var info = new TextureInfo();
-            NativeMethods.bgfx_calc_texture_size(ref info, (ushort)size, (ushort)size, 1, (byte)mipCount, format);
+            NativeMethods.bgfx_calc_texture_size(ref info, (ushort)size, (ushort)size, 1, true, (byte)mipCount, format);
 
             var handle = NativeMethods.bgfx_create_texture_cube(info.Width, info.MipCount, format, flags, memory == null ? null : memory.Value.ptr);
             return new Texture(handle, ref info);
@@ -252,6 +258,7 @@ namespace SharpBgfx {
             public ushort Depth;
             public byte MipCount;
             public byte BitsPerPixel;
+            public bool IsCubeMap;
         }
     }
 }
