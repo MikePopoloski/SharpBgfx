@@ -74,6 +74,14 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// Returns a <see cref="System.String"/> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String"/> that represents this instance.
+        /// </returns>
+        public override string ToString () => $"Handle: {handle}";
+
+        /// <summary>
         /// Implements the equality operator.
         /// </summary>
         /// <param name="left">The left side of the operator.</param>

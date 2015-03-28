@@ -75,15 +75,23 @@ namespace SharpBgfx {
 			return handle.GetHashCode() >> 13 ^ data.GetHashCode();
 		}
 
-		/// <summary>
-		/// Implements the equality operator.
-		/// </summary>
-		/// <param name="left">The left side of the operator.</param>
-		/// <param name="right">The right side of the operator.</param>
-		/// <returns>
-		/// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
-		/// </returns>
-		public static bool operator ==(TransientIndexBuffer left, TransientIndexBuffer right) {
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String"/> that represents this instance.
+        /// </returns>
+        public override string ToString () => $"Count: {Count}";
+
+        /// <summary>
+        /// Implements the equality operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator ==(TransientIndexBuffer left, TransientIndexBuffer right) {
 			return left.Equals(right);
 		}
 
