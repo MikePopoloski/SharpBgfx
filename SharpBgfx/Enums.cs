@@ -891,4 +891,34 @@ namespace SharpBgfx {
         /// </summary>
         Back
     }
+
+    /// <summary>
+    /// Specifies known vendor IDs.
+    /// </summary>
+    public enum Vendor {
+        /// <summary>
+        /// No vendor specified.
+        /// </summary>
+        None = 0,
+
+        /// <summary>
+        /// AMD
+        /// </summary>
+        AMD = 0x1002,
+
+        /// <summary>
+        /// Intel
+        /// </summary>
+        Intel = 0x8086,
+
+        /// <summary>
+        /// NVIDIA
+        /// </summary>
+        Nvidia = 0x10de,
+
+        /// <summary>
+        /// Microsoft
+        /// </summary>
+        Microsoft = 0x1414
+    }
 }

@@ -260,7 +260,7 @@ namespace SharpBgfx {
         public static extern sbyte* bgfx_get_renderer_name (RendererBackend backend);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_init (RendererBackend backend, IntPtr callbacks, IntPtr allocator);
+        public static extern void bgfx_init (RendererBackend backend, ushort vendorId, ushort deviceId, IntPtr callbacks, IntPtr allocator);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_dbg_text_printf (ushort x, ushort y, byte color, [MarshalAs(UnmanagedType.LPStr)] string format, [MarshalAs(UnmanagedType.LPStr)] string args);

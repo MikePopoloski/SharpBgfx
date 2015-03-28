@@ -4,6 +4,7 @@
     /// </summary>
     public unsafe sealed class Capabilities {
         Caps* data;
+        Adapter[] adapters;
 
         /// <summary>
         /// The currently active rendering backend API.
@@ -47,6 +48,29 @@
             get { return data->MaxFramebufferAttachements; }
         }
 
+        /// <summary>
+        /// Details about the currently active graphics adapter.
+        /// </summary>
+        public Adapter CurrentAdapter {
+            get { return new Adapter((Vendor)data->VendorId, data->DeviceId); }
+        }
+
+        /// <summary>
+        /// A list of all graphics adapters installed on the system.
+        /// </summary>
+        public Adapter[] Adapters {
+            get {
+                if (adapters == null) {
+                    var count = data->GPUCount;
+                    adapters = new Adapter[count];
+                    for (int i = 0, j = 0; i < count; i++, j += 2)
+                        adapters[i] = new Adapter((Vendor)data->GPUs[j], data->GPUs[j + 1]);
+                }
+
+                return adapters;
+            }
+        }
+
         internal Capabilities () {
             data = NativeMethods.bgfx_get_caps();
         }
@@ -70,9 +94,43 @@
             public ushort MaxViews;
             public ushort MaxDrawCalls;
             public byte MaxFramebufferAttachements;
+            public byte GPUCount;
+            public ushort VendorId;
+            public ushort DeviceId;
 
+            public fixed ushort GPUs[8];
             public fixed byte Formats[TextureFormatCount];
         }
 #pragma warning restore 649
+    }
+
+    /// <summary>
+    /// Contains details about an installed graphics adapter.
+    /// </summary>
+    public struct Adapter {
+        /// <summary>
+        /// Represents the default adapter for the system.
+        /// </summary>
+        public static readonly Adapter Default = new Adapter(Vendor.None, 0);
+
+        /// <summary>
+        /// The IHV that published the adapter.
+        /// </summary>
+        public readonly Vendor Vendor;
+
+        /// <summary>
+        /// A vendor-specific identifier for the adapter type.
+        /// </summary>
+        public readonly int DeviceId;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Adapter"/> struct.
+        /// </summary>
+        /// <param name="vendor">The vendor.</param>
+        /// <param name="deviceId">The device ID.</param>
+        public Adapter (Vendor vendor, int deviceId) {
+            Vendor = vendor;
+            DeviceId = deviceId;
+        }
     }
 }
