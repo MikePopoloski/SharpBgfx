@@ -140,6 +140,9 @@ namespace SharpBgfx {
         public static extern MemoryBlock.DataPtr* bgfx_copy (IntPtr data, int size);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern MemoryBlock.DataPtr* bgfx_make_ref_release (IntPtr data, int size, IntPtr releaseFn, IntPtr userData);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern ushort bgfx_create_index_buffer (MemoryBlock.DataPtr* memory);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]

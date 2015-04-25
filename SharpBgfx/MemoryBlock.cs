@@ -3,6 +3,13 @@ using System.Runtime.InteropServices;
 
 namespace SharpBgfx {
     /// <summary>
+    /// Delegate type for callback functions.
+    /// </summary>
+    /// <param name="userData">User-provided data to the original allocation call.</param>
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    public delegate void ReleaseCallback (IntPtr userData);
+
+    /// <summary>
     /// Represents a block of memory managed by the graphics API.
     /// </summary>
     public unsafe struct MemoryBlock : IEquatable<MemoryBlock> {
@@ -45,15 +52,51 @@ namespace SharpBgfx {
         /// <typeparam name="T">The type of data in the array.</typeparam>
         /// <param name="data">The array to copy.</param>
         /// <returns>The native memory block containing the copied data.</returns>
-        public static MemoryBlock FromArray<T> (T[] data) where T : struct {
+        public static MemoryBlock FromArray<T>(T[] data) where T : struct {
             if (data == null || data.Length == 0)
-                throw new ArgumentNullException("data");
+                throw new ArgumentNullException(nameof(data));
 
             var gcHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
             var block = new MemoryBlock(gcHandle.AddrOfPinnedObject(), Marshal.SizeOf(typeof(T)) * data.Length);
 
             gcHandle.Free();
             return block;
+        }
+
+        /// <summary>
+        /// Creates a reference to the given data.
+        /// </summary>
+        /// <typeparam name="T">The type of data in the array.</typeparam>
+        /// <param name="data">The array to reference.</param>
+        /// <returns>The native memory block referring to the data.</returns>
+        /// <remarks>
+        /// The array must not be modified for at least 2 rendered frames.
+        /// </remarks>
+        public static MemoryBlock MakeRef<T>(T[] data) where T : struct {
+            if (data == null || data.Length == 0)
+                throw new ArgumentNullException(nameof(data));
+
+            var gcHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
+            return MakeRef(gcHandle.AddrOfPinnedObject(), Marshal.SizeOf(typeof(T)) * data.Length, GCHandle.ToIntPtr(gcHandle), ReleaseHandleCallback);
+        }
+
+        /// <summary>
+        /// Makes a reference to the given memory block.
+        /// </summary>
+        /// <param name="data">A pointer to the memory.</param>
+        /// <param name="size">The size of the memory block.</param>
+        /// <param name="userData">Arbitrary user data passed to the release callback.</param>
+        /// <param name="callback">A function that will be called when the data is ready to be released.</param>
+        /// <returns>A new memory block referring to the given data.</returns>
+        /// <remarks>
+        /// The memory referred to by the returned memory block must not be modified
+        /// or released until the callback fires.
+        /// </remarks>
+        public static MemoryBlock MakeRef (IntPtr data, int size, IntPtr userData, ReleaseCallback callback) {
+            var result = new MemoryBlock();
+            result.ptr = NativeMethods.bgfx_make_ref_release(data, size, Marshal.GetFunctionPointerForDelegate(callback), userData);
+
+            return result;
         }
 
         /// <summary>
@@ -128,5 +171,11 @@ namespace SharpBgfx {
             public int Size;
         }
 #pragma warning restore 649
+
+        static ReleaseCallback ReleaseHandleCallback = ReleaseHandle;
+        static void ReleaseHandle (IntPtr userData) {
+            var handle = GCHandle.FromIntPtr(userData);
+            handle.Free();
+        }
     }
 }
