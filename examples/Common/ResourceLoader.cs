@@ -1,22 +1,28 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using SharpBgfx;
 
 namespace Common {
     public static class ResourceLoader {
+        static readonly string RootPath = "../../../Assets/";
+
         static string GetShaderPath () {
             switch (Bgfx.GetCurrentBackend()) {
                 case RendererBackend.Direct3D11:
-                    return "Assets/dx11/";
+                    return Path.Combine(RootPath, "Shaders/bin/dx11/");
 
                 case RendererBackend.OpenGL:
-                    return "Assets/glsl/";
+                    return Path.Combine(RootPath, "Shaders/bin/glsl/");
 
                 case RendererBackend.OpenGLES:
-                    return "Assets/gles/";
+                    return Path.Combine(RootPath, "Shaders/bin/gles/");
+
+                case RendererBackend.Direct3D9:
+                    return Path.Combine(RootPath, "Shaders/bin/dx9/");
 
                 default:
-                    return "Assets/dx9/";
+                    throw new InvalidOperationException("Unknown renderer backend type.");
             }
         }
 
@@ -34,7 +40,7 @@ namespace Common {
         }
 
         public static Texture LoadTexture (string name) {
-            var path = Path.Combine("Assets/textures/", name);
+            var path = Path.Combine(RootPath, "textures/", name);
             var mem = MemoryBlock.FromArray(File.ReadAllBytes(path));
             return Texture.FromFile(mem, TextureFlags.None, 0);
         }

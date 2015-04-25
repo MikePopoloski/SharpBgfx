@@ -1,2 +1,0 @@
-..\..\Tools\shaderc --platform linux -p 120 --type vertex -f vs_cubes.sc -o Assets\glsl\vs_cubes.bin
-..\..\Tools\shaderc --platform linux -p 120 --type fragment -f fs_cubes.sc -o Assets\glsl\fs_cubes.bin
