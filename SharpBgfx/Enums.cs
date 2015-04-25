@@ -494,7 +494,27 @@ namespace SharpBgfx {
         /// <summary>
         /// Begin screen capture.
         /// </summary>
-        Capture = 0x200
+        Capture = 0x200,
+
+        /// <summary>
+        /// Enable head mounted display support.
+        /// </summary>
+        HeadMountedDisplay = 0x400,
+
+        /// <summary>
+        /// Enable debugging for head mounted display rendering.
+        /// </summary>
+        HeadMountedDisplayDebug = 0x800,
+
+        /// <summary>
+        /// Recenter the head mounted display.
+        /// </summary>
+        HeadMountedDisplayRecenter = 0x1000,
+
+        /// <summary>
+        /// Flip the backbuffer immediately after rendering for reduced latency.
+        /// </summary>
+        FlipAfterRender = 0x2000
     }
 
     /// <summary>
@@ -621,7 +641,7 @@ namespace SharpBgfx {
         TextureCompareLessEqual = 0x1,
 
         /// <summary>
-        /// Device supports other texture cmoparison modes.
+        /// Device supports other texture comparison modes.
         /// </summary>
         TextureCompareExtended = 0x2,
 
@@ -673,7 +693,17 @@ namespace SharpBgfx {
         /// <summary>
         /// Indicates whether the device can render to multiple swap chains.
         /// </summary>
-        SwapChain = 0x400
+        SwapChain = 0x400,
+
+        /// <summary>
+        /// Head mounted displays are supported.
+        /// </summary>
+        HeadMountedDisplay = 0x800,
+
+        /// <summary>
+        /// Device supports 32-bit indices.
+        /// </summary>
+        Index32 = 0x1000
     }
 
     /// <summary>
@@ -698,7 +728,12 @@ namespace SharpBgfx {
         /// <summary>
         /// The format is supported for vertex texturing.
         /// </summary>
-        Vertex = 0x4
+        Vertex = 0x4,
+
+        /// <summary>
+        /// The format is supported for compute image operations.
+        /// </summary>
+        Image = 0x8
     }
 
     /// <summary>
@@ -900,6 +935,11 @@ namespace SharpBgfx {
         /// No vendor specified.
         /// </summary>
         None = 0,
+
+        /// <summary>
+        /// Special flag to use platform's software rasterizer, if available.
+        /// </summary>
+        SoftwareRasterizer = 0x1,
 
         /// <summary>
         /// AMD
