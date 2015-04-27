@@ -313,10 +313,10 @@ namespace SharpBgfx {
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_instance_data_buffer (InstanceDataBuffer.NativeStruct* idb, ushort num);
 
-        //#if DEBUG
-        //        const string DllName = "bgfx_debug.dll";
-        //#else
+#if DEBUG
+        const string DllName = "bgfx_debug.dll";
+#else
         const string DllName = "bgfx.dll";
-        //#endif
+#endif
     }
 }
