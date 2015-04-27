@@ -6,7 +6,7 @@ namespace SharpBgfx {
     [SuppressUnmanagedCodeSecurity]
     unsafe static class NativeMethods {
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_update_texture_2d(ushort handle, byte mip, ushort x, ushort y, ushort width, ushort height, MemoryBlock.DataPtr* memory, ushort pitch);
+        public static extern void bgfx_update_texture_2d (ushort handle, byte mip, ushort x, ushort y, ushort width, ushort height, MemoryBlock.DataPtr* memory, ushort pitch);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_update_texture_3d (ushort handle, byte mip, ushort x, ushort y, ushort z, ushort width, ushort height, ushort depth, MemoryBlock.DataPtr* memory);
@@ -34,7 +34,7 @@ namespace SharpBgfx {
         public static extern void bgfx_alloc_transient_index_buffer (out TransientIndexBuffer tib, int num);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_alloc_transient_vertex_buffer(out TransientVertexBuffer tvb, int num, ref VertexLayout.Data decl);
+        public static extern void bgfx_alloc_transient_vertex_buffer (out TransientVertexBuffer tvb, int num, ref VertexLayout.Data decl);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAs(UnmanagedType.U1)]
@@ -185,7 +185,7 @@ namespace SharpBgfx {
         public static extern void bgfx_image_rgba8_downsample_2x2 (int width, int height, int pitch, IntPtr src, IntPtr dst);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_win_set_hwnd (IntPtr hwnd);
+        public static extern void bgfx_set_platform_data (ref PlatformData data);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern RendererBackend bgfx_get_renderer_type ();
@@ -274,10 +274,10 @@ namespace SharpBgfx {
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_dbg_text_printf (ushort x, ushort y, byte color, [MarshalAs(UnmanagedType.LPStr)] string format, [MarshalAs(UnmanagedType.LPStr)] string args);
 
-		[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern void bgfx_dbg_text_image (ushort x, ushort y, ushort width, ushort height, IntPtr data, ushort pitch);
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_dbg_text_image (ushort x, ushort y, ushort width, ushort height, IntPtr data, ushort pitch);
 
-		[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_program (ushort handle);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
@@ -313,10 +313,10 @@ namespace SharpBgfx {
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_instance_data_buffer (InstanceDataBuffer.NativeStruct* idb, ushort num);
 
-//#if DEBUG
-//        const string DllName = "bgfx_debug.dll";
-//#else
+        //#if DEBUG
+        //        const string DllName = "bgfx_debug.dll";
+        //#else
         const string DllName = "bgfx.dll";
-//#endif
+        //#endif
     }
 }

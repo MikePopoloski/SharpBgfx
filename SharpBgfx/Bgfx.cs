@@ -125,11 +125,20 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// Sets platform-specific data pointers to hook into low-level library functionality.
+        /// </summary>
+        /// <param name="platformData">A collection of platform-specific data pointers.</param>
+        public static void SetPlatformData (PlatformData platformData) {
+            NativeMethods.bgfx_set_platform_data(ref platformData);
+        }
+
+        /// <summary>
         /// Sets the handle of the main rendering window.
         /// </summary>
         /// <param name="windowHandle">The handle of the native OS window.</param>
         public static void SetWindowHandle (IntPtr windowHandle) {
-            NativeMethods.bgfx_win_set_hwnd(windowHandle);
+            var data = new PlatformData { WindowHandle = windowHandle };
+            NativeMethods.bgfx_set_platform_data(ref data);
         }
 
         /// <summary>
