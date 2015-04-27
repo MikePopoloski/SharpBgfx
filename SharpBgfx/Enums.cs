@@ -709,6 +709,7 @@ namespace SharpBgfx {
     /// <summary>
     /// Indicates the level of support for a specific texture format.
     /// </summary>
+    [Flags]
     public enum TextureFormatSupport {
         /// <summary>
         /// The format is unsupported.
@@ -716,9 +717,9 @@ namespace SharpBgfx {
         Unsupported = 0x0,
 
         /// <summary>
-        /// The format is fully supported.
+        /// The format is supported for color data and operations.
         /// </summary>
-        Supported = 0x1,
+        Color = 0x1,
 
         /// <summary>
         /// The format is supported through library emulation.
@@ -1000,6 +1001,7 @@ namespace SharpBgfx {
     /// <summary>
     /// Specifies various flags that control vertex and index buffer behavior.
     /// </summary>
+    [Flags]
     public enum BufferFlags : byte {
         /// <summary>
         /// No flags specified.
