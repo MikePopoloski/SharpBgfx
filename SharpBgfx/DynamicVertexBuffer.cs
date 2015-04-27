@@ -12,8 +12,9 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="vertexCount">The number of vertices that fit in the buffer.</param>
         /// <param name="layout">The layout of the vertex data.</param>
-        public DynamicVertexBuffer (int vertexCount, VertexLayout layout) {
-            handle = NativeMethods.bgfx_create_dynamic_vertex_buffer(vertexCount, ref layout.data, 0);
+        /// <param name="flags">Flags used to control buffer behavior.</param>
+        public DynamicVertexBuffer (int vertexCount, VertexLayout layout, BufferFlags flags = BufferFlags.None) {
+            handle = NativeMethods.bgfx_create_dynamic_vertex_buffer(vertexCount, ref layout.data, flags);
         }
 
         /// <summary>
@@ -21,8 +22,9 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="memory">The initial vertex data with which to populate the buffer.</param>
         /// <param name="layout">The layout of the vertex data.</param>
-        public DynamicVertexBuffer (MemoryBlock memory, VertexLayout layout) {
-            handle = NativeMethods.bgfx_create_dynamic_vertex_buffer_mem(memory.ptr, ref layout.data);
+        /// <param name="flags">Flags used to control buffer behavior.</param>
+        public DynamicVertexBuffer (MemoryBlock memory, VertexLayout layout, BufferFlags flags = BufferFlags.None) {
+            handle = NativeMethods.bgfx_create_dynamic_vertex_buffer_mem(memory.ptr, ref layout.data, flags);
         }
 
         /// <summary>

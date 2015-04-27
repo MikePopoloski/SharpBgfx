@@ -12,8 +12,9 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="memory">The vertex data with which to populate the buffer.</param>
         /// <param name="layout">The layout of the vertex data.</param>
-        public VertexBuffer (MemoryBlock memory, VertexLayout layout) {
-            handle = NativeMethods.bgfx_create_vertex_buffer(memory.ptr, ref layout.data);
+        /// <param name="flags">Flags used to control buffer behavior.</param>
+        public VertexBuffer (MemoryBlock memory, VertexLayout layout, BufferFlags flags = BufferFlags.None) {
+            handle = NativeMethods.bgfx_create_vertex_buffer(memory.ptr, ref layout.data, flags);
         }
 
         /// <summary>

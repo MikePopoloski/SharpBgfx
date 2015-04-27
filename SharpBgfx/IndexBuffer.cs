@@ -12,8 +12,9 @@ namespace SharpBgfx {
         /// Initializes a new instance of the <see cref="IndexBuffer"/> struct.
         /// </summary>
         /// <param name="memory">The 16-bit index data used to populate the buffer.</param>
-        public IndexBuffer (MemoryBlock memory) {
-            handle = NativeMethods.bgfx_create_index_buffer(memory.ptr);
+        /// <param name="flags">Flags used to control buffer behavior.</param>
+        public IndexBuffer (MemoryBlock memory, BufferFlags flags = BufferFlags.None) {
+            handle = NativeMethods.bgfx_create_index_buffer(memory.ptr, flags);
         }
 
         /// <summary>

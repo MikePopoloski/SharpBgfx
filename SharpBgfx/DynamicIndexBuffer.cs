@@ -12,16 +12,18 @@ namespace SharpBgfx {
         /// Initializes a new instance of the <see cref="DynamicIndexBuffer"/> struct.
         /// </summary>
         /// <param name="indexCount">The number of indices that can fit in the buffer.</param>
-        public DynamicIndexBuffer (int indexCount) {
-            handle = NativeMethods.bgfx_create_dynamic_index_buffer(indexCount);
+        /// <param name="flags">Flags used to control buffer behavior.</param>
+        public DynamicIndexBuffer (int indexCount, BufferFlags flags = BufferFlags.None) {
+            handle = NativeMethods.bgfx_create_dynamic_index_buffer(indexCount, flags);
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DynamicIndexBuffer"/> struct.
         /// </summary>
         /// <param name="memory">The initial index data with which to populate the buffer.</param>
-        public DynamicIndexBuffer (MemoryBlock memory) {
-            handle = NativeMethods.bgfx_create_dynamic_index_buffer_mem(memory.ptr);
+        /// <param name="flags">Flags used to control buffer behavior.</param>
+        public DynamicIndexBuffer (MemoryBlock memory, BufferFlags flags = BufferFlags.None) {
+            handle = NativeMethods.bgfx_create_dynamic_index_buffer_mem(memory.ptr, flags);
         }
 
         /// <summary>

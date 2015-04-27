@@ -20,15 +20,15 @@ namespace SharpBgfx {
         /// </summary>
         Direct3D11,
 
-		/// <summary>
-		/// Direct3D 12
-		/// </summary>
-		Direct3D12,
+        /// <summary>
+        /// Direct3D 12
+        /// </summary>
+        Direct3D12,
 
-		/// <summary>
-		/// OpenGL ES
-		/// </summary>
-		OpenGLES,
+        /// <summary>
+        /// OpenGL ES
+        /// </summary>
+        OpenGLES,
 
         /// <summary>
         /// OpenGL
@@ -486,10 +486,10 @@ namespace SharpBgfx {
         /// </summary>
         Vsync = 0x80,
 
-		/// <summary>
-		/// Use the maximum anisotropic filtering level available.
-		/// </summary>
-		MaxAnisotropy = 0x100,
+        /// <summary>
+        /// Use the maximum anisotropic filtering level available.
+        /// </summary>
+        MaxAnisotropy = 0x100,
 
         /// <summary>
         /// Begin screen capture.
@@ -574,56 +574,56 @@ namespace SharpBgfx {
         /// </summary>
         Stencil = 0x4,
 
-		/// <summary>
-		/// Discard the first color framebuffer.
-		/// </summary>
-		DiscardColor0 = 0x8,
+        /// <summary>
+        /// Discard the first color framebuffer.
+        /// </summary>
+        DiscardColor0 = 0x8,
 
-		/// <summary>
-		/// Discard the second color framebuffer.
-		/// </summary>
-		DiscardColor1 = 0x10,
+        /// <summary>
+        /// Discard the second color framebuffer.
+        /// </summary>
+        DiscardColor1 = 0x10,
 
-		/// <summary>
-		/// Discard the third color framebuffer.
-		/// </summary>
-		DiscardColor2 = 0x20,
+        /// <summary>
+        /// Discard the third color framebuffer.
+        /// </summary>
+        DiscardColor2 = 0x20,
 
-		/// <summary>
-		/// Discard the fourth color framebuffer.
-		/// </summary>
-		DiscardColor3 = 0x40,
+        /// <summary>
+        /// Discard the fourth color framebuffer.
+        /// </summary>
+        DiscardColor3 = 0x40,
 
-		/// <summary>
-		/// Discard the fifth color framebuffer.
-		/// </summary>
-		DiscardColor4 = 0x80,
+        /// <summary>
+        /// Discard the fifth color framebuffer.
+        /// </summary>
+        DiscardColor4 = 0x80,
 
-		/// <summary>
-		/// Discard the sixth color framebuffer.
-		/// </summary>
-		DiscardColor5 = 0x100,
+        /// <summary>
+        /// Discard the sixth color framebuffer.
+        /// </summary>
+        DiscardColor5 = 0x100,
 
-		/// <summary>
-		/// Discard the seventh color framebuffer.
-		/// </summary>
-		DiscardColor6 = 0x200,
+        /// <summary>
+        /// Discard the seventh color framebuffer.
+        /// </summary>
+        DiscardColor6 = 0x200,
 
-		/// <summary>
-		/// Discard the eighth color framebuffer.
-		/// </summary>
-		DiscardColor7 = 0x400,
+        /// <summary>
+        /// Discard the eighth color framebuffer.
+        /// </summary>
+        DiscardColor7 = 0x400,
 
-		/// <summary>
-		/// Discard the depth buffer.
-		/// </summary>
-		DiscardDepth = 0x800,
+        /// <summary>
+        /// Discard the depth buffer.
+        /// </summary>
+        DiscardDepth = 0x800,
 
-		/// <summary>
-		/// Discard the stencil buffer.
-		/// </summary>
-		DiscardStencil = 0x1000,
-	}
+        /// <summary>
+        /// Discard the stencil buffer.
+        /// </summary>
+        DiscardStencil = 0x1000,
+    }
 
     /// <summary>
     /// Specifies various capabilities supported by the rendering device.
@@ -634,7 +634,7 @@ namespace SharpBgfx {
         /// No extra features supported.
         /// </summary>
         None = 0,
-        
+
         /// <summary>
         /// Device supports "Less than or equal to" texture comparison mode.
         /// </summary>
@@ -975,7 +975,7 @@ namespace SharpBgfx {
         /// Surface is half the backbuffer size.
         /// </summary>
         Half,
-        
+
         /// <summary>
         /// Surface is a quater of the backbuffer size.
         /// </summary>
@@ -995,5 +995,36 @@ namespace SharpBgfx {
         /// Surface is double the backbuffer size.
         /// </summary>
         Double
+    }
+
+    /// <summary>
+    /// Specifies various flags that control vertex and index buffer behavior.
+    /// </summary>
+    public enum BufferFlags : byte {
+        /// <summary>
+        /// No flags specified.
+        /// </summary>
+        None,
+
+        /// <summary>
+        /// Buffer will be read by a compute shader.
+        /// </summary>
+        ComputeRead = 0x1,
+
+        /// <summary>
+        /// Buffer will be written into by a compute shader. It cannot be accessed by the CPU.
+        /// </summary>
+        ComputeWrite = 0x2,
+
+        /// <summary>
+        /// Buffer will resize on update if a different quantity of data is passed. If this flag is not set
+        /// the data will be trimmed to fit in the existing buffer size. Effective only for dynamic buffers.
+        /// </summary>
+        AllowResize = 0x4,
+
+        /// <summary>
+        /// Buffer is using 32-bit indices. Useful only for index buffers.
+        /// </summary>
+        Index32 = 0x8
     }
 }
