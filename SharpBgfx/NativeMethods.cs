@@ -62,6 +62,9 @@ namespace SharpBgfx {
         public static extern ushort bgfx_create_frame_buffer (ushort width, ushort height, TextureFormat format, TextureFlags flags);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern ushort bgfx_create_frame_buffer_scaled (BackbufferRatio ratio, TextureFormat format, TextureFlags flags);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern ushort bgfx_create_frame_buffer_from_handles (byte count, ushort* handles, [MarshalAs(UnmanagedType.U1)] bool destroyTextures);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
@@ -111,6 +114,9 @@ namespace SharpBgfx {
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern ushort bgfx_create_texture_2d (ushort width, ushort _height, byte numMips, TextureFormat format, TextureFlags flags, MemoryBlock.DataPtr* mem);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern ushort bgfx_create_texture_2d_scaled (BackbufferRatio ratio, byte numMips, TextureFormat format, TextureFlags flags);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern ushort bgfx_create_texture_3d (ushort width, ushort _height, ushort _depth, byte numMips, TextureFormat format, TextureFlags flags, MemoryBlock.DataPtr* mem);

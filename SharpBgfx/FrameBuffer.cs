@@ -21,6 +21,16 @@ namespace SharpBgfx {
         /// <summary>
         /// Initializes a new instance of the <see cref="FrameBuffer"/> struct.
         /// </summary>
+        /// <param name="ratio">The amount to scale when the backbuffer resizes.</param>
+        /// <param name="format">The format of the new surface.</param>
+        /// <param name="flags">Texture sampling flags.</param>
+        public FrameBuffer (BackbufferRatio ratio, TextureFormat format, TextureFlags flags = TextureFlags.ClampU | TextureFlags.ClampV) {
+            handle = NativeMethods.bgfx_create_frame_buffer_scaled(ratio, format, flags);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FrameBuffer"/> struct.
+        /// </summary>
         /// <param name="attachments">A set of attachments from which to build the frame buffer.</param>
         /// <param name="destroyTextures">if set to <c>true</c>, attached textures will be destroyed when the frame buffer is destroyed.</param>
         public FrameBuffer (Texture[] attachments, bool destroyTextures = false) {

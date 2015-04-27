@@ -101,6 +101,25 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// Creates a new 2D texture that scales with backbuffer size.
+        /// </summary>
+        /// <param name="ratio">The amount to scale when the backbuffer resizes.</param>
+        /// <param name="mipCount">The number of mip levels.</param>
+        /// <param name="format">The format of the texture data.</param>
+        /// <param name="flags">Flags that control texture behavior.</param>
+        /// <returns>
+        /// The newly created texture handle.
+        /// </returns>
+        public static Texture Create2D (BackbufferRatio ratio, int mipCount, TextureFormat format, TextureFlags flags = TextureFlags.None) {
+            var info = new TextureInfo();
+            info.Format = format;
+            info.MipCount = (byte)mipCount;
+
+            var handle = NativeMethods.bgfx_create_texture_2d_scaled(ratio, info.MipCount, format, flags);
+            return new Texture(handle, ref info);
+        }
+
+        /// <summary>
         /// Creates a new 3D texture.
         /// </summary>
         /// <param name="width">The width of the texture.</param>

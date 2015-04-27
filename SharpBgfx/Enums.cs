@@ -961,4 +961,39 @@ namespace SharpBgfx {
         /// </summary>
         Microsoft = 0x1414
     }
+
+    /// <summary>
+    /// Specifies scaling relative to the size of the backbuffer.
+    /// </summary>
+    public enum BackbufferRatio {
+        /// <summary>
+        /// Surface is equal to the backbuffer size.
+        /// </summary>
+        Equal,
+
+        /// <summary>
+        /// Surface is half the backbuffer size.
+        /// </summary>
+        Half,
+        
+        /// <summary>
+        /// Surface is a quater of the backbuffer size.
+        /// </summary>
+        Quater,
+
+        /// <summary>
+        /// Surface is an eighth of the backbuffer size.
+        /// </summary>
+        Eighth,
+
+        /// <summary>
+        /// Surface is a sixteenth of the backbuffer size.
+        /// </summary>
+        Sixteenth,
+
+        /// <summary>
+        /// Surface is double the backbuffer size.
+        /// </summary>
+        Double
+    }
 }
