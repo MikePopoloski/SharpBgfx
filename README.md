@@ -4,9 +4,7 @@ Provides managed (C#,VB,F#,etc) bindings for the bgfx graphics library.
 
 See <https://github.com/bkaradzic/bgfx>.
 
-The main library is a minimal set of pinvoke declarations. The examples pull in
-additional dependencies for various bits of helper functionality, such as the
-[SlimMath](https://code.google.com/p/slimmath/) vector math library.
+The main library is a minimal set of pinvoke declarations. The easiest way to use it is to drop the amalgamated SharpBgfx.cs file into your project and go. Alternatively, you can build the library into a managed assembly.
 
 ### Platforms
 
