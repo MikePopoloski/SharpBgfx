@@ -48,16 +48,13 @@
   <ItemGroup>
     <Compile Include="Bgfx.cs" />
     <Compile Include="Capabilities.cs" />
-    <Compile Include="Color4.cs" />
     <Compile Include="DynamicIndexBuffer.cs" />
     <Compile Include="DynamicVertexBuffer.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="Analysis\GlobalSuppressions.cs" />
     <Compile Include="FrameBuffer.cs" />
-    <Compile Include="MathHelpers.cs" />
     <Compile Include="IndexBuffer.cs" />
     <Compile Include="InstanceDataBuffer.cs" />
-    <Compile Include="KnownColors.cs" />
     <Compile Include="MemoryBlock.cs" />
     <Compile Include="NativeMethods.cs" />
     <Compile Include="PlatformData.cs" />

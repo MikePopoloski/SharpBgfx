@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Runtime.InteropServices;
 
-namespace SharpBgfx {
+namespace Common {
     /// <summary>
     /// A four-component (RGBA) color value where each channel is represented by a byte.
     /// </summary>

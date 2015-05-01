@@ -1,4 +1,4 @@
-﻿namespace SharpBgfx {
+﻿namespace Common {
     /// <summary>
     /// Provides a set of predefined color values for convenience.
     /// </summary>

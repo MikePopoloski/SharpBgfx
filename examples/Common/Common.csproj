@@ -46,7 +46,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Clock.cs" />
+    <Compile Include="Color4.cs" />
     <Compile Include="EventQueue.cs" />
+    <Compile Include="KnownColors.cs" />
+    <Compile Include="MathHelpers.cs" />
     <Compile Include="Mesh.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResourceLoader.cs" />

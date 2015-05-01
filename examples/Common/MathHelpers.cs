@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SharpBgfx {
+namespace Common {
     static class MathHelpers {
         public static T Clamp<T>(T value, T min, T max) where T : IComparable<T> {
             if (value.CompareTo(min) < 0)
