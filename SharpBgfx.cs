@@ -742,9 +742,7 @@ namespace SharpBgfx {
 
         const int RendererCount = 6;
     }
-}
 
-namespace SharpBgfx {
     /// <summary>
     /// Contains information about the capabilities of the rendering device.
     /// </summary>
@@ -851,6 +849,383 @@ namespace SharpBgfx {
     }
 
     /// <summary>
+    /// Represents a loaded texture.
+    /// </summary>
+    public unsafe sealed class Texture : IDisposable, IEquatable<Texture> {
+        internal readonly ushort handle;
+
+        /// <summary>
+        /// The width of the texture.
+        /// </summary>
+        public int Width { get; }
+
+        /// <summary>
+        /// The height of the texture.
+        /// </summary>
+        public int Height { get; }
+
+        /// <summary>
+        /// The depth of the texture, if 3D.
+        /// </summary>
+        public int Depth { get; }
+
+        /// <summary>
+        /// Indicates whether the texture is a cubemap.
+        /// </summary>
+        public bool IsCubeMap { get; }
+
+        /// <summary>
+        /// The number of mip levels in the texture.
+        /// </summary>
+        public int MipLevels { get; }
+
+        /// <summary>
+        /// The number of bits per pixel.
+        /// </summary>
+        public int BitsPerPixel { get; }
+
+        /// <summary>
+        /// The size of the entire texture, in bytes.
+        /// </summary>
+        public int SizeInBytes { get; }
+
+        /// <summary>
+        /// The format of the image data.
+        /// </summary>
+        public TextureFormat Format { get; }
+
+        Texture (ushort handle, ref TextureInfo info) {
+            this.handle = handle;
+
+            Width = info.Width;
+            Height = info.Height;
+            Depth = info.Depth;
+            MipLevels = info.MipCount;
+            BitsPerPixel = info.BitsPerPixel;
+            SizeInBytes = info.StorageSize;
+            Format = info.Format;
+            IsCubeMap = info.IsCubeMap;
+        }
+
+        /// <summary>
+        /// Creates a new texture from a file loaded in memory.
+        /// </summary>
+        /// <param name="memory">The content of the file.</param>
+        /// <param name="flags">Flags that control texture behavior.</param>
+        /// <param name="skipMips">A number of top level mips to skip when parsing texture data.</param>
+        /// <returns>The newly created texture.</returns>
+        /// <remarks>
+        /// This function supports textures in the following container formats:
+        /// - DDS
+        /// - KTX
+        /// - PVR
+        /// </remarks>
+        public static Texture FromFile (MemoryBlock memory, TextureFlags flags = TextureFlags.None, int skipMips = 0) {
+            TextureInfo info;
+            var handle = NativeMethods.bgfx_create_texture(memory.ptr, flags, (byte)skipMips, out info);
+
+            return new Texture(handle, ref info);
+        }
+
+        /// <summary>
+        /// Creates a new 2D texture.
+        /// </summary>
+        /// <param name="width">The width of the texture.</param>
+        /// <param name="height">The height of the texture.</param>
+        /// <param name="mipCount">The number of mip levels.</param>
+        /// <param name="format">The format of the texture data.</param>
+        /// <param name="flags">Flags that control texture behavior.</param>
+        /// <param name="memory">If not <c>null</c>, contains the texture's image data.</param>
+        /// <returns>
+        /// The newly created texture handle.
+        /// </returns>
+        public static Texture Create2D (int width, int height, int mipCount, TextureFormat format, TextureFlags flags = TextureFlags.None, MemoryBlock? memory = null) {
+            var info = new TextureInfo();
+            NativeMethods.bgfx_calc_texture_size(ref info, (ushort)width, (ushort)height, 1, false, (byte)mipCount, format);
+
+            var handle = NativeMethods.bgfx_create_texture_2d(info.Width, info.Height, info.MipCount, format, flags, memory == null ? null : memory.Value.ptr);
+            return new Texture(handle, ref info);
+        }
+
+        /// <summary>
+        /// Creates a new 2D texture that scales with backbuffer size.
+        /// </summary>
+        /// <param name="ratio">The amount to scale when the backbuffer resizes.</param>
+        /// <param name="mipCount">The number of mip levels.</param>
+        /// <param name="format">The format of the texture data.</param>
+        /// <param name="flags">Flags that control texture behavior.</param>
+        /// <returns>
+        /// The newly created texture handle.
+        /// </returns>
+        public static Texture Create2D (BackbufferRatio ratio, int mipCount, TextureFormat format, TextureFlags flags = TextureFlags.None) {
+            var info = new TextureInfo {
+                Format = format,
+                MipCount = (byte)mipCount
+            };
+
+            var handle = NativeMethods.bgfx_create_texture_2d_scaled(ratio, info.MipCount, format, flags);
+            return new Texture(handle, ref info);
+        }
+
+        /// <summary>
+        /// Creates a new 3D texture.
+        /// </summary>
+        /// <param name="width">The width of the texture.</param>
+        /// <param name="height">The height of the texture.</param>
+        /// <param name="depth">The depth of the texture.</param>
+        /// <param name="mipCount">The number of mip levels.</param>
+        /// <param name="format">The format of the texture data.</param>
+        /// <param name="flags">Flags that control texture behavior.</param>
+        /// <param name="memory">If not <c>null</c>, contains the texture's image data.</param>
+        /// <returns>The newly created texture handle.</returns>
+        public static Texture Create3D (int width, int height, int depth, int mipCount, TextureFormat format, TextureFlags flags = TextureFlags.None, MemoryBlock? memory = null) {
+            var info = new TextureInfo();
+            NativeMethods.bgfx_calc_texture_size(ref info, (ushort)width, (ushort)height, (ushort)depth, false, (byte)mipCount, format);
+
+            var handle = NativeMethods.bgfx_create_texture_3d(info.Width, info.Height, info.Depth, info.MipCount, format, flags, memory == null ? null : memory.Value.ptr);
+            return new Texture(handle, ref info);
+        }
+
+        /// <summary>
+        /// Creates a new cube texture.
+        /// </summary>
+        /// <param name="size">The size of each cube face.</param>
+        /// <param name="mipCount">The number of mip levels.</param>
+        /// <param name="format">The format of the texture data.</param>
+        /// <param name="flags">Flags that control texture behavior.</param>
+        /// <param name="memory">If not <c>null</c>, contains the texture's image data.</param>
+        /// <returns>
+        /// The newly created texture handle.
+        /// </returns>
+        public static Texture CreateCube (int size, int mipCount, TextureFormat format, TextureFlags flags = TextureFlags.None, MemoryBlock? memory = null) {
+            var info = new TextureInfo();
+            NativeMethods.bgfx_calc_texture_size(ref info, (ushort)size, (ushort)size, 1, true, (byte)mipCount, format);
+
+            var handle = NativeMethods.bgfx_create_texture_cube(info.Width, info.MipCount, format, flags, memory == null ? null : memory.Value.ptr);
+            return new Texture(handle, ref info);
+        }
+
+        /// <summary>
+        /// Releases the texture.
+        /// </summary>
+        public void Dispose () => NativeMethods.bgfx_destroy_texture(handle);
+
+        /// <summary>
+        /// Updates the data in a 2D texture.
+        /// </summary>
+        /// <param name="mipLevel">The mip level.</param>
+        /// <param name="x">The X coordinate of the rectangle to update.</param>
+        /// <param name="y">The Y coordinate of the rectangle to update.</param>
+        /// <param name="width">The width of the rectangle to update.</param>
+        /// <param name="height">The height of the rectangle to update.</param>
+        /// <param name="memory">The new image data.</param>
+        /// <param name="pitch">The pitch of the image data.</param>
+        public void Update2D (int mipLevel, int x, int y, int width, int height, MemoryBlock memory, int pitch) {
+            NativeMethods.bgfx_update_texture_2d(handle, (byte)mipLevel, (ushort)x, (ushort)y, (ushort)width, (ushort)height, memory.ptr, (ushort)pitch);
+        }
+
+        /// <summary>
+        /// Updates the data in a 3D texture.
+        /// </summary>
+        /// <param name="mipLevel">The mip level.</param>
+        /// <param name="x">The X coordinate of the volume to update.</param>
+        /// <param name="y">The Y coordinate of the volume to update.</param>
+        /// <param name="z">The Z coordinate of the volume to update.</param>
+        /// <param name="width">The width of the volume to update.</param>
+        /// <param name="height">The height of the volume to update.</param>
+        /// <param name="depth">The depth of the volume to update.</param>
+        /// <param name="memory">The new image data.</param>
+        public void Update3D (int mipLevel, int x, int y, int z, int width, int height, int depth, MemoryBlock memory) {
+            NativeMethods.bgfx_update_texture_3d(handle, (byte)mipLevel, (ushort)x, (ushort)y, (ushort)z, (ushort)width, (ushort)height, (ushort)depth, memory.ptr);
+        }
+
+        /// <summary>
+        /// Updates the data in a cube texture.
+        /// </summary>
+        /// <param name="face">The cube map face to update.</param>
+        /// <param name="mipLevel">The mip level.</param>
+        /// <param name="x">The X coordinate of the rectangle to update.</param>
+        /// <param name="y">The Y coordinate of the rectangle to update.</param>
+        /// <param name="width">The width of the rectangle to update.</param>
+        /// <param name="height">The height of the rectangle to update.</param>
+        /// <param name="memory">The new image data.</param>
+        /// <param name="pitch">The pitch of the image data.</param>
+        public void UpdateCube (CubeMapFace face, int mipLevel, int x, int y, int width, int height, MemoryBlock memory, int pitch) {
+            NativeMethods.bgfx_update_texture_cube(handle, face, (byte)mipLevel, (ushort)x, (ushort)y, (ushort)width, (ushort)height, memory.ptr, (ushort)pitch);
+        }
+
+        /// <summary>
+        /// Determines whether the specified object is equal to this instance.
+        /// </summary>
+        /// <param name="other">The object to compare with this instance.</param>
+        /// <returns><c>true</c> if the specified object is equal to this instance; otherwise, <c>false</c>.</returns>
+        public bool Equals (Texture other) {
+            if (ReferenceEquals(other, null))
+                return false;
+
+            if (ReferenceEquals(other, this))
+                return true;
+
+            return handle == other.handle;
+        }
+
+        /// <summary>
+        /// Determines whether the specified <see cref="System.Object" /> is equal to this instance.
+        /// </summary>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool Equals (object obj) {
+            return Equals(obj as Texture);
+        }
+
+        /// <summary>
+        /// Returns a hash code for this instance.
+        /// </summary>
+        /// <returns>
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
+        /// </returns>
+        public override int GetHashCode () {
+            return handle.GetHashCode();
+        }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String"/> that represents this instance.
+        /// </returns>
+        public override string ToString () => $"Handle: {handle}";
+
+        /// <summary>
+        /// Implements the equality operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator ==(Texture left, Texture right) {
+            if (ReferenceEquals(left, null))
+                return ReferenceEquals(right, null);
+
+            return left.Equals(right);
+        }
+
+        /// <summary>
+        /// Implements the inequality operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// <c>true</c> if the two objects are not equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator !=(Texture left, Texture right) {
+            return !(left == right);
+        }
+
+        internal struct TextureInfo {
+            public TextureFormat Format;
+            public int StorageSize;
+            public ushort Width;
+            public ushort Height;
+            public ushort Depth;
+            public byte MipCount;
+            public byte BitsPerPixel;
+            public bool IsCubeMap;
+        }
+    }
+
+    /// <summary>
+    /// Describes the layout of data in a vertex stream.
+    /// </summary>
+    public sealed class VertexLayout {
+        internal Data data;
+
+        /// <summary>
+        /// The stride of a single vertex using this layout.
+        /// </summary>
+        public int Stride {
+            get { return data.Stride; }
+        }
+
+        /// <summary>
+        /// Starts a stream of vertex attribute additions to the layout.
+        /// </summary>
+        /// <param name="backend">The rendering backend with which to associate the attributes.</param>
+        /// <returns>This instance, for use in a fluent API.</returns>
+        public VertexLayout Begin (RendererBackend backend = RendererBackend.Null) {
+            NativeMethods.bgfx_vertex_decl_begin(ref data, backend);
+            return this;
+        }
+
+        /// <summary>
+        /// Starts a stream of vertex attribute additions to the layout.
+        /// </summary>
+        /// <param name="attribute">The kind of attribute to add.</param>
+        /// <param name="count">The number of elements in the attribute (1, 2, 3, or 4).</param>
+        /// <param name="type">The type of data described by the attribute.</param>
+        /// <param name="normalized">if set to <c>true</c>, values will be normalized from a 0-255 range to 0.0 - 0.1 in the shader.</param>
+        /// <param name="asInt">if set to <c>true</c>, the attribute is packaged as an integer in the shader.</param>
+        /// <returns>
+        /// This instance, for use in a fluent API.
+        /// </returns>
+        public VertexLayout Add (VertexAttributeUsage attribute, int count, VertexAttributeType type, bool normalized = false, bool asInt = false) {
+            NativeMethods.bgfx_vertex_decl_add(ref data, attribute, (byte)count, type, normalized, asInt);
+            return this;
+        }
+
+        /// <summary>
+        /// Skips the specified number of bytes in the vertex stream.
+        /// </summary>
+        /// <param name="count">The number of bytes to skip.</param>
+        /// <returns>This instance, for use in a fluent API.</returns>
+        public VertexLayout Skip (int count) {
+            NativeMethods.bgfx_vertex_decl_skip(ref data, (byte)count);
+            return this;
+        }
+
+        /// <summary>
+        /// Marks the end of the vertex stream.
+        /// </summary>
+        /// <returns>This instance, for use in a fluent API.</returns>
+        public VertexLayout End () {
+            NativeMethods.bgfx_vertex_decl_end(ref data);
+            return this;
+        }
+
+        /// <summary>
+        /// Gets the byte offset of a particular attribute in the layout.
+        /// </summary>
+        /// <param name="attribute">The attribute for which to get the offset.</param>
+        /// <returns>The offset of the attribute, in bytes.</returns>
+        public unsafe int GetOffset (VertexAttributeUsage attribute) {
+            fixed (Data* ptr = &data)
+                return ptr->Offset[(int)attribute];
+        }
+
+        /// <summary>
+        /// Determines whether the layout contains the given attribute.
+        /// </summary>
+        /// <param name="attribute">The attribute to check/</param>
+        /// <returns><c>true</c> if the layout contains the attribute; otherwise, <c>false</c>.</returns>
+        public unsafe bool HasAttribute (VertexAttributeUsage attribute) {
+            fixed (Data* ptr = &data)
+                return ptr->Attributes[(int)attribute] != 0xff;
+        }
+
+        internal unsafe struct Data {
+            const int MaxAttribCount = 16;
+
+            public uint Hash;
+            public ushort Stride;
+            public fixed ushort Offset[MaxAttribCount];
+            public fixed byte Attributes[MaxAttribCount];
+        }
+    }
+
+    /// <summary>
     /// Contains details about an installed graphics adapter.
     /// </summary>
     public struct Adapter {
@@ -887,15 +1262,13 @@ namespace SharpBgfx {
         /// </returns>
         public override string ToString () => $"Vendor: {Vendor}, Device: {DeviceId}";
     }
-}
 
-namespace SharpBgfx {
     /// <summary>
     /// Represents a dynamically updateable index buffer.
     /// </summary>
     /// <remarks>Indices are always 16-bits.</remarks>
     public unsafe struct DynamicIndexBuffer : IDisposable, IEquatable<DynamicIndexBuffer> {
-        internal ushort handle;
+        internal readonly ushort handle;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DynamicIndexBuffer"/> struct.
@@ -996,14 +1369,12 @@ namespace SharpBgfx {
             return !left.Equals(right);
         }
     }
-}
 
-namespace SharpBgfx {
     /// <summary>
     /// Represents a dynamically updateable vertex buffer.
     /// </summary>
     public unsafe struct DynamicVertexBuffer : IDisposable, IEquatable<DynamicVertexBuffer> {
-        internal ushort handle;
+        internal readonly ushort handle;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DynamicVertexBuffer"/> struct.
@@ -1106,9 +1477,2205 @@ namespace SharpBgfx {
             return !left.Equals(right);
         }
     }
-}
 
-namespace SharpBgfx {
+    /// <summary>
+    /// An aggregated frame buffer, with one or more attached texture surfaces.
+    /// </summary>
+    public unsafe struct FrameBuffer : IDisposable, IEquatable<FrameBuffer> {
+        internal readonly ushort handle;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FrameBuffer"/> struct.
+        /// </summary>
+        /// <param name="width">The width of the render target.</param>
+        /// <param name="height">The height of the render target.</param>
+        /// <param name="format">The format of the new surface.</param>
+        /// <param name="flags">Texture sampling flags.</param>
+        public FrameBuffer (int width, int height, TextureFormat format, TextureFlags flags = TextureFlags.ClampU | TextureFlags.ClampV) {
+            handle = NativeMethods.bgfx_create_frame_buffer((ushort)width, (ushort)height, format, flags);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FrameBuffer"/> struct.
+        /// </summary>
+        /// <param name="ratio">The amount to scale when the backbuffer resizes.</param>
+        /// <param name="format">The format of the new surface.</param>
+        /// <param name="flags">Texture sampling flags.</param>
+        public FrameBuffer (BackbufferRatio ratio, TextureFormat format, TextureFlags flags = TextureFlags.ClampU | TextureFlags.ClampV) {
+            handle = NativeMethods.bgfx_create_frame_buffer_scaled(ratio, format, flags);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FrameBuffer"/> struct.
+        /// </summary>
+        /// <param name="attachments">A set of attachments from which to build the frame buffer.</param>
+        /// <param name="destroyTextures">if set to <c>true</c>, attached textures will be destroyed when the frame buffer is destroyed.</param>
+        public FrameBuffer (Texture[] attachments, bool destroyTextures = false) {
+            var count = (byte)attachments.Length;
+            var handles = stackalloc ushort[count];
+            for (int i = 0; i < count; i++)
+                handles[i] = attachments[i].handle;
+
+            handle = NativeMethods.bgfx_create_frame_buffer_from_handles(count, handles, destroyTextures);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FrameBuffer"/> struct.
+        /// </summary>
+        /// <param name="windowHandle">The OS window handle to which the frame buffer is attached.</param>
+        /// <param name="width">The width of the render target.</param>
+        /// <param name="height">The height of the render target.</param>
+        /// <param name="depthFormat">A desired format for a depth buffer, if applicable.</param>
+        public FrameBuffer (IntPtr windowHandle, int width, int height, TextureFormat depthFormat = TextureFormat.UnknownDepth) {
+            handle = NativeMethods.bgfx_create_frame_buffer_from_nwh(windowHandle, (ushort)width, (ushort)height, depthFormat);
+        }
+
+        /// <summary>
+        /// Releases the frame buffer.
+        /// </summary>
+        public void Dispose () {
+            NativeMethods.bgfx_destroy_frame_buffer(handle);
+        }
+
+        /// <summary>
+        /// Determines whether the specified object is equal to this instance.
+        /// </summary>
+        /// <param name="other">The object to compare with this instance.</param>
+        /// <returns><c>true</c> if the specified object is equal to this instance; otherwise, <c>false</c>.</returns>
+        public bool Equals (FrameBuffer other) {
+            return handle == other.handle;
+        }
+
+        /// <summary>
+        /// Determines whether the specified <see cref="System.Object" /> is equal to this instance.
+        /// </summary>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool Equals (object obj) {
+            var other = obj as FrameBuffer?;
+            if (other == null)
+                return false;
+
+            return Equals(other);
+        }
+
+        /// <summary>
+        /// Returns a hash code for this instance.
+        /// </summary>
+        /// <returns>
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// </returns>
+        public override int GetHashCode () {
+            return handle.GetHashCode();
+        }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String"/> that represents this instance.
+        /// </returns>
+        public override string ToString () => $"Handle: {handle}";
+
+        /// <summary>
+        /// Implements the equality operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator ==(FrameBuffer left, FrameBuffer right) {
+            return left.Equals(right);
+        }
+
+        /// <summary>
+        /// Implements the inequality operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// <c>true</c> if the two objects are not equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator !=(FrameBuffer left, FrameBuffer right) {
+            return !left.Equals(right);
+        }
+    }
+
+    /// <summary>
+    /// Represents a static index buffer.
+    /// </summary>
+    /// <remarks>Indices are always 16-bits.</remarks>
+    public unsafe struct IndexBuffer : IDisposable, IEquatable<IndexBuffer> {
+        internal readonly ushort handle;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IndexBuffer"/> struct.
+        /// </summary>
+        /// <param name="memory">The 16-bit index data used to populate the buffer.</param>
+        /// <param name="flags">Flags used to control buffer behavior.</param>
+        public IndexBuffer (MemoryBlock memory, BufferFlags flags = BufferFlags.None) {
+            handle = NativeMethods.bgfx_create_index_buffer(memory.ptr, flags);
+        }
+
+        /// <summary>
+        /// Releases the index buffer.
+        /// </summary>
+        public void Dispose () {
+            NativeMethods.bgfx_destroy_index_buffer(handle);
+        }
+
+        /// <summary>
+        /// Determines whether the specified object is equal to this instance.
+        /// </summary>
+        /// <param name="other">The object to compare with this instance.</param>
+        /// <returns><c>true</c> if the specified object is equal to this instance; otherwise, <c>false</c>.</returns>
+        public bool Equals (IndexBuffer other) {
+            return handle == other.handle;
+        }
+
+        /// <summary>
+        /// Determines whether the specified <see cref="System.Object" /> is equal to this instance.
+        /// </summary>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool Equals (object obj) {
+            var other = obj as IndexBuffer?;
+            if (other == null)
+                return false;
+
+            return Equals(other);
+        }
+
+        /// <summary>
+        /// Returns a hash code for this instance.
+        /// </summary>
+        /// <returns>
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// </returns>
+        public override int GetHashCode () {
+            return handle.GetHashCode();
+        }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String"/> that represents this instance.
+        /// </returns>
+        public override string ToString () => $"Handle: {handle}";
+
+        /// <summary>
+        /// Implements the equality operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator ==(IndexBuffer left, IndexBuffer right) {
+            return left.Equals(right);
+        }
+
+        /// <summary>
+        /// Implements the inequality operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// <c>true</c> if the two objects are not equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator !=(IndexBuffer left, IndexBuffer right) {
+            return !left.Equals(right);
+        }
+    }
+
+    /// <summary>
+    /// Maintains a data buffer that contains instancing data.
+    /// </summary>
+    public unsafe struct InstanceDataBuffer : IEquatable<InstanceDataBuffer> {
+        internal readonly NativeStruct* ptr;
+
+        /// <summary>
+        /// A pointer that can be filled with instance data.
+        /// </summary>
+        public IntPtr Data => ptr->data;
+
+        /// <summary>
+        /// The size of the data buffer.
+        /// </summary>
+        public int Size => ptr->size;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InstanceDataBuffer" /> struct.
+        /// </summary>
+        /// <param name="count">The number of elements in the buffer.</param>
+        /// <param name="stride">The stride of each element.</param>
+        public InstanceDataBuffer (int count, int stride) {
+            ptr = NativeMethods.bgfx_alloc_instance_data_buffer(count, (ushort)stride);
+        }
+
+        /// <summary>
+        /// Checks for available space to allocate an instance buffer.
+        /// </summary>
+        /// <param name="count">The number of elements to allocate.</param>
+        /// <param name="stride">The stride of each element.</param>
+        /// <returns><c>true</c> if there is space available to allocate the buffer.</returns>
+        public static bool CheckAvailableSpace (int count, int stride) {
+            return NativeMethods.bgfx_check_avail_instance_data_buffer(count, (ushort)stride);
+        }
+
+        /// <summary>
+        /// Determines whether the specified object is equal to this instance.
+        /// </summary>
+        /// <param name="other">The object to compare with this instance.</param>
+        /// <returns><c>true</c> if the specified object is equal to this instance; otherwise, <c>false</c>.</returns>
+        public bool Equals (InstanceDataBuffer other) {
+            return ptr == other.ptr;
+        }
+
+        /// <summary>
+        /// Determines whether the specified <see cref="System.Object" /> is equal to this instance.
+        /// </summary>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool Equals (object obj) {
+            var other = obj as InstanceDataBuffer?;
+            if (other == null)
+                return false;
+
+            return Equals(other);
+        }
+
+        /// <summary>
+        /// Returns a hash code for this instance.
+        /// </summary>
+        /// <returns>
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// </returns>
+        public override int GetHashCode () {
+            return new IntPtr(ptr).GetHashCode();
+        }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String"/> that represents this instance.
+        /// </returns>
+        public override string ToString () => $"Size: {Size}";
+
+        /// <summary>
+        /// Implements the equality operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator ==(InstanceDataBuffer left, InstanceDataBuffer right) {
+            return left.Equals(right);
+        }
+
+        /// <summary>
+        /// Implements the inequality operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// <c>true</c> if the two objects are not equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator !=(InstanceDataBuffer left, InstanceDataBuffer right) {
+            return !left.Equals(right);
+        }
+
+#pragma warning disable 649
+        internal struct NativeStruct {
+            public IntPtr data;
+            public int size;
+            public int offset;
+            public ushort stride;
+            public ushort num;
+            public ushort handle;
+        }
+#pragma warning restore 649
+    }
+
+    /// <summary>
+    /// Represents a block of memory managed by the graphics API.
+    /// </summary>
+    public unsafe struct MemoryBlock : IEquatable<MemoryBlock> {
+        internal readonly DataPtr* ptr;
+
+        /// <summary>
+        /// The pointer to the raw data.
+        /// </summary>
+        public IntPtr Data {
+            get { return ptr == null ? IntPtr.Zero : ptr->Data; }
+        }
+
+        /// <summary>
+        /// The size of the block, in bytes.
+        /// </summary>
+        public int Size {
+            get { return ptr == null ? 0 : ptr->Size; }
+        }
+
+        MemoryBlock (DataPtr* ptr) {
+            this.ptr = ptr;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MemoryBlock"/> struct.
+        /// </summary>
+        /// <param name="size">The size of the block, in bytes.</param>
+        public MemoryBlock (int size) {
+            ptr = NativeMethods.bgfx_alloc(size);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MemoryBlock"/> struct.
+        /// </summary>
+        /// <param name="data">A pointer to the initial data to copy into the new block.</param>
+        /// <param name="size">The size of the block, in bytes.</param>
+        public MemoryBlock (IntPtr data, int size) {
+            ptr = NativeMethods.bgfx_copy(data, size);
+        }
+
+        /// <summary>
+        /// Copies a managed array into a native graphics memory block.
+        /// </summary>
+        /// <typeparam name="T">The type of data in the array.</typeparam>
+        /// <param name="data">The array to copy.</param>
+        /// <returns>The native memory block containing the copied data.</returns>
+        public static MemoryBlock FromArray<T>(T[] data) where T : struct {
+            if (data == null || data.Length == 0)
+                throw new ArgumentNullException(nameof(data));
+
+            var gcHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
+            var block = new MemoryBlock(gcHandle.AddrOfPinnedObject(), Marshal.SizeOf(typeof(T)) * data.Length);
+
+            gcHandle.Free();
+            return block;
+        }
+
+        /// <summary>
+        /// Creates a reference to the given data.
+        /// </summary>
+        /// <typeparam name="T">The type of data in the array.</typeparam>
+        /// <param name="data">The array to reference.</param>
+        /// <returns>The native memory block referring to the data.</returns>
+        /// <remarks>
+        /// The array must not be modified for at least 2 rendered frames.
+        /// </remarks>
+        public static MemoryBlock MakeRef<T>(T[] data) where T : struct {
+            if (data == null || data.Length == 0)
+                throw new ArgumentNullException(nameof(data));
+
+            var gcHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
+            return MakeRef(gcHandle.AddrOfPinnedObject(), Marshal.SizeOf(typeof(T)) * data.Length, GCHandle.ToIntPtr(gcHandle), ReleaseHandleCallback);
+        }
+
+        /// <summary>
+        /// Makes a reference to the given memory block.
+        /// </summary>
+        /// <param name="data">A pointer to the memory.</param>
+        /// <param name="size">The size of the memory block.</param>
+        /// <param name="userData">Arbitrary user data passed to the release callback.</param>
+        /// <param name="callback">A function that will be called when the data is ready to be released.</param>
+        /// <returns>A new memory block referring to the given data.</returns>
+        /// <remarks>
+        /// The memory referred to by the returned memory block must not be modified
+        /// or released until the callback fires.
+        /// </remarks>
+        public static MemoryBlock MakeRef (IntPtr data, int size, IntPtr userData, ReleaseCallback callback) {
+            return new MemoryBlock(NativeMethods.bgfx_make_ref_release(data, size, Marshal.GetFunctionPointerForDelegate(callback), userData));
+        }
+
+        /// <summary>
+        /// Determines whether the specified object is equal to this instance.
+        /// </summary>
+        /// <param name="other">The object to compare with this instance.</param>
+        /// <returns><c>true</c> if the specified object is equal to this instance; otherwise, <c>false</c>.</returns>
+        public bool Equals (MemoryBlock other) {
+            return ptr == other.ptr;
+        }
+
+        /// <summary>
+        /// Determines whether the specified <see cref="System.Object" /> is equal to this instance.
+        /// </summary>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool Equals (object obj) {
+            var other = obj as MemoryBlock?;
+            if (other == null)
+                return false;
+
+            return Equals(other);
+        }
+
+        /// <summary>
+        /// Returns a hash code for this instance.
+        /// </summary>
+        /// <returns>
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
+        /// </returns>
+        public override int GetHashCode () {
+            return new IntPtr(ptr).GetHashCode();
+        }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String"/> that represents this instance.
+        /// </returns>
+        public override string ToString () => $"Size: {Size}";
+
+        /// <summary>
+        /// Implements the equality operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator ==(MemoryBlock left, MemoryBlock right) {
+            return left.Equals(right);
+        }
+
+        /// <summary>
+        /// Implements the inequality operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// <c>true</c> if the two objects are not equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator !=(MemoryBlock left, MemoryBlock right) {
+            return !left.Equals(right);
+        }
+
+#pragma warning disable 649
+        internal struct DataPtr {
+            public IntPtr Data;
+            public int Size;
+        }
+#pragma warning restore 649
+
+        static ReleaseCallback ReleaseHandleCallback = ReleaseHandle;
+        static void ReleaseHandle (IntPtr userData) {
+            var handle = GCHandle.FromIntPtr(userData);
+            handle.Free();
+        }
+    }
+
+    /// <summary>
+    /// Contains platform-specific data used to hook into the bgfx library.
+    /// </summary>
+    public struct PlatformData {
+        /// <summary>
+        /// EGL native display type.
+        /// </summary>
+        public IntPtr DisplayType;
+
+        /// <summary>
+        /// Platform window handle.
+        /// </summary>
+        public IntPtr WindowHandle;
+
+        /// <summary>
+        /// Device context to use instead of letting the library create its own.
+        /// </summary>
+        public IntPtr Context;
+
+        /// <summary>
+        /// Backbuffer pointer to use instead of letting the library create its own.
+        /// </summary>
+        public IntPtr Backbuffer;
+    }
+
+    /// <summary>
+    /// Represents a compiled and linked shader program.
+    /// </summary>
+    public struct Program : IDisposable, IEquatable<Program> {
+        internal readonly ushort handle;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Program"/> struct.
+        /// </summary>
+        /// <param name="vertexShader">The vertex shader.</param>
+        /// <param name="fragmentShader">The fragment shader.</param>
+        /// <param name="destroyShaders">if set to <c>true</c>, the shaders will be released after creating the program.</param>
+        public Program (Shader vertexShader, Shader fragmentShader, bool destroyShaders = false) {
+            handle = NativeMethods.bgfx_create_program(vertexShader.handle, fragmentShader.handle, destroyShaders);
+        }
+
+        /// <summary>
+        /// Releases the program.
+        /// </summary>
+        public void Dispose () {
+            NativeMethods.bgfx_destroy_program(handle);
+        }
+
+        /// <summary>
+        /// Determines whether the specified object is equal to this instance.
+        /// </summary>
+        /// <param name="other">The object to compare with this instance.</param>
+        /// <returns><c>true</c> if the specified object is equal to this instance; otherwise, <c>false</c>.</returns>
+        public bool Equals (Program other) {
+            return handle == other.handle;
+        }
+
+        /// <summary>
+        /// Determines whether the specified <see cref="System.Object" /> is equal to this instance.
+        /// </summary>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool Equals (object obj) {
+            var other = obj as Program?;
+            if (other == null)
+                return false;
+
+            return Equals(other);
+        }
+
+        /// <summary>
+        /// Returns a hash code for this instance.
+        /// </summary>
+        /// <returns>
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// </returns>
+        public override int GetHashCode () {
+            return handle.GetHashCode();
+        }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String"/> that represents this instance.
+        /// </returns>
+        public override string ToString () => $"Handle: {handle}";
+
+        /// <summary>
+        /// Implements the equality operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator ==(Program left, Program right) {
+            return left.Equals(right);
+        }
+
+        /// <summary>
+        /// Implements the inequality operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// <c>true</c> if the two objects are not equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator !=(Program left, Program right) {
+            return !left.Equals(right);
+        }
+    }
+
+    /// <summary>
+    /// Specifies state information used to configure rendering operations.
+    /// </summary>
+    public struct RenderState : IEquatable<RenderState> {
+        const int AlphaRefShift = 40;
+        const int PointSizeShift = 52;
+        const ulong AlphaRefMask = 0x0000ff0000000000;
+        const ulong PointSizeMask = 0x0ff0000000000000;
+
+        readonly ulong value;
+
+        /// <summary>
+        /// No state bits set.
+        /// </summary>
+        public static readonly RenderState None = 0;
+
+        /// <summary>
+        /// Enable writing color data to the framebuffer.
+        /// </summary>
+        public static readonly RenderState ColorWrite = 0x0000000000000001;
+
+        /// <summary>
+        /// Enable writing alpha data to the framebuffer.
+        /// </summary>
+        public static readonly RenderState AlphaWrite = 0x0000000000000002;
+
+        /// <summary>
+        /// Enable writing to the depth buffer.
+        /// </summary>
+        public static readonly RenderState DepthWrite = 0x0000000000000004;
+
+        /// <summary>
+        /// Use a "less than" comparison to pass the depth test.
+        /// </summary>
+        public static readonly RenderState DepthTestLess = 0x0000000000000010;
+
+        /// <summary>
+        /// Use a "less than or equal to" comparison to pass the depth test.
+        /// </summary>
+        public static readonly RenderState DepthTestLessEqual = 0x0000000000000020;
+
+        /// <summary>
+        /// Pass the depth test if both values are equal.
+        /// </summary>
+        public static readonly RenderState DepthTestEqual = 0x0000000000000030;
+
+        /// <summary>
+        /// Use a "greater than or equal to" comparison to pass the depth test.
+        /// </summary>
+        public static readonly RenderState DepthTestGreaterEqual = 0x0000000000000040;
+
+        /// <summary>
+        /// Use a "greater than" comparison to pass the depth test.
+        /// </summary>
+        public static readonly RenderState DepthTestGreater = 0x0000000000000050;
+
+        /// <summary>
+        /// Pass the depth test if both values are not equal.
+        /// </summary>
+        public static readonly RenderState DepthTestNotEqual = 0x0000000000000060;
+
+        /// <summary>
+        /// Never pass the depth test.
+        /// </summary>
+        public static readonly RenderState DepthTestNever = 0x0000000000000070;
+
+        /// <summary>
+        /// Always pass the depth test.
+        /// </summary>
+        public static readonly RenderState DepthTestAlways = 0x0000000000000080;
+
+        /// <summary>
+        /// Use a value of 0 as an input to a blend equation.
+        /// </summary>
+        public static readonly RenderState BlendZero = 0x0000000000001000;
+
+        /// <summary>
+        /// Use a value of 1 as an input to a blend equation.
+        /// </summary>
+        public static readonly RenderState BlendOne = 0x0000000000002000;
+
+        /// <summary>
+        /// Use the source pixel color as an input to a blend equation.
+        /// </summary>
+        public static readonly RenderState BlendSourceColor = 0x0000000000003000;
+
+        /// <summary>
+        /// Use one minus the source pixel color as an input to a blend equation.
+        /// </summary>
+        public static readonly RenderState BlendInverseSourceColor = 0x0000000000004000;
+
+        /// <summary>
+        /// Use the source pixel alpha as an input to a blend equation.
+        /// </summary>
+        public static readonly RenderState BlendSourceAlpha = 0x0000000000005000;
+
+        /// <summary>
+        /// Use one minus the source pixel alpha as an input to a blend equation.
+        /// </summary>
+        public static readonly RenderState BlendInverseSourceAlpha = 0x0000000000006000;
+
+        /// <summary>
+        /// Use the destination pixel alpha as an input to a blend equation.
+        /// </summary>
+        public static readonly RenderState BlendDestinationAlpha = 0x0000000000007000;
+
+        /// <summary>
+        /// Use one minus the destination pixel alpha as an input to a blend equation.
+        /// </summary>
+        public static readonly RenderState BlendInverseDestinationAlpha = 0x0000000000008000;
+
+        /// <summary>
+        /// Use the destination pixel color as an input to a blend equation.
+        /// </summary>
+        public static readonly RenderState BlendDestinationColor = 0x0000000000009000;
+
+        /// <summary>
+        /// Use one minus the destination pixel color as an input to a blend equation.
+        /// </summary>
+        public static readonly RenderState BlendInverseDestinationColor = 0x000000000000a000;
+
+        /// <summary>
+        /// Use the source pixel alpha (saturated) as an input to a blend equation.
+        /// </summary>
+        public static readonly RenderState BlendSourceAlphaSaturate = 0x000000000000b000;
+
+        /// <summary>
+        /// Use an application supplied blending factor as an input to a blend equation.
+        /// </summary>
+        public static readonly RenderState BlendFactor = 0x000000000000c000;
+
+        /// <summary>
+        /// Use one minus an application supplied blending factor as an input to a blend equation.
+        /// </summary>
+        public static readonly RenderState BlendInverseFactor = 0x000000000000d000;
+
+        /// <summary>
+        /// Blend equation: A + B
+        /// </summary>
+        public static readonly RenderState BlendEquationAdd = 0x0000000000000000;
+
+        /// <summary>
+        /// Blend equation: B - A
+        /// </summary>
+        public static readonly RenderState BlendEquationSub = 0x0000000010000000;
+
+        /// <summary>
+        /// Blend equation: A - B
+        /// </summary>
+        public static readonly RenderState BlendEquationReverseSub = 0x0000000020000000;
+
+        /// <summary>
+        /// Blend equation: min(a, b)
+        /// </summary>
+        public static readonly RenderState BlendEquationMin = 0x0000000030000000;
+
+        /// <summary>
+        /// Blend equation: max(a, b)
+        /// </summary>
+        public static readonly RenderState BlendEquationMax = 0x0000000040000000;
+
+        /// <summary>
+        /// Enable independent blending of simultaenous render targets.
+        /// </summary>
+        public static readonly RenderState BlendIndependent = 0x0000000400000000;
+
+        /// <summary>
+        /// Don't perform culling of back faces.
+        /// </summary>
+        public static readonly RenderState NoCulling = 0x0000000000000000;
+
+        /// <summary>
+        /// Perform culling of clockwise faces.
+        /// </summary>
+        public static readonly RenderState CullClockwise = 0x0000001000000000;
+
+        /// <summary>
+        /// Perform culling of counter-clockwise faces.
+        /// </summary>
+        public static readonly RenderState CullCounterclockwise = 0x0000002000000000;
+
+        /// <summary>
+        /// Primitive topology: triangle list.
+        /// </summary>
+        public static readonly RenderState PrimitiveTriangles = 0x0000000000000000;
+
+        /// <summary>
+        /// Primitive topology: triangle strip.
+        /// </summary>
+        public static readonly RenderState PrimitiveTriangleStrip = 0x0001000000000000;
+
+        /// <summary>
+        /// Primitive topology: line list.
+        /// </summary>
+        public static readonly RenderState PrimitiveLines = 0x0002000000000000;
+
+        /// <summary>
+        /// Primitive topology: line strip.
+        /// </summary>
+        public static readonly RenderState PrimitiveLineStrip = 0x0003000000000000;
+
+        /// <summary>
+        /// Primitive topology: point list.
+        /// </summary>
+        public static readonly RenderState PrimitivePoints = 0x0004000000000000;
+
+        /// <summary>
+        /// Enable multisampling.
+        /// </summary>
+        public static readonly RenderState Multisampling = 0x1000000000000000;
+
+        /// <summary>
+        /// Provides a set of sane defaults.
+        /// </summary>
+        public static readonly RenderState Default =
+            ColorWrite |
+            AlphaWrite |
+            DepthWrite |
+            DepthTestLess |
+            CullClockwise |
+            Multisampling;
+
+        /// <summary>
+        /// Predefined blend effect: additive blending.
+        /// </summary>
+        public static readonly RenderState BlendAdd = BlendFunction(BlendOne, BlendOne);
+
+        /// <summary>
+        /// Predefined blend effect: alpha blending.
+        /// </summary>
+        public static readonly RenderState BlendAlpha = BlendFunction(BlendSourceAlpha, BlendInverseSourceAlpha);
+
+        /// <summary>
+        /// Predefined blend effect: "darken" blending.
+        /// </summary>
+        public static readonly RenderState BlendDarken = BlendFunction(BlendOne, BlendOne) | BlendEquation(BlendEquationMin);
+
+        /// <summary>
+        /// Predefined blend effect: "lighten" blending.
+        /// </summary>
+        public static readonly RenderState BlendLighten = BlendFunction(BlendOne, BlendOne) | BlendEquation(BlendEquationMax);
+
+        /// <summary>
+        /// Predefined blend effect: multiplicative blending.
+        /// </summary>
+        public static readonly RenderState BlendMultiply = BlendFunction(BlendDestinationColor, BlendZero);
+
+        /// <summary>
+        /// Predefined blend effect: normal blending based on alpha.
+        /// </summary>
+        public static readonly RenderState BlendNormal = BlendFunction(BlendOne, BlendInverseSourceAlpha);
+
+        /// <summary>
+        /// Predefined blend effect: "screen" blending.
+        /// </summary>
+        public static readonly RenderState BlendScreen = BlendFunction(BlendOne, BlendInverseSourceColor);
+
+        /// <summary>
+        /// Predefined blend effect: "linear burn" blending.
+        /// </summary>
+        public static readonly RenderState BlendLinearBurn = BlendFunction(BlendDestinationColor, BlendInverseDestinationColor) | BlendEquation(BlendEquationSub);
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RenderState"/> struct.
+        /// </summary>
+        /// <param name="value">The integer value of the state.</param>
+        public RenderState (long value) {
+            this.value = (ulong)value;
+        }
+
+        /// <summary>
+        /// Encodes an alpha reference value in a render state.
+        /// </summary>
+        /// <param name="alpha">The alpha reference value.</param>
+        /// <returns>The encoded render state.</returns>
+        public static RenderState AlphaRef (byte alpha) => (((ulong)alpha) << AlphaRefShift) & AlphaRefMask;
+
+        /// <summary>
+        /// Encodes a point size value in a render state.
+        /// </summary>
+        /// <param name="size">The point size.</param>
+        /// <returns>The encoded render state.</returns>
+        public static RenderState PointSize (byte size) => (((ulong)size) << PointSizeShift) & PointSizeMask;
+
+        /// <summary>
+        /// Builds a render state for a blend function.
+        /// </summary>
+        /// <param name="source">The source blend operation.</param>
+        /// <param name="destination">The destination blend operation.</param>
+        /// <returns>The render state for the blend function.</returns>
+        public static RenderState BlendFunction (RenderState source, RenderState destination) => BlendFunction(source, destination, source, destination);
+
+        /// <summary>
+        /// Builds a render state for a blend function.
+        /// </summary>
+        /// <param name="sourceColor">The source color blend operation.</param>
+        /// <param name="destinationColor">The destination color blend operation.</param>
+        /// <param name="sourceAlpha">The source alpha blend operation.</param>
+        /// <param name="destinationAlpha">The destination alpha blend operation.</param>
+        /// <returns>
+        /// The render state for the blend function.
+        /// </returns>
+        public static RenderState BlendFunction (RenderState sourceColor, RenderState destinationColor, RenderState sourceAlpha, RenderState destinationAlpha) {
+            return (sourceColor | (destinationColor << 4)) | ((sourceAlpha | (destinationAlpha << 4)) << 8);
+        }
+
+        /// <summary>
+        /// Builds a render state for a blend equation.
+        /// </summary>
+        /// <param name="equation">The equation.</param>
+        /// <returns>
+        /// The render state for the blend equation.
+        /// </returns>
+        public static RenderState BlendEquation (RenderState equation) => BlendEquation(equation, equation);
+
+        /// <summary>
+        /// Builds a render state for a blend equation.
+        /// </summary>
+        /// <param name="sourceEquation">The source equation.</param>
+        /// <param name="alphaEquation">The alpha equation.</param>
+        /// <returns>
+        /// The render state for the blend equation.
+        /// </returns>
+        public static RenderState BlendEquation (RenderState sourceEquation, RenderState alphaEquation) => sourceEquation | (alphaEquation << 3);
+
+        /// <summary>
+        /// Returns a hash code for this instance.
+        /// </summary>
+        /// <returns>
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// </returns>
+        public override int GetHashCode () => value.GetHashCode();
+
+        /// <summary>
+        /// Determines whether the specific value is equal to this instance.
+        /// </summary>
+        /// <param name="other">The value to compare with this instance.</param>
+        /// <returns><c>true</c> if the value is equal to this instance; otherwise, <c>false</c>.</returns>
+        public bool Equals (RenderState other) => value == other.value;
+
+        /// <summary>
+        /// Determines whether the specified <see cref="System.Object" /> is equal to this instance.
+        /// </summary>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool Equals (object obj) {
+            var state = obj as RenderState?;
+            if (state == null)
+                return false;
+
+            return Equals(state);
+        }
+
+        /// <summary>
+        /// Implements the equality operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator ==(RenderState left, RenderState right) => left.Equals(right);
+
+        /// <summary>
+        /// Implements the inequality operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// <c>true</c> if the two objects are not equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator !=(RenderState left, RenderState right) => !left.Equals(right);
+
+        /// <summary>
+        /// Performs an implicit conversion from ulong.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        [CLSCompliant(false)]
+        public static implicit operator RenderState (ulong value) => new RenderState((long)value);
+
+        /// <summary>
+        /// Performs an explicit conversion to ulong.
+        /// </summary>
+        /// <param name="state">The value to convert.</param>
+        [CLSCompliant(false)]
+        public static explicit operator ulong (RenderState state) => state.value;
+
+        /// <summary>
+        /// Implements the bitwise-or operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
+        public static RenderState operator |(RenderState left, RenderState right) => left.value | right.value;
+
+        /// <summary>
+        /// Implements the bitwise-and operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
+        public static RenderState operator &(RenderState left, RenderState right) => left.value & right.value;
+
+        /// <summary>
+        /// Implements the bitwise-complement operator.
+        /// </summary>
+        /// <param name="state">The operand.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
+        public static RenderState operator ~(RenderState state) => ~state.value;
+
+        /// <summary>
+        /// Implements the left shift operator.
+        /// </summary>
+        /// <param name="state">The value to shift.</param>
+        /// <param name="amount">The amount to shift.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
+        public static RenderState operator <<(RenderState state, int amount) => state.value << amount;
+
+        /// <summary>
+        /// Implements the right shift operator.
+        /// </summary>
+        /// <param name="state">The value to shift.</param>
+        /// <param name="amount">The amount to shift.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
+        public static RenderState operator >>(RenderState state, int amount) => state.value >> amount;
+    }
+
+    /// <summary>
+    /// Represents a single compiled shader component.
+    /// </summary>
+    public unsafe struct Shader : IDisposable, IEquatable<Shader> {
+        Uniform[] uniforms;
+        internal readonly ushort handle;
+
+        /// <summary>
+        /// The set of uniforms exposed by the shader.
+        /// </summary>
+        public IReadOnlyList<Uniform> Uniforms {
+            get {
+                if (uniforms == null) {
+                    var count = NativeMethods.bgfx_get_shader_uniforms(handle, null, 0);
+                    uniforms = new Uniform[count];
+                    NativeMethods.bgfx_get_shader_uniforms(handle, uniforms, count);
+                }
+
+                return uniforms;
+            }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Shader"/> struct.
+        /// </summary>
+        /// <param name="memory">The compiled shader memory.</param>
+        public Shader (MemoryBlock memory) {
+            handle = NativeMethods.bgfx_create_shader(memory.ptr);
+            uniforms = null;
+        }
+
+        /// <summary>
+        /// Releases the shader.
+        /// </summary>
+        public void Dispose () {
+            NativeMethods.bgfx_destroy_shader(handle);
+        }
+
+        /// <summary>
+        /// Determines whether the specified object is equal to this instance.
+        /// </summary>
+        /// <param name="other">The object to compare with this instance.</param>
+        /// <returns><c>true</c> if the specified object is equal to this instance; otherwise, <c>false</c>.</returns>
+        public bool Equals (Shader other) {
+            return handle == other.handle;
+        }
+
+        /// <summary>
+        /// Determines whether the specified <see cref="System.Object" /> is equal to this instance.
+        /// </summary>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool Equals (object obj) {
+            var other = obj as Shader?;
+            if (other == null)
+                return false;
+
+            return Equals(other);
+        }
+
+        /// <summary>
+        /// Returns a hash code for this instance.
+        /// </summary>
+        /// <returns>
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// </returns>
+        public override int GetHashCode () {
+            return handle.GetHashCode();
+        }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String"/> that represents this instance.
+        /// </returns>
+        public override string ToString () => $"Handle: {handle}";
+
+        /// <summary>
+        /// Implements the equality operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator ==(Shader left, Shader right) {
+            return left.Equals(right);
+        }
+
+        /// <summary>
+        /// Implements the inequality operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// <c>true</c> if the two objects are not equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator !=(Shader left, Shader right) {
+            return !left.Equals(right);
+        }
+    }
+
+    /// <summary>
+    /// Specifies state information used to configure rendering operations.
+    /// </summary>
+    public struct StencilFlags : IEquatable<StencilFlags> {
+        const int ReadMaskShift = 8;
+        const uint RefMask = 0x000000ff;
+        const uint ReadMaskMask = 0x0000ff00;
+
+        readonly uint value;
+
+        /// <summary>
+        /// No state bits set.
+        /// </summary>
+        public static readonly StencilFlags None = 0;
+
+        /// <summary>
+        /// Perform a "less than" stencil test.
+        /// </summary>
+        public static readonly StencilFlags TestLess = 0x00010000;
+
+        /// <summary>
+        /// Perform a "less than or equal" stencil test.
+        /// </summary>
+        public static readonly StencilFlags TestLessEqual = 0x00020000;
+
+        /// <summary>
+        /// Perform an equality stencil test.
+        /// </summary>
+        public static readonly StencilFlags TestEqual = 0x00030000;
+
+        /// <summary>
+        /// Perform a "greater than or equal" stencil test.
+        /// </summary>
+        public static readonly StencilFlags TestGreaterEqual = 0x00040000;
+
+        /// <summary>
+        /// Perform a "greater than" stencil test.
+        /// </summary>
+        public static readonly StencilFlags TestGreater = 0x00050000;
+
+        /// <summary>
+        /// Perform an inequality stencil test.
+        /// </summary>
+        public static readonly StencilFlags TestNotEqual = 0x00060000;
+
+        /// <summary>
+        /// Never pass the stencil test.
+        /// </summary>
+        public static readonly StencilFlags TestNever = 0x00070000;
+
+        /// <summary>
+        /// Always pass the stencil test.
+        /// </summary>
+        public static readonly StencilFlags TestAlways = 0x00080000;
+
+        /// <summary>
+        /// On failing the stencil test, zero out the stencil value.
+        /// </summary>
+        public static readonly StencilFlags FailSZero = 0x00000000;
+
+        /// <summary>
+        /// On failing the stencil test, keep the old stencil value.
+        /// </summary>
+        public static readonly StencilFlags FailSKeep = 0x00100000;
+
+        /// <summary>
+        /// On failing the stencil test, replace the stencil value.
+        /// </summary>
+        public static readonly StencilFlags FailSReplace = 0x00200000;
+
+        /// <summary>
+        /// On failing the stencil test, increment the stencil value.
+        /// </summary>
+        public static readonly StencilFlags FailSIncrement = 0x00300000;
+
+        /// <summary>
+        /// On failing the stencil test, increment the stencil value (with saturation).
+        /// </summary>
+        public static readonly StencilFlags FailSIncrementSaturate = 0x00400000;
+
+        /// <summary>
+        /// On failing the stencil test, decrement the stencil value.
+        /// </summary>
+        public static readonly StencilFlags FailSDecrement = 0x00500000;
+
+        /// <summary>
+        /// On failing the stencil test, decrement the stencil value (with saturation).
+        /// </summary>
+        public static readonly StencilFlags FailSDecrementSaturate = 0x00600000;
+
+        /// <summary>
+        /// On failing the stencil test, invert the stencil value.
+        /// </summary>
+        public static readonly StencilFlags FailSInvert = 0x00700000;
+
+        /// <summary>
+        /// On failing the stencil test, zero out the depth value.
+        /// </summary>
+        public static readonly StencilFlags FailZZero = 0x00000000;
+
+        /// <summary>
+        /// On failing the stencil test, keep the depth value.
+        /// </summary>
+        public static readonly StencilFlags FailZKeep = 0x01000000;
+
+        /// <summary>
+        /// On failing the stencil test, replace the depth value.
+        /// </summary>
+        public static readonly StencilFlags FailZReplace = 0x02000000;
+
+        /// <summary>
+        /// On failing the stencil test, increment the depth value.
+        /// </summary>
+        public static readonly StencilFlags FailZIncrement = 0x03000000;
+
+        /// <summary>
+        /// On failing the stencil test, increment the depth value (with saturation).
+        /// </summary>
+        public static readonly StencilFlags FailZIncrementSaturate = 0x04000000;
+
+        /// <summary>
+        /// On failing the stencil test, decrement the depth value.
+        /// </summary>
+        public static readonly StencilFlags FailZDecrement = 0x05000000;
+
+        /// <summary>
+        /// On failing the stencil test, decrement the depth value (with saturation).
+        /// </summary>
+        public static readonly StencilFlags FailZDecrementSaturate = 0x06000000;
+
+        /// <summary>
+        /// On failing the stencil test, invert the depth value.
+        /// </summary>
+        public static readonly StencilFlags FailZInvert = 0x07000000;
+
+        /// <summary>
+        /// On passing the stencil test, zero out the depth value.
+        /// </summary>
+        public static readonly StencilFlags PassZZero = 0x00000000;
+
+        /// <summary>
+        /// On passing the stencil test, keep the old depth value.
+        /// </summary>
+        public static readonly StencilFlags PassZKeep = 0x10000000;
+
+        /// <summary>
+        /// On passing the stencil test, replace the depth value.
+        /// </summary>
+        public static readonly StencilFlags PassZReplace = 0x20000000;
+
+        /// <summary>
+        /// On passing the stencil test, increment the depth value.
+        /// </summary>
+        public static readonly StencilFlags PassZIncrement = 0x30000000;
+
+        /// <summary>
+        /// On passing the stencil test, increment the depth value (with saturation).
+        /// </summary>
+        public static readonly StencilFlags PassZIncrementSaturate = 0x40000000;
+
+        /// <summary>
+        /// On passing the stencil test, decrement the depth value.
+        /// </summary>
+        public static readonly StencilFlags PassZDecrement = 0x50000000;
+
+        /// <summary>
+        /// On passing the stencil test, decrement the depth value (with saturation).
+        /// </summary>
+        public static readonly StencilFlags PassZDecrementSaturate = 0x60000000;
+
+        /// <summary>
+        /// On passing the stencil test, invert the depth value.
+        /// </summary>
+        public static readonly StencilFlags PassZInvert = 0x70000000;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StencilFlags"/> struct.
+        /// </summary>
+        /// <param name="value">The integer value of the state.</param>
+        public StencilFlags (int value) {
+            this.value = (uint)value;
+        }
+
+        /// <summary>
+        /// Encodes a reference value in a stencil state.
+        /// </summary>
+        /// <param name="reference">The stencil reference value.</param>
+        /// <returns>The encoded stencil state.</returns>
+        public static StencilFlags ReferenceValue (byte reference) => reference & RefMask;
+
+        /// <summary>
+        /// Encodes a read mask in a stencil state.
+        /// </summary>
+        /// <param name="mask">The mask.</param>
+        /// <returns>
+        /// The encoded stencil state.
+        /// </returns>
+        public static StencilFlags ReadMask (byte mask) => (((uint)mask) << ReadMaskShift) & ReadMaskMask;
+
+        /// <summary>
+        /// Returns a hash code for this instance.
+        /// </summary>
+        /// <returns>
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// </returns>
+        public override int GetHashCode () => value.GetHashCode();
+
+        /// <summary>
+        /// Determines whether the specific value is equal to this instance.
+        /// </summary>
+        /// <param name="other">The value to compare with this instance.</param>
+        /// <returns><c>true</c> if the value is equal to this instance; otherwise, <c>false</c>.</returns>
+        public bool Equals (StencilFlags other) => value == other.value;
+
+        /// <summary>
+        /// Determines whether the specified <see cref="System.Object" /> is equal to this instance.
+        /// </summary>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool Equals (object obj) {
+            var state = obj as StencilFlags?;
+            if (state == null)
+                return false;
+
+            return Equals(state);
+        }
+
+        /// <summary>
+        /// Implements the equality operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator ==(StencilFlags left, StencilFlags right) => left.Equals(right);
+
+        /// <summary>
+        /// Implements the inequality operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// <c>true</c> if the two objects are not equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator !=(StencilFlags left, StencilFlags right) => !left.Equals(right);
+
+        /// <summary>
+        /// Performs an implicit conversion from uint.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        [CLSCompliant(false)]
+        public static implicit operator StencilFlags (uint value) => new StencilFlags((int)value);
+
+        /// <summary>
+        /// Performs an explicit conversion to uint.
+        /// </summary>
+        /// <param name="state">The value to convert.</param>
+        [CLSCompliant(false)]
+        public static explicit operator uint (StencilFlags state) => state.value;
+
+        /// <summary>
+        /// Implements the bitwise-or operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
+        public static StencilFlags operator |(StencilFlags left, StencilFlags right) => left.value | right.value;
+
+        /// <summary>
+        /// Implements the bitwise-and operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
+        public static StencilFlags operator &(StencilFlags left, StencilFlags right) => left.value & right.value;
+
+        /// <summary>
+        /// Implements the bitwise-complement operator.
+        /// </summary>
+        /// <param name="state">The operand.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
+        public static StencilFlags operator ~(StencilFlags state) => ~state.value;
+
+        /// <summary>
+        /// Implements the left shift operator.
+        /// </summary>
+        /// <param name="state">The value to shift.</param>
+        /// <param name="amount">The amount to shift.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
+        public static StencilFlags operator <<(StencilFlags state, int amount) => state.value << amount;
+
+        /// <summary>
+        /// Implements the right shift operator.
+        /// </summary>
+        /// <param name="state">The value to shift.</param>
+        /// <param name="amount">The amount to shift.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
+        public static StencilFlags operator >>(StencilFlags state, int amount) => state.value >> amount;
+    }
+
+    /// <summary>
+    /// Maintains a transient index buffer.
+    /// </summary>
+    /// <remarks>
+    /// The contents of the buffer are valid for the current frame only.
+    /// You must call SetVertexBuffer with the buffer or a leak could occur.
+    /// </remarks>
+    public unsafe struct TransientIndexBuffer : IEquatable<TransientIndexBuffer> {
+        readonly IntPtr data;
+        int size;
+        int startIndex;
+        readonly ushort handle;
+
+        /// <summary>
+        /// A pointer that can be filled with index data.
+        /// </summary>
+        public IntPtr Data => data;
+
+        /// <summary>
+        /// The size of the buffer.
+        /// </summary>
+        public int Count => size;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TransientIndexBuffer"/> struct.
+        /// </summary>
+        /// <param name="indexCount">The number of 16-bit indices that fit in the buffer.</param>
+        public TransientIndexBuffer (int indexCount) {
+            NativeMethods.bgfx_alloc_transient_index_buffer(out this, indexCount);
+        }
+
+        /// <summary>
+        /// Check if there is available space in the global transient index buffer.
+        /// </summary>
+        /// <param name="count">The number of 16-bit indices to allocate.</param>
+        /// <returns><c>true</c> if there is sufficient space for the give number of indices.</returns>
+        public static bool CheckAvailableSpace (int count) {
+            return NativeMethods.bgfx_check_avail_transient_index_buffer(count);
+        }
+
+        /// <summary>
+        /// Determines whether the specified object is equal to this instance.
+        /// </summary>
+        /// <param name="other">The object to compare with this instance.</param>
+        /// <returns><c>true</c> if the specified object is equal to this instance; otherwise, <c>false</c>.</returns>
+        public bool Equals (TransientIndexBuffer other) {
+            return handle == other.handle && data == other.data;
+        }
+
+        /// <summary>
+        /// Determines whether the specified <see cref="System.Object" /> is equal to this instance.
+        /// </summary>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool Equals (object obj) {
+            var other = obj as TransientIndexBuffer?;
+            if (other == null)
+                return false;
+
+            return Equals(other);
+        }
+
+        /// <summary>
+        /// Returns a hash code for this instance.
+        /// </summary>
+        /// <returns>
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// </returns>
+        public override int GetHashCode () {
+            return handle.GetHashCode() >> 13 ^ data.GetHashCode();
+        }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String"/> that represents this instance.
+        /// </returns>
+        public override string ToString () => $"Count: {Count}";
+
+        /// <summary>
+        /// Implements the equality operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator ==(TransientIndexBuffer left, TransientIndexBuffer right) {
+            return left.Equals(right);
+        }
+
+        /// <summary>
+        /// Implements the inequality operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// <c>true</c> if the two objects are not equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator !=(TransientIndexBuffer left, TransientIndexBuffer right) {
+            return !left.Equals(right);
+        }
+    }
+
+    /// <summary>
+    /// Maintains a transient vertex buffer.
+    /// </summary>
+    /// <remarks>
+    /// The contents of the buffer are valid for the current frame only.
+    /// You must call SetVertexBuffer with the buffer or a leak could occur.
+    /// </remarks>
+    public unsafe struct TransientVertexBuffer : IEquatable<TransientVertexBuffer> {
+        readonly IntPtr data;
+        int size;
+        int startVertex;
+        ushort stride;
+        readonly ushort handle;
+        ushort decl;
+
+        /// <summary>
+        /// A pointer that can be filled with vertex data.
+        /// </summary>
+        public IntPtr Data => data;
+
+        /// <summary>
+        /// The size of the buffer.
+        /// </summary>
+        public int Count => size;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TransientVertexBuffer"/> struct.
+        /// </summary>
+        /// <param name="vertexCount">The number of vertices that fit in the buffer.</param>
+        /// <param name="layout">The layout of the vertex data.</param>
+        public TransientVertexBuffer (int vertexCount, VertexLayout layout) {
+            NativeMethods.bgfx_alloc_transient_vertex_buffer(out this, vertexCount, ref layout.data);
+        }
+
+        /// <summary>
+        /// Check if there is available space in the global transient vertex buffer.
+        /// </summary>
+        /// <param name="count">The number of vertices to allocate.</param>
+        /// <param name="layout">The layout of each vertex.</param>
+        /// <returns>
+        ///   <c>true</c> if there is sufficient space for the give number of vertices.
+        /// </returns>
+        public static bool CheckAvailableSpace (int count, VertexLayout layout) {
+            return NativeMethods.bgfx_check_avail_transient_vertex_buffer(count, ref layout.data);
+        }
+
+        /// <summary>
+        /// Determines whether the specified object is equal to this instance.
+        /// </summary>
+        /// <param name="other">The object to compare with this instance.</param>
+        /// <returns><c>true</c> if the specified object is equal to this instance; otherwise, <c>false</c>.</returns>
+        public bool Equals (TransientVertexBuffer other) {
+            return handle == other.handle && data == other.data;
+        }
+
+        /// <summary>
+        /// Determines whether the specified <see cref="System.Object" /> is equal to this instance.
+        /// </summary>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool Equals (object obj) {
+            var other = obj as TransientVertexBuffer?;
+            if (other == null)
+                return false;
+
+            return Equals(other);
+        }
+
+        /// <summary>
+        /// Returns a hash code for this instance.
+        /// </summary>
+        /// <returns>
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// </returns>
+        public override int GetHashCode () {
+            return handle.GetHashCode() >> 13 ^ data.GetHashCode();
+        }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String"/> that represents this instance.
+        /// </returns>
+        public override string ToString () => $"Count: {Count}";
+
+        /// <summary>
+        /// Implements the equality operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator ==(TransientVertexBuffer left, TransientVertexBuffer right) {
+            return left.Equals(right);
+        }
+
+        /// <summary>
+        /// Implements the inequality operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// <c>true</c> if the two objects are not equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator !=(TransientVertexBuffer left, TransientVertexBuffer right) {
+            return !left.Equals(right);
+        }
+    }
+
+    /// <summary>
+    /// Represents a shader uniform.
+    /// </summary>
+    public struct Uniform : IDisposable, IEquatable<Uniform> {
+        internal readonly ushort handle;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Uniform"/> struct.
+        /// </summary>
+        /// <param name="name">The name of the uniform.</param>
+        /// <param name="type">The type of data represented by the uniform.</param>
+        /// <param name="arraySize">Size of the array, if the uniform is an array type.</param>
+        /// <remarks>
+        /// Predefined uniform names:
+        /// u_viewRect vec4(x, y, width, height) - view rectangle for current view.
+        /// u_viewTexel vec4 (1.0/width, 1.0/height, undef, undef) - inverse width and height
+        /// u_view mat4 - view matrix
+        /// u_invView mat4 - inverted view matrix
+        /// u_proj mat4 - projection matrix
+        /// u_invProj mat4 - inverted projection matrix
+        /// u_viewProj mat4 - concatenated view projection matrix
+        /// u_invViewProj mat4 - concatenated inverted view projection matrix
+        /// u_model mat4[BGFX_CONFIG_MAX_BONES] - array of model matrices.
+        /// u_modelView mat4 - concatenated model view matrix, only first model matrix from array is used.
+        /// u_modelViewProj mat4 - concatenated model view projection matrix.
+        /// u_alphaRef float - alpha reference value for alpha test.
+        /// </remarks>
+        public Uniform (string name, UniformType type, int arraySize = 1) {
+            handle = NativeMethods.bgfx_create_uniform(name, type, (ushort)arraySize);
+        }
+
+        /// <summary>
+        /// Releases the uniform.
+        /// </summary>
+        public void Dispose () {
+            NativeMethods.bgfx_destroy_uniform(handle);
+        }
+
+        /// <summary>
+        /// Determines whether the specified object is equal to this instance.
+        /// </summary>
+        /// <param name="other">The object to compare with this instance.</param>
+        /// <returns><c>true</c> if the specified object is equal to this instance; otherwise, <c>false</c>.</returns>
+        public bool Equals (Uniform other) {
+            return handle == other.handle;
+        }
+
+        /// <summary>
+        /// Determines whether the specified <see cref="System.Object" /> is equal to this instance.
+        /// </summary>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool Equals (object obj) {
+            var other = obj as Uniform?;
+            if (other == null)
+                return false;
+
+            return Equals(other);
+        }
+
+        /// <summary>
+        /// Returns a hash code for this instance.
+        /// </summary>
+        /// <returns>
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// </returns>
+        public override int GetHashCode () {
+            return handle.GetHashCode();
+        }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String"/> that represents this instance.
+        /// </returns>
+        public override string ToString () => $"Handle: {handle}";
+
+        /// <summary>
+        /// Implements the equality operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator ==(Uniform left, Uniform right) {
+            return left.Equals(right);
+        }
+
+        /// <summary>
+        /// Implements the inequality operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// <c>true</c> if the two objects are not equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator !=(Uniform left, Uniform right) {
+            return !left.Equals(right);
+        }
+    }
+
+    /// <summary>
+    /// Represents a static vertex buffer.
+    /// </summary>
+    public unsafe struct VertexBuffer : IDisposable, IEquatable<VertexBuffer> {
+        internal readonly ushort handle;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="VertexBuffer"/> struct.
+        /// </summary>
+        /// <param name="memory">The vertex data with which to populate the buffer.</param>
+        /// <param name="layout">The layout of the vertex data.</param>
+        /// <param name="flags">Flags used to control buffer behavior.</param>
+        public VertexBuffer (MemoryBlock memory, VertexLayout layout, BufferFlags flags = BufferFlags.None) {
+            handle = NativeMethods.bgfx_create_vertex_buffer(memory.ptr, ref layout.data, flags);
+        }
+
+        /// <summary>
+        /// Releases the vertex buffer.
+        /// </summary>
+        public void Dispose () {
+            NativeMethods.bgfx_destroy_vertex_buffer(handle);
+        }
+
+        /// <summary>
+        /// Determines whether the specified object is equal to this instance.
+        /// </summary>
+        /// <param name="other">The object to compare with this instance.</param>
+        /// <returns><c>true</c> if the specified object is equal to this instance; otherwise, <c>false</c>.</returns>
+        public bool Equals (VertexBuffer other) {
+            return handle == other.handle;
+        }
+
+        /// <summary>
+        /// Determines whether the specified <see cref="System.Object" /> is equal to this instance.
+        /// </summary>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool Equals (object obj) {
+            var other = obj as VertexBuffer?;
+            if (other == null)
+                return false;
+
+            return Equals(other);
+        }
+
+        /// <summary>
+        /// Returns a hash code for this instance.
+        /// </summary>
+        /// <returns>
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// </returns>
+        public override int GetHashCode () {
+            return handle.GetHashCode();
+        }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String"/> that represents this instance.
+        /// </returns>
+        public override string ToString () => $"Handle: {handle}";
+
+        /// <summary>
+        /// Implements the equality operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator ==(VertexBuffer left, VertexBuffer right) {
+            return left.Equals(right);
+        }
+
+        /// <summary>
+        /// Implements the inequality operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// <c>true</c> if the two objects are not equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator !=(VertexBuffer left, VertexBuffer right) {
+            return !left.Equals(right);
+        }
+    }
+
+    /// <summary>
+    /// Specifies scaling relative to the size of the backbuffer.
+    /// </summary>
+    public enum BackbufferRatio {
+        /// <summary>
+        /// Surface is equal to the backbuffer size.
+        /// </summary>
+        Equal,
+
+        /// <summary>
+        /// Surface is half the backbuffer size.
+        /// </summary>
+        Half,
+
+        /// <summary>
+        /// Surface is a quater of the backbuffer size.
+        /// </summary>
+        Quater,
+
+        /// <summary>
+        /// Surface is an eighth of the backbuffer size.
+        /// </summary>
+        Eighth,
+
+        /// <summary>
+        /// Surface is a sixteenth of the backbuffer size.
+        /// </summary>
+        Sixteenth,
+
+        /// <summary>
+        /// Surface is double the backbuffer size.
+        /// </summary>
+        Double
+    }
+
+    /// <summary>
+    /// Specifies various flags that control vertex and index buffer behavior.
+    /// </summary>
+    [Flags]
+    public enum BufferFlags : byte {
+        /// <summary>
+        /// No flags specified.
+        /// </summary>
+        None,
+
+        /// <summary>
+        /// Buffer will be read by a compute shader.
+        /// </summary>
+        ComputeRead = 0x1,
+
+        /// <summary>
+        /// Buffer will be written into by a compute shader. It cannot be accessed by the CPU.
+        /// </summary>
+        ComputeWrite = 0x2,
+
+        /// <summary>
+        /// Buffer will resize on update if a different quantity of data is passed. If this flag is not set
+        /// the data will be trimmed to fit in the existing buffer size. Effective only for dynamic buffers.
+        /// </summary>
+        AllowResize = 0x4,
+
+        /// <summary>
+        /// Buffer is using 32-bit indices. Useful only for index buffers.
+        /// </summary>
+        Index32 = 0x8
+    }
+
+    /// <summary>
+    /// Specifies flags for clearing surfaces.
+    /// </summary>
+    [Flags]
+    public enum ClearTargets : short {
+        /// <summary>
+        /// Don't clear anything.
+        /// </summary>
+        None = 0,
+
+        /// <summary>
+        /// Clear the color channels.
+        /// </summary>
+        Color = 0x1,
+
+        /// <summary>
+        /// Clear the depth buffer.
+        /// </summary>
+        Depth = 0x2,
+
+        /// <summary>
+        /// Clear the stencil buffer.
+        /// </summary>
+        Stencil = 0x4,
+
+        /// <summary>
+        /// Discard the first color framebuffer.
+        /// </summary>
+        DiscardColor0 = 0x8,
+
+        /// <summary>
+        /// Discard the second color framebuffer.
+        /// </summary>
+        DiscardColor1 = 0x10,
+
+        /// <summary>
+        /// Discard the third color framebuffer.
+        /// </summary>
+        DiscardColor2 = 0x20,
+
+        /// <summary>
+        /// Discard the fourth color framebuffer.
+        /// </summary>
+        DiscardColor3 = 0x40,
+
+        /// <summary>
+        /// Discard the fifth color framebuffer.
+        /// </summary>
+        DiscardColor4 = 0x80,
+
+        /// <summary>
+        /// Discard the sixth color framebuffer.
+        /// </summary>
+        DiscardColor5 = 0x100,
+
+        /// <summary>
+        /// Discard the seventh color framebuffer.
+        /// </summary>
+        DiscardColor6 = 0x200,
+
+        /// <summary>
+        /// Discard the eighth color framebuffer.
+        /// </summary>
+        DiscardColor7 = 0x400,
+
+        /// <summary>
+        /// Discard the depth buffer.
+        /// </summary>
+        DiscardDepth = 0x800,
+
+        /// <summary>
+        /// Discard the stencil buffer.
+        /// </summary>
+        DiscardStencil = 0x1000,
+    }
+
+    /// <summary>
+    /// Describes access rights for a compute buffer.
+    /// </summary>
+    public enum ComputeBufferAccess {
+        /// <summary>
+        /// The buffer can only be read.
+        /// </summary>
+        Read,
+
+        /// <summary>
+        /// The buffer can only be written to.
+        /// </summary>
+        Write,
+
+        /// <summary>
+        /// The buffer can be read and written.
+        /// </summary>
+        ReadWrite
+    }
+
+    /// <summary>
+    /// Addresses a particular face of a cube map.
+    /// </summary>
+    public enum CubeMapFace : byte {
+        /// <summary>
+        /// The right face.
+        /// </summary>
+        Right,
+
+        /// <summary>
+        /// The left face.
+        /// </summary>
+        Left,
+
+        /// <summary>
+        /// The top face.
+        /// </summary>
+        Top,
+
+        /// <summary>
+        /// The bottom face.
+        /// </summary>
+        Bottom,
+
+        /// <summary>
+        /// The front face.
+        /// </summary>
+        Front,
+
+        /// <summary>
+        /// The back face.
+        /// </summary>
+        Back
+    }
+
+    /// <summary>
+    /// Specifies various debug options.
+    /// </summary>
+    [Flags]
+    public enum DebugFeatures {
+        /// <summary>
+        /// Don't enable any debugging features.
+        /// </summary>
+        None = 0,
+
+        /// <summary>
+        /// Force wireframe rendering.
+        /// </summary>
+        Wireframe = 0x1,
+
+        /// <summary>
+        /// When set, all rendering calls are skipped. This is useful when profiling to
+        /// find bottlenecks between the CPU and GPU.
+        /// </summary>
+        InfinitelyFastHardware = 0x2,
+
+        /// <summary>
+        /// Display internal statistics.
+        /// </summary>
+        DisplayStatistics = 0x4,
+
+        /// <summary>
+        /// Display debug text.
+        /// </summary>
+        DisplayText = 0x8
+    }
+
+    /// <summary>
+    /// Specifies various capabilities supported by the rendering device.
+    /// </summary>
+    [Flags]
+    public enum DeviceFeatures : long {
+        /// <summary>
+        /// No extra features supported.
+        /// </summary>
+        None = 0,
+
+        /// <summary>
+        /// Device supports "Less than or equal to" texture comparison mode.
+        /// </summary>
+        TextureCompareLessEqual = 0x1,
+
+        /// <summary>
+        /// Device supports other texture comparison modes.
+        /// </summary>
+        TextureCompareExtended = 0x2,
+
+        /// <summary>
+        /// Device supports all texture comparison modes.
+        /// </summary>
+        TextureCompareAll = TextureCompareLessEqual | TextureCompareExtended,
+
+        /// <summary>
+        /// Device supports 3D textures.
+        /// </summary>
+        Texture3D = 0x4,
+
+        /// <summary>
+        /// Device supports 16-bit floats as vertex attributes.
+        /// </summary>
+        VertexAttributeHalf = 0x8,
+
+        /// <summary>
+        /// Device supports instancing.
+        /// </summary>
+        Instancing = 0x10,
+
+        /// <summary>
+        /// Device supports multithreaded rendering.
+        /// </summary>
+        RendererMultithreaded = 0x20,
+
+        /// <summary>
+        /// Fragment shaders can access depth values.
+        /// </summary>
+        FragmentDepth = 0x40,
+
+        /// <summary>
+        /// Device supports independent blending of simultaneous render targets.
+        /// </summary>
+        BlendIndependent = 0x80,
+
+        /// <summary>
+        /// Device supports compute shaders.
+        /// </summary>
+        Compute = 0x100,
+
+        /// <summary>
+        /// Device supports ordering of fragment output.
+        /// </summary>
+        FragmentOrdering = 0x200,
+
+        /// <summary>
+        /// Indicates whether the device can render to multiple swap chains.
+        /// </summary>
+        SwapChain = 0x400,
+
+        /// <summary>
+        /// Head mounted displays are supported.
+        /// </summary>
+        HeadMountedDisplay = 0x800,
+
+        /// <summary>
+        /// Device supports 32-bit indices.
+        /// </summary>
+        Index32 = 0x1000
+    }
+
     /// <summary>
     /// Specifies the supported rendering backend APIs.
     /// </summary>
@@ -1145,113 +3712,210 @@ namespace SharpBgfx {
     }
 
     /// <summary>
-    /// Specifies vertex attribute usages.
+    /// Specifies various settings to change during a reset call.
     /// </summary>
-    public enum VertexAttributeUsage {
+    [Flags]
+    public enum ResetFlags {
         /// <summary>
-        /// Position data.
+        /// No features to change.
         /// </summary>
-        Position,
+        None = 0,
 
         /// <summary>
-        /// Normals.
+        /// Not yet supported.
         /// </summary>
-        Normal,
+        Fullscreen = 0x1,
 
         /// <summary>
-        /// Tangents.
+        /// Enable 2x multisampling.
         /// </summary>
-        Tangent,
+        MSAA2x = 0x10,
 
         /// <summary>
-        /// Bitangents.
+        /// Enable 4x multisampling.
         /// </summary>
-        Bitangent,
+        MSAA4x = 0x20,
 
         /// <summary>
-        /// First color channel.
+        /// Enable 8x multisampling.
         /// </summary>
-        Color0,
+        MSAA8x = 0x30,
 
         /// <summary>
-        /// Second color channel.
+        /// Enable 16x multisampling.
         /// </summary>
-        Color1,
+        MSAA16x = 0x40,
 
         /// <summary>
-        /// Indices.
+        /// Enable v-sync.
         /// </summary>
-        Indices,
+        Vsync = 0x80,
 
         /// <summary>
-        /// Animation weights.
+        /// Use the maximum anisotropic filtering level available.
         /// </summary>
-        Weight,
+        MaxAnisotropy = 0x100,
 
         /// <summary>
-        /// First texture coordinate channel (arbitrary data).
+        /// Begin screen capture.
         /// </summary>
-        TexCoord0,
+        Capture = 0x200,
 
         /// <summary>
-        /// Second texture coordinate channel (arbitrary data).
+        /// Enable head mounted display support.
         /// </summary>
-        TexCoord1,
+        HeadMountedDisplay = 0x400,
 
         /// <summary>
-        /// Third texture coordinate channel (arbitrary data).
+        /// Enable debugging for head mounted display rendering.
         /// </summary>
-        TexCoord2,
+        HeadMountedDisplayDebug = 0x800,
 
         /// <summary>
-        /// Fourth texture coordinate channel (arbitrary data).
+        /// Recenter the head mounted display.
         /// </summary>
-        TexCoord3,
+        HeadMountedDisplayRecenter = 0x1000,
 
         /// <summary>
-        /// Fifth texture coordinate channel (arbitrary data).
+        /// Flip the backbuffer immediately after rendering for reduced latency.
         /// </summary>
-        TexCoord4,
-
-        /// <summary>
-        /// Sixth texture coordinate channel (arbitrary data).
-        /// </summary>
-        TexCoord5,
-
-        /// <summary>
-        /// Seventh texture coordinate channel (arbitrary data).
-        /// </summary>
-        TexCoord6,
-
-        /// <summary>
-        /// Eighth texture coordinate channel (arbitrary data).
-        /// </summary>
-        TexCoord7
+        FlipAfterRender = 0x2000
     }
 
     /// <summary>
-    /// Specifies data types for vertex attributes.
+    /// Specifies various texture flags.
     /// </summary>
-    public enum VertexAttributeType {
+    [Flags]
+    public enum TextureFlags {
         /// <summary>
-        /// One-byte unsigned integer.
+        /// No flags set.
         /// </summary>
-        UInt8,
+        None = 0x00000000,
 
         /// <summary>
-        /// Two-byte signed integer.
+        /// Mirror the texture in the U coordinate.
         /// </summary>
-        Int16,
+        MirrorU = 0x00000001,
 
         /// <summary>
-        /// Two-byte float.
+        /// Clamp the texture in the U coordinate.
         /// </summary>
-        Half,
+        ClampU = 0x00000002,
 
         /// <summary>
-        /// Four-byte float.
+        /// Mirror the texture in the V coordinate.
         /// </summary>
-        Float
+        MirrorV = 0x00000004,
+
+        /// <summary>
+        /// Clamp the texture in the V coordinate.
+        /// </summary>
+        ClampV = 0x00000008,
+
+        /// <summary>
+        /// Mirror the texture in the W coordinate.
+        /// </summary>
+        MirrorW = 0x00000010,
+
+        /// <summary>
+        /// Clamp the texture in the W coordinate.
+        /// </summary>
+        ClampW = 0x00000020,
+
+        /// <summary>
+        /// Use point filtering for texture minification.
+        /// </summary>
+        MinFilterPoint = 0x00000040,
+
+        /// <summary>
+        /// Use anisotropic filtering for texture minification.
+        /// </summary>
+        MinFilterAnisotropic = 0x00000080,
+
+        /// <summary>
+        /// Use point filtering for texture magnification.
+        /// </summary>
+        MagFilterPoint = 0x00000100,
+
+        /// <summary>
+        /// Use anisotropic filtering for texture magnification.
+        /// </summary>
+        MagFilterAnisotropic = 0x00000200,
+
+        /// <summary>
+        /// Use point filtering for texture mipmaps.
+        /// </summary>
+        MipFilterPoint = 0x00000400,
+
+        /// <summary>
+        /// The texture will be used as a render target.
+        /// </summary>
+        RenderTarget = 0x00001000,
+
+        /// <summary>
+        /// The render target texture support 2x multisampling.
+        /// </summary>
+        RenderTargetMultisample2x = 0x00002000,
+
+        /// <summary>
+        /// The render target texture support 4x multisampling.
+        /// </summary>
+        RenderTargetMultisample4x = 0x00003000,
+
+        /// <summary>
+        /// The render target texture support 8x multisampling.
+        /// </summary>
+        RenderTargetMultisample8x = 0x00004000,
+
+        /// <summary>
+        /// The render target texture support 16x multisampling.
+        /// </summary>
+        RenderTargetMultisample16x = 0x00005000,
+
+        /// <summary>
+        /// The texture is only usable as a render target, not as a shader resource.
+        /// </summary>
+        RenderTargetBufferOnly = 0x00008000,
+
+        /// <summary>
+        /// Use a "less than" operator when comparing textures.
+        /// </summary>
+        CompareLess = 0x00010000,
+
+        /// <summary>
+        /// Use a "less than or equal" operator when comparing textures.
+        /// </summary>
+        CompareLessEqual = 0x00020000,
+
+        /// <summary>
+        /// Use an equality operator when comparing textures.
+        /// </summary>
+        CompareEqual = 0x00030000,
+
+        /// <summary>
+        /// Use a "greater than or equal" operator when comparing textures.
+        /// </summary>
+        CompareGreaterEqual = 0x00040000,
+
+        /// <summary>
+        /// Use a "greater than" operator when comparing textures.
+        /// </summary>
+        CompareGreater = 0x00050000,
+
+        /// <summary>
+        /// Use an inequality operator when comparing textures.
+        /// </summary>
+        CompareNotEqual = 0x00060000,
+
+        /// <summary>
+        /// Never compare two textures as equal.
+        /// </summary>
+        CompareNever = 0x00070000,
+
+        /// <summary>
+        /// Always compare two textures as equal.
+        /// </summary>
+        CompareAlways = 0x00080000,
     }
 
     /// <summary>
@@ -1505,6 +4169,37 @@ namespace SharpBgfx {
     }
 
     /// <summary>
+    /// Indicates the level of support for a specific texture format.
+    /// </summary>
+    [Flags]
+    public enum TextureFormatSupport {
+        /// <summary>
+        /// The format is unsupported.
+        /// </summary>
+        Unsupported = 0x0,
+
+        /// <summary>
+        /// The format is supported for color data and operations.
+        /// </summary>
+        Color = 0x1,
+
+        /// <summary>
+        /// The format is supported through library emulation.
+        /// </summary>
+        Emulated = 0x2,
+
+        /// <summary>
+        /// The format is supported for vertex texturing.
+        /// </summary>
+        Vertex = 0x4,
+
+        /// <summary>
+        /// The format is supported for compute image operations.
+        /// </summary>
+        Image = 0x8
+    }
+
+    /// <summary>
     /// Specifies the type of uniform data.
     /// </summary>
     public enum UniformType {
@@ -1555,488 +4250,6 @@ namespace SharpBgfx {
     }
 
     /// <summary>
-    /// Specifies various settings to change during a reset call.
-    /// </summary>
-    [Flags]
-    public enum ResetFlags {
-        /// <summary>
-        /// No features to change.
-        /// </summary>
-        None = 0,
-
-        /// <summary>
-        /// Not yet supported.
-        /// </summary>
-        Fullscreen = 0x1,
-
-        /// <summary>
-        /// Enable 2x multisampling.
-        /// </summary>
-        MSAA2x = 0x10,
-
-        /// <summary>
-        /// Enable 4x multisampling.
-        /// </summary>
-        MSAA4x = 0x20,
-
-        /// <summary>
-        /// Enable 8x multisampling.
-        /// </summary>
-        MSAA8x = 0x30,
-
-        /// <summary>
-        /// Enable 16x multisampling.
-        /// </summary>
-        MSAA16x = 0x40,
-
-        /// <summary>
-        /// Enable v-sync.
-        /// </summary>
-        Vsync = 0x80,
-
-        /// <summary>
-        /// Use the maximum anisotropic filtering level available.
-        /// </summary>
-        MaxAnisotropy = 0x100,
-
-        /// <summary>
-        /// Begin screen capture.
-        /// </summary>
-        Capture = 0x200,
-
-        /// <summary>
-        /// Enable head mounted display support.
-        /// </summary>
-        HeadMountedDisplay = 0x400,
-
-        /// <summary>
-        /// Enable debugging for head mounted display rendering.
-        /// </summary>
-        HeadMountedDisplayDebug = 0x800,
-
-        /// <summary>
-        /// Recenter the head mounted display.
-        /// </summary>
-        HeadMountedDisplayRecenter = 0x1000,
-
-        /// <summary>
-        /// Flip the backbuffer immediately after rendering for reduced latency.
-        /// </summary>
-        FlipAfterRender = 0x2000
-    }
-
-    /// <summary>
-    /// Specifies various debug options.
-    /// </summary>
-    [Flags]
-    public enum DebugFeatures {
-        /// <summary>
-        /// Don't enable any debugging features.
-        /// </summary>
-        None = 0,
-
-        /// <summary>
-        /// Force wireframe rendering.
-        /// </summary>
-        Wireframe = 0x1,
-
-        /// <summary>
-        /// When set, all rendering calls are skipped. This is useful when profiling to
-        /// find bottlenecks between the CPU and GPU.
-        /// </summary>
-        InfinitelyFastHardware = 0x2,
-
-        /// <summary>
-        /// Display internal statistics.
-        /// </summary>
-        DisplayStatistics = 0x4,
-
-        /// <summary>
-        /// Display debug text.
-        /// </summary>
-        DisplayText = 0x8
-    }
-
-    /// <summary>
-    /// Specifies flags for clearing surfaces.
-    /// </summary>
-    [Flags]
-    public enum ClearTargets : short {
-        /// <summary>
-        /// Don't clear anything.
-        /// </summary>
-        None = 0,
-
-        /// <summary>
-        /// Clear the color channels.
-        /// </summary>
-        Color = 0x1,
-
-        /// <summary>
-        /// Clear the depth buffer.
-        /// </summary>
-        Depth = 0x2,
-
-        /// <summary>
-        /// Clear the stencil buffer.
-        /// </summary>
-        Stencil = 0x4,
-
-        /// <summary>
-        /// Discard the first color framebuffer.
-        /// </summary>
-        DiscardColor0 = 0x8,
-
-        /// <summary>
-        /// Discard the second color framebuffer.
-        /// </summary>
-        DiscardColor1 = 0x10,
-
-        /// <summary>
-        /// Discard the third color framebuffer.
-        /// </summary>
-        DiscardColor2 = 0x20,
-
-        /// <summary>
-        /// Discard the fourth color framebuffer.
-        /// </summary>
-        DiscardColor3 = 0x40,
-
-        /// <summary>
-        /// Discard the fifth color framebuffer.
-        /// </summary>
-        DiscardColor4 = 0x80,
-
-        /// <summary>
-        /// Discard the sixth color framebuffer.
-        /// </summary>
-        DiscardColor5 = 0x100,
-
-        /// <summary>
-        /// Discard the seventh color framebuffer.
-        /// </summary>
-        DiscardColor6 = 0x200,
-
-        /// <summary>
-        /// Discard the eighth color framebuffer.
-        /// </summary>
-        DiscardColor7 = 0x400,
-
-        /// <summary>
-        /// Discard the depth buffer.
-        /// </summary>
-        DiscardDepth = 0x800,
-
-        /// <summary>
-        /// Discard the stencil buffer.
-        /// </summary>
-        DiscardStencil = 0x1000,
-    }
-
-    /// <summary>
-    /// Specifies various capabilities supported by the rendering device.
-    /// </summary>
-    [Flags]
-    public enum DeviceFeatures : long {
-        /// <summary>
-        /// No extra features supported.
-        /// </summary>
-        None = 0,
-
-        /// <summary>
-        /// Device supports "Less than or equal to" texture comparison mode.
-        /// </summary>
-        TextureCompareLessEqual = 0x1,
-
-        /// <summary>
-        /// Device supports other texture comparison modes.
-        /// </summary>
-        TextureCompareExtended = 0x2,
-
-        /// <summary>
-        /// Device supports all texture comparison modes.
-        /// </summary>
-        TextureCompareAll = TextureCompareLessEqual | TextureCompareExtended,
-
-        /// <summary>
-        /// Device supports 3D textures.
-        /// </summary>
-        Texture3D = 0x4,
-
-        /// <summary>
-        /// Device supports 16-bit floats as vertex attributes.
-        /// </summary>
-        VertexAttributeHalf = 0x8,
-
-        /// <summary>
-        /// Device supports instancing.
-        /// </summary>
-        Instancing = 0x10,
-
-        /// <summary>
-        /// Device supports multithreaded rendering.
-        /// </summary>
-        RendererMultithreaded = 0x20,
-
-        /// <summary>
-        /// Fragment shaders can access depth values.
-        /// </summary>
-        FragmentDepth = 0x40,
-
-        /// <summary>
-        /// Device supports independent blending of simultaneous render targets.
-        /// </summary>
-        BlendIndependent = 0x80,
-
-        /// <summary>
-        /// Device supports compute shaders.
-        /// </summary>
-        Compute = 0x100,
-
-        /// <summary>
-        /// Device supports ordering of fragment output.
-        /// </summary>
-        FragmentOrdering = 0x200,
-
-        /// <summary>
-        /// Indicates whether the device can render to multiple swap chains.
-        /// </summary>
-        SwapChain = 0x400,
-
-        /// <summary>
-        /// Head mounted displays are supported.
-        /// </summary>
-        HeadMountedDisplay = 0x800,
-
-        /// <summary>
-        /// Device supports 32-bit indices.
-        /// </summary>
-        Index32 = 0x1000
-    }
-
-    /// <summary>
-    /// Indicates the level of support for a specific texture format.
-    /// </summary>
-    [Flags]
-    public enum TextureFormatSupport {
-        /// <summary>
-        /// The format is unsupported.
-        /// </summary>
-        Unsupported = 0x0,
-
-        /// <summary>
-        /// The format is supported for color data and operations.
-        /// </summary>
-        Color = 0x1,
-
-        /// <summary>
-        /// The format is supported through library emulation.
-        /// </summary>
-        Emulated = 0x2,
-
-        /// <summary>
-        /// The format is supported for vertex texturing.
-        /// </summary>
-        Vertex = 0x4,
-
-        /// <summary>
-        /// The format is supported for compute image operations.
-        /// </summary>
-        Image = 0x8
-    }
-
-    /// <summary>
-    /// Specifies various texture flags.
-    /// </summary>
-    [Flags]
-    public enum TextureFlags {
-        /// <summary>
-        /// No flags set.
-        /// </summary>
-        None = 0x00000000,
-
-        /// <summary>
-        /// Mirror the texture in the U coordinate.
-        /// </summary>
-        MirrorU = 0x00000001,
-
-        /// <summary>
-        /// Clamp the texture in the U coordinate.
-        /// </summary>
-        ClampU = 0x00000002,
-
-        /// <summary>
-        /// Mirror the texture in the V coordinate.
-        /// </summary>
-        MirrorV = 0x00000004,
-
-        /// <summary>
-        /// Clamp the texture in the V coordinate.
-        /// </summary>
-        ClampV = 0x00000008,
-
-        /// <summary>
-        /// Mirror the texture in the W coordinate.
-        /// </summary>
-        MirrorW = 0x00000010,
-
-        /// <summary>
-        /// Clamp the texture in the W coordinate.
-        /// </summary>
-        ClampW = 0x00000020,
-
-        /// <summary>
-        /// Use point filtering for texture minification.
-        /// </summary>
-        MinFilterPoint = 0x00000040,
-
-        /// <summary>
-        /// Use anisotropic filtering for texture minification.
-        /// </summary>
-        MinFilterAnisotropic = 0x00000080,
-
-        /// <summary>
-        /// Use point filtering for texture magnification.
-        /// </summary>
-        MagFilterPoint = 0x00000100,
-
-        /// <summary>
-        /// Use anisotropic filtering for texture magnification.
-        /// </summary>
-        MagFilterAnisotropic = 0x00000200,
-
-        /// <summary>
-        /// Use point filtering for texture mipmaps.
-        /// </summary>
-        MipFilterPoint = 0x00000400,
-
-        /// <summary>
-        /// The texture will be used as a render target.
-        /// </summary>
-        RenderTarget = 0x00001000,
-
-        /// <summary>
-        /// The render target texture support 2x multisampling.
-        /// </summary>
-        RenderTargetMultisample2x = 0x00002000,
-
-        /// <summary>
-        /// The render target texture support 4x multisampling.
-        /// </summary>
-        RenderTargetMultisample4x = 0x00003000,
-
-        /// <summary>
-        /// The render target texture support 8x multisampling.
-        /// </summary>
-        RenderTargetMultisample8x = 0x00004000,
-
-        /// <summary>
-        /// The render target texture support 16x multisampling.
-        /// </summary>
-        RenderTargetMultisample16x = 0x00005000,
-
-        /// <summary>
-        /// The texture is only usable as a render target, not as a shader resource.
-        /// </summary>
-        RenderTargetBufferOnly = 0x00008000,
-
-        /// <summary>
-        /// Use a "less than" operator when comparing textures.
-        /// </summary>
-        CompareLess = 0x00010000,
-
-        /// <summary>
-        /// Use a "less than or equal" operator when comparing textures.
-        /// </summary>
-        CompareLessEqual = 0x00020000,
-
-        /// <summary>
-        /// Use an equality operator when comparing textures.
-        /// </summary>
-        CompareEqual = 0x00030000,
-
-        /// <summary>
-        /// Use a "greater than or equal" operator when comparing textures.
-        /// </summary>
-        CompareGreaterEqual = 0x00040000,
-
-        /// <summary>
-        /// Use a "greater than" operator when comparing textures.
-        /// </summary>
-        CompareGreater = 0x00050000,
-
-        /// <summary>
-        /// Use an inequality operator when comparing textures.
-        /// </summary>
-        CompareNotEqual = 0x00060000,
-
-        /// <summary>
-        /// Never compare two textures as equal.
-        /// </summary>
-        CompareNever = 0x00070000,
-
-        /// <summary>
-        /// Always compare two textures as equal.
-        /// </summary>
-        CompareAlways = 0x00080000,
-    }
-
-    /// <summary>
-    /// Describes access rights for a compute buffer.
-    /// </summary>
-    public enum ComputeBufferAccess {
-        /// <summary>
-        /// The buffer can only be read.
-        /// </summary>
-        Read,
-
-        /// <summary>
-        /// The buffer can only be written to.
-        /// </summary>
-        Write,
-
-        /// <summary>
-        /// The buffer can be read and written.
-        /// </summary>
-        ReadWrite
-    }
-
-    /// <summary>
-    /// Addresses a particular face of a cube map.
-    /// </summary>
-    public enum CubeMapFace : byte {
-        /// <summary>
-        /// The right face.
-        /// </summary>
-        Right,
-
-        /// <summary>
-        /// The left face.
-        /// </summary>
-        Left,
-
-        /// <summary>
-        /// The top face.
-        /// </summary>
-        Top,
-
-        /// <summary>
-        /// The bottom face.
-        /// </summary>
-        Bottom,
-
-        /// <summary>
-        /// The front face.
-        /// </summary>
-        Front,
-
-        /// <summary>
-        /// The back face.
-        /// </summary>
-        Back
-    }
-
-    /// <summary>
     /// Specifies known vendor IDs.
     /// </summary>
     public enum Vendor {
@@ -2072,409 +4285,115 @@ namespace SharpBgfx {
     }
 
     /// <summary>
-    /// Specifies scaling relative to the size of the backbuffer.
+    /// Specifies data types for vertex attributes.
     /// </summary>
-    public enum BackbufferRatio {
+    public enum VertexAttributeType {
         /// <summary>
-        /// Surface is equal to the backbuffer size.
+        /// One-byte unsigned integer.
         /// </summary>
-        Equal,
+        UInt8,
 
         /// <summary>
-        /// Surface is half the backbuffer size.
+        /// Two-byte signed integer.
+        /// </summary>
+        Int16,
+
+        /// <summary>
+        /// Two-byte float.
         /// </summary>
         Half,
 
         /// <summary>
-        /// Surface is a quater of the backbuffer size.
+        /// Four-byte float.
         /// </summary>
-        Quater,
-
-        /// <summary>
-        /// Surface is an eighth of the backbuffer size.
-        /// </summary>
-        Eighth,
-
-        /// <summary>
-        /// Surface is a sixteenth of the backbuffer size.
-        /// </summary>
-        Sixteenth,
-
-        /// <summary>
-        /// Surface is double the backbuffer size.
-        /// </summary>
-        Double
+        Float
     }
 
     /// <summary>
-    /// Specifies various flags that control vertex and index buffer behavior.
+    /// Specifies vertex attribute usages.
     /// </summary>
-    [Flags]
-    public enum BufferFlags : byte {
+    public enum VertexAttributeUsage {
         /// <summary>
-        /// No flags specified.
+        /// Position data.
         /// </summary>
-        None,
+        Position,
 
         /// <summary>
-        /// Buffer will be read by a compute shader.
+        /// Normals.
         /// </summary>
-        ComputeRead = 0x1,
+        Normal,
 
         /// <summary>
-        /// Buffer will be written into by a compute shader. It cannot be accessed by the CPU.
+        /// Tangents.
         /// </summary>
-        ComputeWrite = 0x2,
+        Tangent,
 
         /// <summary>
-        /// Buffer will resize on update if a different quantity of data is passed. If this flag is not set
-        /// the data will be trimmed to fit in the existing buffer size. Effective only for dynamic buffers.
+        /// Bitangents.
         /// </summary>
-        AllowResize = 0x4,
+        Bitangent,
 
         /// <summary>
-        /// Buffer is using 32-bit indices. Useful only for index buffers.
+        /// First color channel.
         /// </summary>
-        Index32 = 0x8
+        Color0,
+
+        /// <summary>
+        /// Second color channel.
+        /// </summary>
+        Color1,
+
+        /// <summary>
+        /// Indices.
+        /// </summary>
+        Indices,
+
+        /// <summary>
+        /// Animation weights.
+        /// </summary>
+        Weight,
+
+        /// <summary>
+        /// First texture coordinate channel (arbitrary data).
+        /// </summary>
+        TexCoord0,
+
+        /// <summary>
+        /// Second texture coordinate channel (arbitrary data).
+        /// </summary>
+        TexCoord1,
+
+        /// <summary>
+        /// Third texture coordinate channel (arbitrary data).
+        /// </summary>
+        TexCoord2,
+
+        /// <summary>
+        /// Fourth texture coordinate channel (arbitrary data).
+        /// </summary>
+        TexCoord3,
+
+        /// <summary>
+        /// Fifth texture coordinate channel (arbitrary data).
+        /// </summary>
+        TexCoord4,
+
+        /// <summary>
+        /// Sixth texture coordinate channel (arbitrary data).
+        /// </summary>
+        TexCoord5,
+
+        /// <summary>
+        /// Seventh texture coordinate channel (arbitrary data).
+        /// </summary>
+        TexCoord6,
+
+        /// <summary>
+        /// Eighth texture coordinate channel (arbitrary data).
+        /// </summary>
+        TexCoord7
     }
-}
 
-namespace SharpBgfx {
-    /// <summary>
-    /// An aggregated frame buffer, with one or more attached texture surfaces.
-    /// </summary>
-    public unsafe struct FrameBuffer : IDisposable, IEquatable<FrameBuffer> {
-        internal ushort handle;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="FrameBuffer"/> struct.
-        /// </summary>
-        /// <param name="width">The width of the render target.</param>
-        /// <param name="height">The height of the render target.</param>
-        /// <param name="format">The format of the new surface.</param>
-        /// <param name="flags">Texture sampling flags.</param>
-        public FrameBuffer (int width, int height, TextureFormat format, TextureFlags flags = TextureFlags.ClampU | TextureFlags.ClampV) {
-            handle = NativeMethods.bgfx_create_frame_buffer((ushort)width, (ushort)height, format, flags);
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="FrameBuffer"/> struct.
-        /// </summary>
-        /// <param name="ratio">The amount to scale when the backbuffer resizes.</param>
-        /// <param name="format">The format of the new surface.</param>
-        /// <param name="flags">Texture sampling flags.</param>
-        public FrameBuffer (BackbufferRatio ratio, TextureFormat format, TextureFlags flags = TextureFlags.ClampU | TextureFlags.ClampV) {
-            handle = NativeMethods.bgfx_create_frame_buffer_scaled(ratio, format, flags);
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="FrameBuffer"/> struct.
-        /// </summary>
-        /// <param name="attachments">A set of attachments from which to build the frame buffer.</param>
-        /// <param name="destroyTextures">if set to <c>true</c>, attached textures will be destroyed when the frame buffer is destroyed.</param>
-        public FrameBuffer (Texture[] attachments, bool destroyTextures = false) {
-            var count = (byte)attachments.Length;
-            var handles = stackalloc ushort[count];
-            for (int i = 0; i < count; i++)
-                handles[i] = attachments[i].handle;
-
-            handle = NativeMethods.bgfx_create_frame_buffer_from_handles(count, handles, destroyTextures);
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="FrameBuffer"/> struct.
-        /// </summary>
-        /// <param name="windowHandle">The OS window handle to which the frame buffer is attached.</param>
-        /// <param name="width">The width of the render target.</param>
-        /// <param name="height">The height of the render target.</param>
-        /// <param name="depthFormat">A desired format for a depth buffer, if applicable.</param>
-        public FrameBuffer (IntPtr windowHandle, int width, int height, TextureFormat depthFormat = TextureFormat.UnknownDepth) {
-            handle = NativeMethods.bgfx_create_frame_buffer_from_nwh(windowHandle, (ushort)width, (ushort)height, depthFormat);
-        }
-
-        /// <summary>
-        /// Releases the frame buffer.
-        /// </summary>
-        public void Dispose () {
-            NativeMethods.bgfx_destroy_frame_buffer(handle);
-        }
-
-        /// <summary>
-        /// Determines whether the specified object is equal to this instance.
-        /// </summary>
-        /// <param name="other">The object to compare with this instance.</param>
-        /// <returns><c>true</c> if the specified object is equal to this instance; otherwise, <c>false</c>.</returns>
-        public bool Equals (FrameBuffer other) {
-            return handle == other.handle;
-        }
-
-        /// <summary>
-        /// Determines whether the specified <see cref="System.Object" /> is equal to this instance.
-        /// </summary>
-        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
-        /// <returns>
-        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
-        public override bool Equals (object obj) {
-            var other = obj as FrameBuffer?;
-            if (other == null)
-                return false;
-
-            return Equals(other);
-        }
-
-        /// <summary>
-        /// Returns a hash code for this instance.
-        /// </summary>
-        /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
-        /// </returns>
-        public override int GetHashCode () {
-            return handle.GetHashCode();
-        }
-
-        /// <summary>
-        /// Returns a <see cref="System.String"/> that represents this instance.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="System.String"/> that represents this instance.
-        /// </returns>
-        public override string ToString () => $"Handle: {handle}";
-
-        /// <summary>
-        /// Implements the equality operator.
-        /// </summary>
-        /// <param name="left">The left side of the operator.</param>
-        /// <param name="right">The right side of the operator.</param>
-        /// <returns>
-        /// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool operator ==(FrameBuffer left, FrameBuffer right) {
-            return left.Equals(right);
-        }
-
-        /// <summary>
-        /// Implements the inequality operator.
-        /// </summary>
-        /// <param name="left">The left side of the operator.</param>
-        /// <param name="right">The right side of the operator.</param>
-        /// <returns>
-        /// <c>true</c> if the two objects are not equal; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool operator !=(FrameBuffer left, FrameBuffer right) {
-            return !left.Equals(right);
-        }
-    }
-}
-
-namespace SharpBgfx {
-    /// <summary>
-    /// Represents a static index buffer.
-    /// </summary>
-    /// <remarks>Indices are always 16-bits.</remarks>
-    public unsafe struct IndexBuffer : IDisposable, IEquatable<IndexBuffer> {
-        internal ushort handle;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="IndexBuffer"/> struct.
-        /// </summary>
-        /// <param name="memory">The 16-bit index data used to populate the buffer.</param>
-        /// <param name="flags">Flags used to control buffer behavior.</param>
-        public IndexBuffer (MemoryBlock memory, BufferFlags flags = BufferFlags.None) {
-            handle = NativeMethods.bgfx_create_index_buffer(memory.ptr, flags);
-        }
-
-        /// <summary>
-        /// Releases the index buffer.
-        /// </summary>
-        public void Dispose () {
-            NativeMethods.bgfx_destroy_index_buffer(handle);
-        }
-
-        /// <summary>
-        /// Determines whether the specified object is equal to this instance.
-        /// </summary>
-        /// <param name="other">The object to compare with this instance.</param>
-        /// <returns><c>true</c> if the specified object is equal to this instance; otherwise, <c>false</c>.</returns>
-        public bool Equals (IndexBuffer other) {
-            return handle == other.handle;
-        }
-
-        /// <summary>
-        /// Determines whether the specified <see cref="System.Object" /> is equal to this instance.
-        /// </summary>
-        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
-        /// <returns>
-        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
-        public override bool Equals (object obj) {
-            var other = obj as IndexBuffer?;
-            if (other == null)
-                return false;
-
-            return Equals(other);
-        }
-
-        /// <summary>
-        /// Returns a hash code for this instance.
-        /// </summary>
-        /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
-        /// </returns>
-        public override int GetHashCode () {
-            return handle.GetHashCode();
-        }
-
-        /// <summary>
-        /// Returns a <see cref="System.String"/> that represents this instance.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="System.String"/> that represents this instance.
-        /// </returns>
-        public override string ToString () => $"Handle: {handle}";
-
-        /// <summary>
-        /// Implements the equality operator.
-        /// </summary>
-        /// <param name="left">The left side of the operator.</param>
-        /// <param name="right">The right side of the operator.</param>
-        /// <returns>
-        /// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool operator ==(IndexBuffer left, IndexBuffer right) {
-            return left.Equals(right);
-        }
-
-        /// <summary>
-        /// Implements the inequality operator.
-        /// </summary>
-        /// <param name="left">The left side of the operator.</param>
-        /// <param name="right">The right side of the operator.</param>
-        /// <returns>
-        /// <c>true</c> if the two objects are not equal; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool operator !=(IndexBuffer left, IndexBuffer right) {
-            return !left.Equals(right);
-        }
-    }
-}
-
-namespace SharpBgfx {
-    /// <summary>
-    /// Maintains a data buffer that contains instancing data.
-    /// </summary>
-    public unsafe struct InstanceDataBuffer : IEquatable<InstanceDataBuffer> {
-        internal NativeStruct* ptr;
-
-        /// <summary>
-        /// A pointer that can be filled with instance data.
-        /// </summary>
-        public IntPtr Data => ptr->data;
-
-        /// <summary>
-        /// The size of the data buffer.
-        /// </summary>
-        public int Size => ptr->size;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="InstanceDataBuffer" /> struct.
-        /// </summary>
-        /// <param name="count">The number of elements in the buffer.</param>
-        /// <param name="stride">The stride of each element.</param>
-        public InstanceDataBuffer (int count, int stride) {
-            ptr = NativeMethods.bgfx_alloc_instance_data_buffer(count, (ushort)stride);
-        }
-
-        /// <summary>
-        /// Checks for available space to allocate an instance buffer.
-        /// </summary>
-        /// <param name="count">The number of elements to allocate.</param>
-        /// <param name="stride">The stride of each element.</param>
-        /// <returns><c>true</c> if there is space available to allocate the buffer.</returns>
-        public static bool CheckAvailableSpace (int count, int stride) {
-            return NativeMethods.bgfx_check_avail_instance_data_buffer(count, (ushort)stride);
-        }
-
-        /// <summary>
-        /// Determines whether the specified object is equal to this instance.
-        /// </summary>
-        /// <param name="other">The object to compare with this instance.</param>
-        /// <returns><c>true</c> if the specified object is equal to this instance; otherwise, <c>false</c>.</returns>
-        public bool Equals (InstanceDataBuffer other) {
-            return ptr == other.ptr;
-        }
-
-        /// <summary>
-        /// Determines whether the specified <see cref="System.Object" /> is equal to this instance.
-        /// </summary>
-        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
-        /// <returns>
-        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
-        public override bool Equals (object obj) {
-            var other = obj as InstanceDataBuffer?;
-            if (other == null)
-                return false;
-
-            return Equals(other);
-        }
-
-        /// <summary>
-        /// Returns a hash code for this instance.
-        /// </summary>
-        /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
-        /// </returns>
-        public override int GetHashCode () {
-            return new IntPtr(ptr).GetHashCode();
-        }
-
-        /// <summary>
-        /// Returns a <see cref="System.String"/> that represents this instance.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="System.String"/> that represents this instance.
-        /// </returns>
-        public override string ToString () => $"Size: {Size}";
-
-        /// <summary>
-        /// Implements the equality operator.
-        /// </summary>
-        /// <param name="left">The left side of the operator.</param>
-        /// <param name="right">The right side of the operator.</param>
-        /// <returns>
-        /// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool operator ==(InstanceDataBuffer left, InstanceDataBuffer right) {
-            return left.Equals(right);
-        }
-
-        /// <summary>
-        /// Implements the inequality operator.
-        /// </summary>
-        /// <param name="left">The left side of the operator.</param>
-        /// <param name="right">The right side of the operator.</param>
-        /// <returns>
-        /// <c>true</c> if the two objects are not equal; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool operator !=(InstanceDataBuffer left, InstanceDataBuffer right) {
-            return !left.Equals(right);
-        }
-
-#pragma warning disable 649
-        internal struct NativeStruct {
-            public IntPtr data;
-            public int size;
-            public int offset;
-            public ushort stride;
-            public ushort num;
-            public ushort handle;
-        }
-#pragma warning restore 649
-    }
-}
-
-namespace SharpBgfx {
     /// <summary>
     /// Delegate type for callback functions.
     /// </summary>
@@ -2482,178 +4401,6 @@ namespace SharpBgfx {
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public delegate void ReleaseCallback (IntPtr userData);
 
-    /// <summary>
-    /// Represents a block of memory managed by the graphics API.
-    /// </summary>
-    public unsafe struct MemoryBlock : IEquatable<MemoryBlock> {
-        internal DataPtr* ptr;
-
-        /// <summary>
-        /// The pointer to the raw data.
-        /// </summary>
-        public IntPtr Data {
-            get { return ptr == null ? IntPtr.Zero : ptr->Data; }
-        }
-
-        /// <summary>
-        /// The size of the block, in bytes.
-        /// </summary>
-        public int Size {
-            get { return ptr == null ? 0 : ptr->Size; }
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MemoryBlock"/> struct.
-        /// </summary>
-        /// <param name="size">The size of the block, in bytes.</param>
-        public MemoryBlock (int size) {
-            ptr = NativeMethods.bgfx_alloc(size);
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MemoryBlock"/> struct.
-        /// </summary>
-        /// <param name="data">A pointer to the initial data to copy into the new block.</param>
-        /// <param name="size">The size of the block, in bytes.</param>
-        public MemoryBlock (IntPtr data, int size) {
-            ptr = NativeMethods.bgfx_copy(data, size);
-        }
-
-        /// <summary>
-        /// Copies a managed array into a native graphics memory block.
-        /// </summary>
-        /// <typeparam name="T">The type of data in the array.</typeparam>
-        /// <param name="data">The array to copy.</param>
-        /// <returns>The native memory block containing the copied data.</returns>
-        public static MemoryBlock FromArray<T>(T[] data) where T : struct {
-            if (data == null || data.Length == 0)
-                throw new ArgumentNullException(nameof(data));
-
-            var gcHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
-            var block = new MemoryBlock(gcHandle.AddrOfPinnedObject(), Marshal.SizeOf(typeof(T)) * data.Length);
-
-            gcHandle.Free();
-            return block;
-        }
-
-        /// <summary>
-        /// Creates a reference to the given data.
-        /// </summary>
-        /// <typeparam name="T">The type of data in the array.</typeparam>
-        /// <param name="data">The array to reference.</param>
-        /// <returns>The native memory block referring to the data.</returns>
-        /// <remarks>
-        /// The array must not be modified for at least 2 rendered frames.
-        /// </remarks>
-        public static MemoryBlock MakeRef<T>(T[] data) where T : struct {
-            if (data == null || data.Length == 0)
-                throw new ArgumentNullException(nameof(data));
-
-            var gcHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
-            return MakeRef(gcHandle.AddrOfPinnedObject(), Marshal.SizeOf(typeof(T)) * data.Length, GCHandle.ToIntPtr(gcHandle), ReleaseHandleCallback);
-        }
-
-        /// <summary>
-        /// Makes a reference to the given memory block.
-        /// </summary>
-        /// <param name="data">A pointer to the memory.</param>
-        /// <param name="size">The size of the memory block.</param>
-        /// <param name="userData">Arbitrary user data passed to the release callback.</param>
-        /// <param name="callback">A function that will be called when the data is ready to be released.</param>
-        /// <returns>A new memory block referring to the given data.</returns>
-        /// <remarks>
-        /// The memory referred to by the returned memory block must not be modified
-        /// or released until the callback fires.
-        /// </remarks>
-        public static MemoryBlock MakeRef (IntPtr data, int size, IntPtr userData, ReleaseCallback callback) {
-            var result = new MemoryBlock();
-            result.ptr = NativeMethods.bgfx_make_ref_release(data, size, Marshal.GetFunctionPointerForDelegate(callback), userData);
-
-            return result;
-        }
-
-        /// <summary>
-        /// Determines whether the specified object is equal to this instance.
-        /// </summary>
-        /// <param name="other">The object to compare with this instance.</param>
-        /// <returns><c>true</c> if the specified object is equal to this instance; otherwise, <c>false</c>.</returns>
-        public bool Equals (MemoryBlock other) {
-            return ptr == other.ptr;
-        }
-
-        /// <summary>
-        /// Determines whether the specified <see cref="System.Object" /> is equal to this instance.
-        /// </summary>
-        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
-        /// <returns>
-        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
-        public override bool Equals (object obj) {
-            var other = obj as MemoryBlock?;
-            if (other == null)
-                return false;
-
-            return Equals(other);
-        }
-
-        /// <summary>
-        /// Returns a hash code for this instance.
-        /// </summary>
-        /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
-        /// </returns>
-        public override int GetHashCode () {
-            return new IntPtr(ptr).GetHashCode();
-        }
-
-        /// <summary>
-        /// Returns a <see cref="System.String"/> that represents this instance.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="System.String"/> that represents this instance.
-        /// </returns>
-        public override string ToString () => $"Size: {Size}";
-
-        /// <summary>
-        /// Implements the equality operator.
-        /// </summary>
-        /// <param name="left">The left side of the operator.</param>
-        /// <param name="right">The right side of the operator.</param>
-        /// <returns>
-        /// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool operator ==(MemoryBlock left, MemoryBlock right) {
-            return left.Equals(right);
-        }
-
-        /// <summary>
-        /// Implements the inequality operator.
-        /// </summary>
-        /// <param name="left">The left side of the operator.</param>
-        /// <param name="right">The right side of the operator.</param>
-        /// <returns>
-        /// <c>true</c> if the two objects are not equal; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool operator !=(MemoryBlock left, MemoryBlock right) {
-            return !left.Equals(right);
-        }
-
-#pragma warning disable 649
-        internal struct DataPtr {
-            public IntPtr Data;
-            public int Size;
-        }
-#pragma warning restore 649
-
-        static ReleaseCallback ReleaseHandleCallback = ReleaseHandle;
-        static void ReleaseHandle (IntPtr userData) {
-            var handle = GCHandle.FromIntPtr(userData);
-            handle.Free();
-        }
-    }
-}
-
-namespace SharpBgfx {
     [SuppressUnmanagedCodeSecurity]
     unsafe static class NativeMethods {
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
@@ -2971,1789 +4718,3 @@ namespace SharpBgfx {
 #endif
     }
 }
-
-namespace SharpBgfx {
-    /// <summary>
-    /// Contains platform-specific data used to hook into the bgfx library.
-    /// </summary>
-    public struct PlatformData {
-        /// <summary>
-        /// EGL native display type.
-        /// </summary>
-        public IntPtr DisplayType;
-
-        /// <summary>
-        /// Platform window handle.
-        /// </summary>
-        public IntPtr WindowHandle;
-
-        /// <summary>
-        /// Device context to use instead of letting the library create its own.
-        /// </summary>
-        public IntPtr Context;
-
-        /// <summary>
-        /// Backbuffer pointer to use instead of letting the library create its own.
-        /// </summary>
-        public IntPtr Backbuffer;
-    }
-}
-
-namespace SharpBgfx {
-    /// <summary>
-    /// Represents a compiled and linked shader program.
-    /// </summary>
-    public struct Program : IDisposable, IEquatable<Program> {
-        internal ushort handle;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Program"/> struct.
-        /// </summary>
-        /// <param name="vertexShader">The vertex shader.</param>
-        /// <param name="fragmentShader">The fragment shader.</param>
-        /// <param name="destroyShaders">if set to <c>true</c>, the shaders will be released after creating the program.</param>
-        public Program (Shader vertexShader, Shader fragmentShader, bool destroyShaders = false) {
-            handle = NativeMethods.bgfx_create_program(vertexShader.handle, fragmentShader.handle, destroyShaders);
-        }
-
-        /// <summary>
-        /// Releases the program.
-        /// </summary>
-        public void Dispose () {
-            NativeMethods.bgfx_destroy_program(handle);
-        }
-
-        /// <summary>
-        /// Determines whether the specified object is equal to this instance.
-        /// </summary>
-        /// <param name="other">The object to compare with this instance.</param>
-        /// <returns><c>true</c> if the specified object is equal to this instance; otherwise, <c>false</c>.</returns>
-        public bool Equals (Program other) {
-            return handle == other.handle;
-        }
-
-        /// <summary>
-        /// Determines whether the specified <see cref="System.Object" /> is equal to this instance.
-        /// </summary>
-        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
-        /// <returns>
-        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
-        public override bool Equals (object obj) {
-            var other = obj as Program?;
-            if (other == null)
-                return false;
-
-            return Equals(other);
-        }
-
-        /// <summary>
-        /// Returns a hash code for this instance.
-        /// </summary>
-        /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
-        /// </returns>
-        public override int GetHashCode () {
-            return handle.GetHashCode();
-        }
-
-        /// <summary>
-        /// Returns a <see cref="System.String"/> that represents this instance.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="System.String"/> that represents this instance.
-        /// </returns>
-        public override string ToString () => $"Handle: {handle}";
-
-        /// <summary>
-        /// Implements the equality operator.
-        /// </summary>
-        /// <param name="left">The left side of the operator.</param>
-        /// <param name="right">The right side of the operator.</param>
-        /// <returns>
-        /// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool operator ==(Program left, Program right) {
-            return left.Equals(right);
-        }
-
-        /// <summary>
-        /// Implements the inequality operator.
-        /// </summary>
-        /// <param name="left">The left side of the operator.</param>
-        /// <param name="right">The right side of the operator.</param>
-        /// <returns>
-        /// <c>true</c> if the two objects are not equal; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool operator !=(Program left, Program right) {
-            return !left.Equals(right);
-        }
-    }
-}
-
-namespace SharpBgfx {
-    /// <summary>
-    /// Specifies state information used to configure rendering operations.
-    /// </summary>
-    public struct RenderState : IEquatable<RenderState> {
-        const int AlphaRefShift = 40;
-        const int PointSizeShift = 52;
-        const ulong AlphaRefMask = 0x0000ff0000000000;
-        const ulong PointSizeMask = 0x0ff0000000000000;
-
-        ulong value;
-
-        /// <summary>
-        /// No state bits set.
-        /// </summary>
-        public static readonly RenderState None = 0;
-
-        /// <summary>
-        /// Enable writing color data to the framebuffer.
-        /// </summary>
-        public static readonly RenderState ColorWrite = 0x0000000000000001;
-
-        /// <summary>
-        /// Enable writing alpha data to the framebuffer.
-        /// </summary>
-        public static readonly RenderState AlphaWrite = 0x0000000000000002;
-
-        /// <summary>
-        /// Enable writing to the depth buffer.
-        /// </summary>
-        public static readonly RenderState DepthWrite = 0x0000000000000004;
-
-        /// <summary>
-        /// Use a "less than" comparison to pass the depth test.
-        /// </summary>
-        public static readonly RenderState DepthTestLess = 0x0000000000000010;
-
-        /// <summary>
-        /// Use a "less than or equal to" comparison to pass the depth test.
-        /// </summary>
-        public static readonly RenderState DepthTestLessEqual = 0x0000000000000020;
-
-        /// <summary>
-        /// Pass the depth test if both values are equal.
-        /// </summary>
-        public static readonly RenderState DepthTestEqual = 0x0000000000000030;
-
-        /// <summary>
-        /// Use a "greater than or equal to" comparison to pass the depth test.
-        /// </summary>
-        public static readonly RenderState DepthTestGreaterEqual = 0x0000000000000040;
-
-        /// <summary>
-        /// Use a "greater than" comparison to pass the depth test.
-        /// </summary>
-        public static readonly RenderState DepthTestGreater = 0x0000000000000050;
-
-        /// <summary>
-        /// Pass the depth test if both values are not equal.
-        /// </summary>
-        public static readonly RenderState DepthTestNotEqual = 0x0000000000000060;
-
-        /// <summary>
-        /// Never pass the depth test.
-        /// </summary>
-        public static readonly RenderState DepthTestNever = 0x0000000000000070;
-
-        /// <summary>
-        /// Always pass the depth test.
-        /// </summary>
-        public static readonly RenderState DepthTestAlways = 0x0000000000000080;
-
-        /// <summary>
-        /// Use a value of 0 as an input to a blend equation.
-        /// </summary>
-        public static readonly RenderState BlendZero = 0x0000000000001000;
-
-        /// <summary>
-        /// Use a value of 1 as an input to a blend equation.
-        /// </summary>
-        public static readonly RenderState BlendOne = 0x0000000000002000;
-
-        /// <summary>
-        /// Use the source pixel color as an input to a blend equation.
-        /// </summary>
-        public static readonly RenderState BlendSourceColor = 0x0000000000003000;
-
-        /// <summary>
-        /// Use one minus the source pixel color as an input to a blend equation.
-        /// </summary>
-        public static readonly RenderState BlendInverseSourceColor = 0x0000000000004000;
-
-        /// <summary>
-        /// Use the source pixel alpha as an input to a blend equation.
-        /// </summary>
-        public static readonly RenderState BlendSourceAlpha = 0x0000000000005000;
-
-        /// <summary>
-        /// Use one minus the source pixel alpha as an input to a blend equation.
-        /// </summary>
-        public static readonly RenderState BlendInverseSourceAlpha = 0x0000000000006000;
-
-        /// <summary>
-        /// Use the destination pixel alpha as an input to a blend equation.
-        /// </summary>
-        public static readonly RenderState BlendDestinationAlpha = 0x0000000000007000;
-
-        /// <summary>
-        /// Use one minus the destination pixel alpha as an input to a blend equation.
-        /// </summary>
-        public static readonly RenderState BlendInverseDestinationAlpha = 0x0000000000008000;
-
-        /// <summary>
-        /// Use the destination pixel color as an input to a blend equation.
-        /// </summary>
-        public static readonly RenderState BlendDestinationColor = 0x0000000000009000;
-
-        /// <summary>
-        /// Use one minus the destination pixel color as an input to a blend equation.
-        /// </summary>
-        public static readonly RenderState BlendInverseDestinationColor = 0x000000000000a000;
-
-        /// <summary>
-        /// Use the source pixel alpha (saturated) as an input to a blend equation.
-        /// </summary>
-        public static readonly RenderState BlendSourceAlphaSaturate = 0x000000000000b000;
-
-        /// <summary>
-        /// Use an application supplied blending factor as an input to a blend equation.
-        /// </summary>
-        public static readonly RenderState BlendFactor = 0x000000000000c000;
-
-        /// <summary>
-        /// Use one minus an application supplied blending factor as an input to a blend equation.
-        /// </summary>
-        public static readonly RenderState BlendInverseFactor = 0x000000000000d000;
-
-        /// <summary>
-        /// Blend equation: A + B
-        /// </summary>
-        public static readonly RenderState BlendEquationAdd = 0x0000000000000000;
-
-        /// <summary>
-        /// Blend equation: B - A
-        /// </summary>
-        public static readonly RenderState BlendEquationSub = 0x0000000010000000;
-
-        /// <summary>
-        /// Blend equation: A - B
-        /// </summary>
-        public static readonly RenderState BlendEquationReverseSub = 0x0000000020000000;
-
-        /// <summary>
-        /// Blend equation: min(a, b)
-        /// </summary>
-        public static readonly RenderState BlendEquationMin = 0x0000000030000000;
-
-        /// <summary>
-        /// Blend equation: max(a, b)
-        /// </summary>
-        public static readonly RenderState BlendEquationMax = 0x0000000040000000;
-
-        /// <summary>
-        /// Enable independent blending of simultaenous render targets.
-        /// </summary>
-        public static readonly RenderState BlendIndependent = 0x0000000400000000;
-
-        /// <summary>
-        /// Don't perform culling of back faces.
-        /// </summary>
-        public static readonly RenderState NoCulling = 0x0000000000000000;
-
-        /// <summary>
-        /// Perform culling of clockwise faces.
-        /// </summary>
-        public static readonly RenderState CullClockwise = 0x0000001000000000;
-
-        /// <summary>
-        /// Perform culling of counter-clockwise faces.
-        /// </summary>
-        public static readonly RenderState CullCounterclockwise = 0x0000002000000000;
-
-        /// <summary>
-        /// Primitive topology: triangle list.
-        /// </summary>
-        public static readonly RenderState PrimitiveTriangles = 0x0000000000000000;
-
-        /// <summary>
-        /// Primitive topology: triangle strip.
-        /// </summary>
-        public static readonly RenderState PrimitiveTriangleStrip = 0x0001000000000000;
-
-        /// <summary>
-        /// Primitive topology: line list.
-        /// </summary>
-        public static readonly RenderState PrimitiveLines = 0x0002000000000000;
-
-        /// <summary>
-        /// Primitive topology: line strip.
-        /// </summary>
-        public static readonly RenderState PrimitiveLineStrip = 0x0003000000000000;
-
-        /// <summary>
-        /// Primitive topology: point list.
-        /// </summary>
-        public static readonly RenderState PrimitivePoints = 0x0004000000000000;
-
-        /// <summary>
-        /// Enable multisampling.
-        /// </summary>
-        public static readonly RenderState Multisampling = 0x1000000000000000;
-
-        /// <summary>
-        /// Provides a set of sane defaults.
-        /// </summary>
-        public static readonly RenderState Default =
-            ColorWrite |
-            AlphaWrite |
-            DepthWrite |
-            DepthTestLess |
-            CullClockwise |
-            Multisampling;
-
-        /// <summary>
-        /// Predefined blend effect: additive blending.
-        /// </summary>
-        public static readonly RenderState BlendAdd = BlendFunction(RenderState.BlendOne, RenderState.BlendOne);
-
-        /// <summary>
-        /// Predefined blend effect: alpha blending.
-        /// </summary>
-        public static readonly RenderState BlendAlpha = BlendFunction(RenderState.BlendSourceAlpha, RenderState.BlendInverseSourceAlpha);
-
-        /// <summary>
-        /// Predefined blend effect: "darken" blending.
-        /// </summary>
-        public static readonly RenderState BlendDarken = BlendFunction(RenderState.BlendOne, RenderState.BlendOne) | BlendEquation(RenderState.BlendEquationMin);
-
-        /// <summary>
-        /// Predefined blend effect: "lighten" blending.
-        /// </summary>
-        public static readonly RenderState BlendLighten = BlendFunction(RenderState.BlendOne, RenderState.BlendOne) | BlendEquation(RenderState.BlendEquationMax);
-
-        /// <summary>
-        /// Predefined blend effect: multiplicative blending.
-        /// </summary>
-        public static readonly RenderState BlendMultiply = BlendFunction(RenderState.BlendDestinationColor, RenderState.BlendZero);
-
-        /// <summary>
-        /// Predefined blend effect: normal blending based on alpha.
-        /// </summary>
-        public static readonly RenderState BlendNormal = BlendFunction(RenderState.BlendOne, RenderState.BlendInverseSourceAlpha);
-
-        /// <summary>
-        /// Predefined blend effect: "screen" blending.
-        /// </summary>
-        public static readonly RenderState BlendScreen = BlendFunction(RenderState.BlendOne, RenderState.BlendInverseSourceColor);
-
-        /// <summary>
-        /// Predefined blend effect: "linear burn" blending.
-        /// </summary>
-        public static readonly RenderState BlendLinearBurn = BlendFunction(RenderState.BlendDestinationColor, RenderState.BlendInverseDestinationColor) | BlendEquation(RenderState.BlendEquationSub);
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RenderState"/> struct.
-        /// </summary>
-        /// <param name="value">The integer value of the state.</param>
-        public RenderState (long value) {
-            this.value = (ulong)value;
-        }
-
-        /// <summary>
-        /// Encodes an alpha reference value in a render state.
-        /// </summary>
-        /// <param name="alpha">The alpha reference value.</param>
-        /// <returns>The encoded render state.</returns>
-        public static RenderState AlphaRef (byte alpha) => (((ulong)alpha) << AlphaRefShift) & AlphaRefMask;
-
-        /// <summary>
-        /// Encodes a point size value in a render state.
-        /// </summary>
-        /// <param name="size">The point size.</param>
-        /// <returns>The encoded render state.</returns>
-        public static RenderState PointSize (byte size) => (((ulong)size) << PointSizeShift) & PointSizeMask;
-
-        /// <summary>
-        /// Builds a render state for a blend function.
-        /// </summary>
-        /// <param name="source">The source blend operation.</param>
-        /// <param name="destination">The destination blend operation.</param>
-        /// <returns>The render state for the blend function.</returns>
-        public static RenderState BlendFunction (RenderState source, RenderState destination) => BlendFunction(source, destination, source, destination);
-
-        /// <summary>
-        /// Builds a render state for a blend function.
-        /// </summary>
-        /// <param name="sourceColor">The source color blend operation.</param>
-        /// <param name="destinationColor">The destination color blend operation.</param>
-        /// <param name="sourceAlpha">The source alpha blend operation.</param>
-        /// <param name="destinationAlpha">The destination alpha blend operation.</param>
-        /// <returns>
-        /// The render state for the blend function.
-        /// </returns>
-        public static RenderState BlendFunction (RenderState sourceColor, RenderState destinationColor, RenderState sourceAlpha, RenderState destinationAlpha) {
-            return (sourceColor | (destinationColor << 4)) | ((sourceAlpha | (destinationAlpha << 4)) << 8);
-        }
-
-        /// <summary>
-        /// Builds a render state for a blend equation.
-        /// </summary>
-        /// <param name="equation">The equation.</param>
-        /// <returns>
-        /// The render state for the blend equation.
-        /// </returns>
-        public static RenderState BlendEquation (RenderState equation) => BlendEquation(equation, equation);
-
-        /// <summary>
-        /// Builds a render state for a blend equation.
-        /// </summary>
-        /// <param name="sourceEquation">The source equation.</param>
-        /// <param name="alphaEquation">The alpha equation.</param>
-        /// <returns>
-        /// The render state for the blend equation.
-        /// </returns>
-        public static RenderState BlendEquation (RenderState sourceEquation, RenderState alphaEquation) => sourceEquation | (alphaEquation << 3);
-
-        /// <summary>
-        /// Returns a hash code for this instance.
-        /// </summary>
-        /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
-        /// </returns>
-        public override int GetHashCode () => value.GetHashCode();
-
-        /// <summary>
-        /// Determines whether the specific value is equal to this instance.
-        /// </summary>
-        /// <param name="other">The value to compare with this instance.</param>
-        /// <returns><c>true</c> if the value is equal to this instance; otherwise, <c>false</c>.</returns>
-        public bool Equals (RenderState other) => value == other.value;
-
-        /// <summary>
-        /// Determines whether the specified <see cref="System.Object" /> is equal to this instance.
-        /// </summary>
-        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
-        /// <returns>
-        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
-        public override bool Equals (object obj) {
-            var state = obj as RenderState?;
-            if (state == null)
-                return false;
-
-            return Equals(state);
-        }
-
-        /// <summary>
-        /// Implements the equality operator.
-        /// </summary>
-        /// <param name="left">The left side of the operator.</param>
-        /// <param name="right">The right side of the operator.</param>
-        /// <returns>
-        /// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool operator ==(RenderState left, RenderState right) => left.Equals(right);
-
-        /// <summary>
-        /// Implements the inequality operator.
-        /// </summary>
-        /// <param name="left">The left side of the operator.</param>
-        /// <param name="right">The right side of the operator.</param>
-        /// <returns>
-        /// <c>true</c> if the two objects are not equal; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool operator !=(RenderState left, RenderState right) => !left.Equals(right);
-
-        /// <summary>
-        /// Performs an implicit conversion from ulong.
-        /// </summary>
-        /// <param name="value">The value to convert.</param>
-        [CLSCompliant(false)]
-        public static implicit operator RenderState (ulong value) => new RenderState((long)value);
-
-        /// <summary>
-        /// Performs an explicit conversion to ulong.
-        /// </summary>
-        /// <param name="state">The value to convert.</param>
-        [CLSCompliant(false)]
-        public static explicit operator ulong (RenderState state) => state.value;
-
-        /// <summary>
-        /// Implements the bitwise-or operator.
-        /// </summary>
-        /// <param name="left">The left side of the operator.</param>
-        /// <param name="right">The right side of the operator.</param>
-        /// <returns>
-        /// The result of the operator.
-        /// </returns>
-        public static RenderState operator |(RenderState left, RenderState right) => left.value | right.value;
-
-        /// <summary>
-        /// Implements the bitwise-and operator.
-        /// </summary>
-        /// <param name="left">The left side of the operator.</param>
-        /// <param name="right">The right side of the operator.</param>
-        /// <returns>
-        /// The result of the operator.
-        /// </returns>
-        public static RenderState operator &(RenderState left, RenderState right) => left.value & right.value;
-
-        /// <summary>
-        /// Implements the bitwise-complement operator.
-        /// </summary>
-        /// <param name="state">The operand.</param>
-        /// <returns>
-        /// The result of the operator.
-        /// </returns>
-        public static RenderState operator ~(RenderState state) => ~state.value;
-
-        /// <summary>
-        /// Implements the left shift operator.
-        /// </summary>
-        /// <param name="state">The value to shift.</param>
-        /// <param name="amount">The amount to shift.</param>
-        /// <returns>
-        /// The result of the operator.
-        /// </returns>
-        public static RenderState operator <<(RenderState state, int amount) => state.value << amount;
-
-        /// <summary>
-        /// Implements the right shift operator.
-        /// </summary>
-        /// <param name="state">The value to shift.</param>
-        /// <param name="amount">The amount to shift.</param>
-        /// <returns>
-        /// The result of the operator.
-        /// </returns>
-        public static RenderState operator >>(RenderState state, int amount) => state.value >> amount;
-    }
-}
-
-namespace SharpBgfx {
-    /// <summary>
-    /// Represents a single compiled shader component.
-    /// </summary>
-    public unsafe struct Shader : IDisposable, IEquatable<Shader> {
-        Uniform[] uniforms;
-        internal ushort handle;
-
-        /// <summary>
-        /// The set of uniforms exposed by the shader.
-        /// </summary>
-        public IReadOnlyList<Uniform> Uniforms {
-            get {
-                if (uniforms == null) {
-                    var count = NativeMethods.bgfx_get_shader_uniforms(handle, null, 0);
-                    uniforms = new Uniform[count];
-                    NativeMethods.bgfx_get_shader_uniforms(handle, uniforms, count);
-                }
-
-                return uniforms;
-            }
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Shader"/> struct.
-        /// </summary>
-        /// <param name="memory">The compiled shader memory.</param>
-        public Shader (MemoryBlock memory) {
-            handle = NativeMethods.bgfx_create_shader(memory.ptr);
-            uniforms = null;
-        }
-
-        /// <summary>
-        /// Releases the shader.
-        /// </summary>
-        public void Dispose () {
-            NativeMethods.bgfx_destroy_shader(handle);
-        }
-
-        /// <summary>
-        /// Determines whether the specified object is equal to this instance.
-        /// </summary>
-        /// <param name="other">The object to compare with this instance.</param>
-        /// <returns><c>true</c> if the specified object is equal to this instance; otherwise, <c>false</c>.</returns>
-        public bool Equals (Shader other) {
-            return handle == other.handle;
-        }
-
-        /// <summary>
-        /// Determines whether the specified <see cref="System.Object" /> is equal to this instance.
-        /// </summary>
-        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
-        /// <returns>
-        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
-        public override bool Equals (object obj) {
-            var other = obj as Shader?;
-            if (other == null)
-                return false;
-
-            return Equals(other);
-        }
-
-        /// <summary>
-        /// Returns a hash code for this instance.
-        /// </summary>
-        /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
-        /// </returns>
-        public override int GetHashCode () {
-            return handle.GetHashCode();
-        }
-
-        /// <summary>
-        /// Returns a <see cref="System.String"/> that represents this instance.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="System.String"/> that represents this instance.
-        /// </returns>
-        public override string ToString () => $"Handle: {handle}";
-
-        /// <summary>
-        /// Implements the equality operator.
-        /// </summary>
-        /// <param name="left">The left side of the operator.</param>
-        /// <param name="right">The right side of the operator.</param>
-        /// <returns>
-        /// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool operator ==(Shader left, Shader right) {
-            return left.Equals(right);
-        }
-
-        /// <summary>
-        /// Implements the inequality operator.
-        /// </summary>
-        /// <param name="left">The left side of the operator.</param>
-        /// <param name="right">The right side of the operator.</param>
-        /// <returns>
-        /// <c>true</c> if the two objects are not equal; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool operator !=(Shader left, Shader right) {
-            return !left.Equals(right);
-        }
-    }
-}
-
-namespace SharpBgfx {
-    /// <summary>
-    /// Specifies state information used to configure rendering operations.
-    /// </summary>
-    public struct StencilFlags : IEquatable<StencilFlags> {
-        const int ReadMaskShift = 8;
-        const uint RefMask = 0x000000ff;
-        const uint ReadMaskMask = 0x0000ff00;
-
-        uint value;
-
-        /// <summary>
-        /// No state bits set.
-        /// </summary>
-        public static readonly StencilFlags None = 0;
-
-        /// <summary>
-        /// Perform a "less than" stencil test.
-        /// </summary>
-        public static readonly StencilFlags TestLess = 0x00010000;
-
-        /// <summary>
-        /// Perform a "less than or equal" stencil test.
-        /// </summary>
-        public static readonly StencilFlags TestLessEqual = 0x00020000;
-
-        /// <summary>
-        /// Perform an equality stencil test.
-        /// </summary>
-        public static readonly StencilFlags TestEqual = 0x00030000;
-
-        /// <summary>
-        /// Perform a "greater than or equal" stencil test.
-        /// </summary>
-        public static readonly StencilFlags TestGreaterEqual = 0x00040000;
-
-        /// <summary>
-        /// Perform a "greater than" stencil test.
-        /// </summary>
-        public static readonly StencilFlags TestGreater = 0x00050000;
-
-        /// <summary>
-        /// Perform an inequality stencil test.
-        /// </summary>
-        public static readonly StencilFlags TestNotEqual = 0x00060000;
-
-        /// <summary>
-        /// Never pass the stencil test.
-        /// </summary>
-        public static readonly StencilFlags TestNever = 0x00070000;
-
-        /// <summary>
-        /// Always pass the stencil test.
-        /// </summary>
-        public static readonly StencilFlags TestAlways = 0x00080000;
-
-        /// <summary>
-        /// On failing the stencil test, zero out the stencil value.
-        /// </summary>
-        public static readonly StencilFlags FailSZero = 0x00000000;
-
-        /// <summary>
-        /// On failing the stencil test, keep the old stencil value.
-        /// </summary>
-        public static readonly StencilFlags FailSKeep = 0x00100000;
-
-        /// <summary>
-        /// On failing the stencil test, replace the stencil value.
-        /// </summary>
-        public static readonly StencilFlags FailSReplace = 0x00200000;
-
-        /// <summary>
-        /// On failing the stencil test, increment the stencil value.
-        /// </summary>
-        public static readonly StencilFlags FailSIncrement = 0x00300000;
-
-        /// <summary>
-        /// On failing the stencil test, increment the stencil value (with saturation).
-        /// </summary>
-        public static readonly StencilFlags FailSIncrementSaturate = 0x00400000;
-
-        /// <summary>
-        /// On failing the stencil test, decrement the stencil value.
-        /// </summary>
-        public static readonly StencilFlags FailSDecrement = 0x00500000;
-
-        /// <summary>
-        /// On failing the stencil test, decrement the stencil value (with saturation).
-        /// </summary>
-        public static readonly StencilFlags FailSDecrementSaturate = 0x00600000;
-
-        /// <summary>
-        /// On failing the stencil test, invert the stencil value.
-        /// </summary>
-        public static readonly StencilFlags FailSInvert = 0x00700000;
-
-        /// <summary>
-        /// On failing the stencil test, zero out the depth value.
-        /// </summary>
-        public static readonly StencilFlags FailZZero = 0x00000000;
-
-        /// <summary>
-        /// On failing the stencil test, keep the depth value.
-        /// </summary>
-        public static readonly StencilFlags FailZKeep = 0x01000000;
-
-        /// <summary>
-        /// On failing the stencil test, replace the depth value.
-        /// </summary>
-        public static readonly StencilFlags FailZReplace = 0x02000000;
-
-        /// <summary>
-        /// On failing the stencil test, increment the depth value.
-        /// </summary>
-        public static readonly StencilFlags FailZIncrement = 0x03000000;
-
-        /// <summary>
-        /// On failing the stencil test, increment the depth value (with saturation).
-        /// </summary>
-        public static readonly StencilFlags FailZIncrementSaturate = 0x04000000;
-
-        /// <summary>
-        /// On failing the stencil test, decrement the depth value.
-        /// </summary>
-        public static readonly StencilFlags FailZDecrement = 0x05000000;
-
-        /// <summary>
-        /// On failing the stencil test, decrement the depth value (with saturation).
-        /// </summary>
-        public static readonly StencilFlags FailZDecrementSaturate = 0x06000000;
-
-        /// <summary>
-        /// On failing the stencil test, invert the depth value.
-        /// </summary>
-        public static readonly StencilFlags FailZInvert = 0x07000000;
-
-        /// <summary>
-        /// On passing the stencil test, zero out the depth value.
-        /// </summary>
-        public static readonly StencilFlags PassZZero = 0x00000000;
-
-        /// <summary>
-        /// On passing the stencil test, keep the old depth value.
-        /// </summary>
-        public static readonly StencilFlags PassZKeep = 0x10000000;
-
-        /// <summary>
-        /// On passing the stencil test, replace the depth value.
-        /// </summary>
-        public static readonly StencilFlags PassZReplace = 0x20000000;
-
-        /// <summary>
-        /// On passing the stencil test, increment the depth value.
-        /// </summary>
-        public static readonly StencilFlags PassZIncrement = 0x30000000;
-
-        /// <summary>
-        /// On passing the stencil test, increment the depth value (with saturation).
-        /// </summary>
-        public static readonly StencilFlags PassZIncrementSaturate = 0x40000000;
-
-        /// <summary>
-        /// On passing the stencil test, decrement the depth value.
-        /// </summary>
-        public static readonly StencilFlags PassZDecrement = 0x50000000;
-
-        /// <summary>
-        /// On passing the stencil test, decrement the depth value (with saturation).
-        /// </summary>
-        public static readonly StencilFlags PassZDecrementSaturate = 0x60000000;
-
-        /// <summary>
-        /// On passing the stencil test, invert the depth value.
-        /// </summary>
-        public static readonly StencilFlags PassZInvert = 0x70000000;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StencilFlags"/> struct.
-        /// </summary>
-        /// <param name="value">The integer value of the state.</param>
-        public StencilFlags (int value) {
-            this.value = (uint)value;
-        }
-
-        /// <summary>
-        /// Encodes a reference value in a stencil state.
-        /// </summary>
-        /// <param name="reference">The stencil reference value.</param>
-        /// <returns>The encoded stencil state.</returns>
-        public static StencilFlags ReferenceValue (byte reference) => reference & RefMask;
-
-        /// <summary>
-        /// Encodes a read mask in a stencil state.
-        /// </summary>
-        /// <param name="mask">The mask.</param>
-        /// <returns>
-        /// The encoded stencil state.
-        /// </returns>
-        public static StencilFlags ReadMask (byte mask) => (((uint)mask) << ReadMaskShift) & ReadMaskMask;
-
-        /// <summary>
-        /// Returns a hash code for this instance.
-        /// </summary>
-        /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
-        /// </returns>
-        public override int GetHashCode () => value.GetHashCode();
-
-        /// <summary>
-        /// Determines whether the specific value is equal to this instance.
-        /// </summary>
-        /// <param name="other">The value to compare with this instance.</param>
-        /// <returns><c>true</c> if the value is equal to this instance; otherwise, <c>false</c>.</returns>
-        public bool Equals (StencilFlags other) => value == other.value;
-
-        /// <summary>
-        /// Determines whether the specified <see cref="System.Object" /> is equal to this instance.
-        /// </summary>
-        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
-        /// <returns>
-        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
-        public override bool Equals (object obj) {
-            var state = obj as StencilFlags?;
-            if (state == null)
-                return false;
-
-            return Equals(state);
-        }
-
-        /// <summary>
-        /// Implements the equality operator.
-        /// </summary>
-        /// <param name="left">The left side of the operator.</param>
-        /// <param name="right">The right side of the operator.</param>
-        /// <returns>
-        /// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool operator ==(StencilFlags left, StencilFlags right) => left.Equals(right);
-
-        /// <summary>
-        /// Implements the inequality operator.
-        /// </summary>
-        /// <param name="left">The left side of the operator.</param>
-        /// <param name="right">The right side of the operator.</param>
-        /// <returns>
-        /// <c>true</c> if the two objects are not equal; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool operator !=(StencilFlags left, StencilFlags right) => !left.Equals(right);
-
-        /// <summary>
-        /// Performs an implicit conversion from uint.
-        /// </summary>
-        /// <param name="value">The value to convert.</param>
-        [CLSCompliant(false)]
-        public static implicit operator StencilFlags (uint value) => new StencilFlags((int)value);
-
-        /// <summary>
-        /// Performs an explicit conversion to uint.
-        /// </summary>
-        /// <param name="state">The value to convert.</param>
-        [CLSCompliant(false)]
-        public static explicit operator uint (StencilFlags state) => state.value;
-
-        /// <summary>
-        /// Implements the bitwise-or operator.
-        /// </summary>
-        /// <param name="left">The left side of the operator.</param>
-        /// <param name="right">The right side of the operator.</param>
-        /// <returns>
-        /// The result of the operator.
-        /// </returns>
-        public static StencilFlags operator |(StencilFlags left, StencilFlags right) => left.value | right.value;
-
-        /// <summary>
-        /// Implements the bitwise-and operator.
-        /// </summary>
-        /// <param name="left">The left side of the operator.</param>
-        /// <param name="right">The right side of the operator.</param>
-        /// <returns>
-        /// The result of the operator.
-        /// </returns>
-        public static StencilFlags operator &(StencilFlags left, StencilFlags right) => left.value & right.value;
-
-        /// <summary>
-        /// Implements the bitwise-complement operator.
-        /// </summary>
-        /// <param name="state">The operand.</param>
-        /// <returns>
-        /// The result of the operator.
-        /// </returns>
-        public static StencilFlags operator ~(StencilFlags state) => ~state.value;
-
-        /// <summary>
-        /// Implements the left shift operator.
-        /// </summary>
-        /// <param name="state">The value to shift.</param>
-        /// <param name="amount">The amount to shift.</param>
-        /// <returns>
-        /// The result of the operator.
-        /// </returns>
-        public static StencilFlags operator <<(StencilFlags state, int amount) => state.value << amount;
-
-        /// <summary>
-        /// Implements the right shift operator.
-        /// </summary>
-        /// <param name="state">The value to shift.</param>
-        /// <param name="amount">The amount to shift.</param>
-        /// <returns>
-        /// The result of the operator.
-        /// </returns>
-        public static StencilFlags operator >>(StencilFlags state, int amount) => state.value >> amount;
-    }
-}
-
-namespace SharpBgfx {
-    /// <summary>
-    /// Represents a loaded texture.
-    /// </summary>
-    public unsafe sealed class Texture : IDisposable, IEquatable<Texture> {
-        internal ushort handle;
-
-        /// <summary>
-        /// The width of the texture.
-        /// </summary>
-        public int Width { get; }
-
-        /// <summary>
-        /// The height of the texture.
-        /// </summary>
-        public int Height { get; }
-
-        /// <summary>
-        /// The depth of the texture, if 3D.
-        /// </summary>
-        public int Depth { get; }
-
-        /// <summary>
-        /// Indicates whether the texture is a cubemap.
-        /// </summary>
-        public bool IsCubeMap { get; }
-
-        /// <summary>
-        /// The number of mip levels in the texture.
-        /// </summary>
-        public int MipLevels { get; }
-
-        /// <summary>
-        /// The number of bits per pixel.
-        /// </summary>
-        public int BitsPerPixel { get; }
-
-        /// <summary>
-        /// The size of the entire texture, in bytes.
-        /// </summary>
-        public int SizeInBytes { get; }
-
-        /// <summary>
-        /// The format of the image data.
-        /// </summary>
-        public TextureFormat Format { get; }
-
-        Texture (ushort handle, ref TextureInfo info) {
-            this.handle = handle;
-
-            Width = info.Width;
-            Height = info.Height;
-            Depth = info.Depth;
-            MipLevels = info.MipCount;
-            BitsPerPixel = info.BitsPerPixel;
-            SizeInBytes = info.StorageSize;
-            Format = info.Format;
-            IsCubeMap = info.IsCubeMap;
-        }
-
-        /// <summary>
-        /// Creates a new texture from a file loaded in memory.
-        /// </summary>
-        /// <param name="memory">The content of the file.</param>
-        /// <param name="flags">Flags that control texture behavior.</param>
-        /// <param name="skipMips">A number of top level mips to skip when parsing texture data.</param>
-        /// <returns>The newly created texture.</returns>
-        /// <remarks>
-        /// This function supports textures in the following container formats:
-        /// - DDS
-        /// - KTX
-        /// - PVR
-        /// </remarks>
-        public static Texture FromFile (MemoryBlock memory, TextureFlags flags = TextureFlags.None, int skipMips = 0) {
-            TextureInfo info;
-            var handle = NativeMethods.bgfx_create_texture(memory.ptr, flags, (byte)skipMips, out info);
-
-            return new Texture(handle, ref info);
-        }
-
-        /// <summary>
-        /// Creates a new 2D texture.
-        /// </summary>
-        /// <param name="width">The width of the texture.</param>
-        /// <param name="height">The height of the texture.</param>
-        /// <param name="mipCount">The number of mip levels.</param>
-        /// <param name="format">The format of the texture data.</param>
-        /// <param name="flags">Flags that control texture behavior.</param>
-        /// <param name="memory">If not <c>null</c>, contains the texture's image data.</param>
-        /// <returns>
-        /// The newly created texture handle.
-        /// </returns>
-        public static Texture Create2D (int width, int height, int mipCount, TextureFormat format, TextureFlags flags = TextureFlags.None, MemoryBlock? memory = null) {
-            var info = new TextureInfo();
-            NativeMethods.bgfx_calc_texture_size(ref info, (ushort)width, (ushort)height, 1, false, (byte)mipCount, format);
-
-            var handle = NativeMethods.bgfx_create_texture_2d(info.Width, info.Height, info.MipCount, format, flags, memory == null ? null : memory.Value.ptr);
-            return new Texture(handle, ref info);
-        }
-
-        /// <summary>
-        /// Creates a new 2D texture that scales with backbuffer size.
-        /// </summary>
-        /// <param name="ratio">The amount to scale when the backbuffer resizes.</param>
-        /// <param name="mipCount">The number of mip levels.</param>
-        /// <param name="format">The format of the texture data.</param>
-        /// <param name="flags">Flags that control texture behavior.</param>
-        /// <returns>
-        /// The newly created texture handle.
-        /// </returns>
-        public static Texture Create2D (BackbufferRatio ratio, int mipCount, TextureFormat format, TextureFlags flags = TextureFlags.None) {
-            var info = new TextureInfo();
-            info.Format = format;
-            info.MipCount = (byte)mipCount;
-
-            var handle = NativeMethods.bgfx_create_texture_2d_scaled(ratio, info.MipCount, format, flags);
-            return new Texture(handle, ref info);
-        }
-
-        /// <summary>
-        /// Creates a new 3D texture.
-        /// </summary>
-        /// <param name="width">The width of the texture.</param>
-        /// <param name="height">The height of the texture.</param>
-        /// <param name="depth">The depth of the texture.</param>
-        /// <param name="mipCount">The number of mip levels.</param>
-        /// <param name="format">The format of the texture data.</param>
-        /// <param name="flags">Flags that control texture behavior.</param>
-        /// <param name="memory">If not <c>null</c>, contains the texture's image data.</param>
-        /// <returns>The newly created texture handle.</returns>
-        public static Texture Create3D (int width, int height, int depth, int mipCount, TextureFormat format, TextureFlags flags = TextureFlags.None, MemoryBlock? memory = null) {
-            var info = new TextureInfo();
-            NativeMethods.bgfx_calc_texture_size(ref info, (ushort)width, (ushort)height, (ushort)depth, false, (byte)mipCount, format);
-
-            var handle = NativeMethods.bgfx_create_texture_3d(info.Width, info.Height, info.Depth, info.MipCount, format, flags, memory == null ? null : memory.Value.ptr);
-            return new Texture(handle, ref info);
-        }
-
-        /// <summary>
-        /// Creates a new cube texture.
-        /// </summary>
-        /// <param name="size">The size of each cube face.</param>
-        /// <param name="mipCount">The number of mip levels.</param>
-        /// <param name="format">The format of the texture data.</param>
-        /// <param name="flags">Flags that control texture behavior.</param>
-        /// <param name="memory">If not <c>null</c>, contains the texture's image data.</param>
-        /// <returns>
-        /// The newly created texture handle.
-        /// </returns>
-        public static Texture CreateCube (int size, int mipCount, TextureFormat format, TextureFlags flags = TextureFlags.None, MemoryBlock? memory = null) {
-            var info = new TextureInfo();
-            NativeMethods.bgfx_calc_texture_size(ref info, (ushort)size, (ushort)size, 1, true, (byte)mipCount, format);
-
-            var handle = NativeMethods.bgfx_create_texture_cube(info.Width, info.MipCount, format, flags, memory == null ? null : memory.Value.ptr);
-            return new Texture(handle, ref info);
-        }
-
-        /// <summary>
-        /// Releases the texture.
-        /// </summary>
-        public void Dispose () => NativeMethods.bgfx_destroy_texture(handle);
-
-        /// <summary>
-        /// Updates the data in a 2D texture.
-        /// </summary>
-        /// <param name="mipLevel">The mip level.</param>
-        /// <param name="x">The X coordinate of the rectangle to update.</param>
-        /// <param name="y">The Y coordinate of the rectangle to update.</param>
-        /// <param name="width">The width of the rectangle to update.</param>
-        /// <param name="height">The height of the rectangle to update.</param>
-        /// <param name="memory">The new image data.</param>
-        /// <param name="pitch">The pitch of the image data.</param>
-        public void Update2D (int mipLevel, int x, int y, int width, int height, MemoryBlock memory, int pitch) {
-            NativeMethods.bgfx_update_texture_2d(handle, (byte)mipLevel, (ushort)x, (ushort)y, (ushort)width, (ushort)height, memory.ptr, (ushort)pitch);
-        }
-
-        /// <summary>
-        /// Updates the data in a 3D texture.
-        /// </summary>
-        /// <param name="mipLevel">The mip level.</param>
-        /// <param name="x">The X coordinate of the volume to update.</param>
-        /// <param name="y">The Y coordinate of the volume to update.</param>
-        /// <param name="z">The Z coordinate of the volume to update.</param>
-        /// <param name="width">The width of the volume to update.</param>
-        /// <param name="height">The height of the volume to update.</param>
-        /// <param name="depth">The depth of the volume to update.</param>
-        /// <param name="memory">The new image data.</param>
-        public void Update3D (int mipLevel, int x, int y, int z, int width, int height, int depth, MemoryBlock memory) {
-            NativeMethods.bgfx_update_texture_3d(handle, (byte)mipLevel, (ushort)x, (ushort)y, (ushort)z, (ushort)width, (ushort)height, (ushort)depth, memory.ptr);
-        }
-
-        /// <summary>
-        /// Updates the data in a cube texture.
-        /// </summary>
-        /// <param name="face">The cube map face to update.</param>
-        /// <param name="mipLevel">The mip level.</param>
-        /// <param name="x">The X coordinate of the rectangle to update.</param>
-        /// <param name="y">The Y coordinate of the rectangle to update.</param>
-        /// <param name="width">The width of the rectangle to update.</param>
-        /// <param name="height">The height of the rectangle to update.</param>
-        /// <param name="memory">The new image data.</param>
-        /// <param name="pitch">The pitch of the image data.</param>
-        public void UpdateCube (CubeMapFace face, int mipLevel, int x, int y, int width, int height, MemoryBlock memory, int pitch) {
-            NativeMethods.bgfx_update_texture_cube(handle, face, (byte)mipLevel, (ushort)x, (ushort)y, (ushort)width, (ushort)height, memory.ptr, (ushort)pitch);
-        }
-
-        /// <summary>
-        /// Determines whether the specified object is equal to this instance.
-        /// </summary>
-        /// <param name="other">The object to compare with this instance.</param>
-        /// <returns><c>true</c> if the specified object is equal to this instance; otherwise, <c>false</c>.</returns>
-        public bool Equals (Texture other) {
-            if (ReferenceEquals(other, null))
-                return false;
-
-            if (ReferenceEquals(other, this))
-                return true;
-
-            return handle == other.handle;
-        }
-
-        /// <summary>
-        /// Determines whether the specified <see cref="System.Object" /> is equal to this instance.
-        /// </summary>
-        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
-        /// <returns>
-        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
-        public override bool Equals (object obj) {
-            return Equals(obj as Texture);
-        }
-
-        /// <summary>
-        /// Returns a hash code for this instance.
-        /// </summary>
-        /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
-        /// </returns>
-        public override int GetHashCode () {
-            return handle.GetHashCode();
-        }
-
-        /// <summary>
-        /// Returns a <see cref="System.String"/> that represents this instance.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="System.String"/> that represents this instance.
-        /// </returns>
-        public override string ToString () => $"Handle: {handle}";
-
-        /// <summary>
-        /// Implements the equality operator.
-        /// </summary>
-        /// <param name="left">The left side of the operator.</param>
-        /// <param name="right">The right side of the operator.</param>
-        /// <returns>
-        /// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool operator ==(Texture left, Texture right) {
-            if (ReferenceEquals(left, null))
-                return ReferenceEquals(right, null);
-
-            return left.Equals(right);
-        }
-
-        /// <summary>
-        /// Implements the inequality operator.
-        /// </summary>
-        /// <param name="left">The left side of the operator.</param>
-        /// <param name="right">The right side of the operator.</param>
-        /// <returns>
-        /// <c>true</c> if the two objects are not equal; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool operator !=(Texture left, Texture right) {
-            return !(left == right);
-        }
-
-        internal struct TextureInfo {
-            public TextureFormat Format;
-            public int StorageSize;
-            public ushort Width;
-            public ushort Height;
-            public ushort Depth;
-            public byte MipCount;
-            public byte BitsPerPixel;
-            public bool IsCubeMap;
-        }
-    }
-}
-
-namespace SharpBgfx {
-	/// <summary>
-	/// Maintains a transient index buffer.
-	/// </summary>
-	/// <remarks>
-	/// The contents of the buffer are valid for the current frame only.
-	/// You must call SetVertexBuffer with the buffer or a leak could occur.
-	/// </remarks>
-	public unsafe struct TransientIndexBuffer : IEquatable<TransientIndexBuffer> {
-		IntPtr data;
-		int size;
-		int startIndex;
-		ushort handle;
-
-		/// <summary>
-		/// A pointer that can be filled with index data.
-		/// </summary>
-		public IntPtr Data => data;
-
-        /// <summary>
-        /// The size of the buffer.
-        /// </summary>
-        public int Count => size;
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="TransientIndexBuffer"/> struct.
-		/// </summary>
-		/// <param name="indexCount">The number of 16-bit indices that fit in the buffer.</param>
-		public TransientIndexBuffer (int indexCount) {
-			NativeMethods.bgfx_alloc_transient_index_buffer(out this, indexCount);
-		}
-
-        /// <summary>
-        /// Check if there is available space in the global transient index buffer.
-        /// </summary>
-        /// <param name="count">The number of 16-bit indices to allocate.</param>
-        /// <returns><c>true</c> if there is sufficient space for the give number of indices.</returns>
-        public static bool CheckAvailableSpace (int count) {
-            return NativeMethods.bgfx_check_avail_transient_index_buffer(count);
-        }
-
-		/// <summary>
-		/// Determines whether the specified object is equal to this instance.
-		/// </summary>
-		/// <param name="other">The object to compare with this instance.</param>
-		/// <returns><c>true</c> if the specified object is equal to this instance; otherwise, <c>false</c>.</returns>
-		public bool Equals (TransientIndexBuffer other) {
-			return handle == other.handle && data == other.data;
-		}
-
-		/// <summary>
-		/// Determines whether the specified <see cref="System.Object" /> is equal to this instance.
-		/// </summary>
-		/// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
-		/// <returns>
-		///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
-		/// </returns>
-		public override bool Equals (object obj) {
-			var other = obj as TransientIndexBuffer?;
-			if (other == null)
-				return false;
-
-			return Equals(other);
-		}
-
-		/// <summary>
-		/// Returns a hash code for this instance.
-		/// </summary>
-		/// <returns>
-		/// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
-		/// </returns>
-		public override int GetHashCode () {
-			return handle.GetHashCode() >> 13 ^ data.GetHashCode();
-		}
-
-        /// <summary>
-        /// Returns a <see cref="System.String"/> that represents this instance.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="System.String"/> that represents this instance.
-        /// </returns>
-        public override string ToString () => $"Count: {Count}";
-
-        /// <summary>
-        /// Implements the equality operator.
-        /// </summary>
-        /// <param name="left">The left side of the operator.</param>
-        /// <param name="right">The right side of the operator.</param>
-        /// <returns>
-        /// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool operator ==(TransientIndexBuffer left, TransientIndexBuffer right) {
-			return left.Equals(right);
-		}
-
-		/// <summary>
-		/// Implements the inequality operator.
-		/// </summary>
-		/// <param name="left">The left side of the operator.</param>
-		/// <param name="right">The right side of the operator.</param>
-		/// <returns>
-		/// <c>true</c> if the two objects are not equal; otherwise, <c>false</c>.
-		/// </returns>
-		public static bool operator !=(TransientIndexBuffer left, TransientIndexBuffer right) {
-			return !left.Equals(right);
-		}
-	}
-}
-
-namespace SharpBgfx {
-	/// <summary>
-	/// Maintains a transient vertex buffer.
-	/// </summary>
-	/// <remarks>
-	/// The contents of the buffer are valid for the current frame only.
-	/// You must call SetVertexBuffer with the buffer or a leak could occur.
-	/// </remarks>
-	public unsafe struct TransientVertexBuffer : IEquatable<TransientVertexBuffer> {
-		IntPtr data;
-		int size;
-		int startVertex;
-		ushort stride;
-		ushort handle;
-		ushort decl;
-
-		/// <summary>
-		/// A pointer that can be filled with vertex data.
-		/// </summary>
-		public IntPtr Data => data;
-
-		/// <summary>
-		/// The size of the buffer.
-		/// </summary>
-		public int Count => size;
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="TransientVertexBuffer"/> struct.
-		/// </summary>
-		/// <param name="vertexCount">The number of vertices that fit in the buffer.</param>
-		/// <param name="layout">The layout of the vertex data.</param>
-		public TransientVertexBuffer (int vertexCount, VertexLayout layout) {
-			NativeMethods.bgfx_alloc_transient_vertex_buffer(out this, vertexCount, ref layout.data);
-		}
-
-		/// <summary>
-		/// Check if there is available space in the global transient vertex buffer.
-		/// </summary>
-		/// <param name="count">The number of vertices to allocate.</param>
-		/// <param name="layout">The layout of each vertex.</param>
-		/// <returns>
-		///   <c>true</c> if there is sufficient space for the give number of vertices.
-		/// </returns>
-		public static bool CheckAvailableSpace (int count, VertexLayout layout) {
-			return NativeMethods.bgfx_check_avail_transient_vertex_buffer(count, ref layout.data);
-		}
-
-		/// <summary>
-		/// Determines whether the specified object is equal to this instance.
-		/// </summary>
-		/// <param name="other">The object to compare with this instance.</param>
-		/// <returns><c>true</c> if the specified object is equal to this instance; otherwise, <c>false</c>.</returns>
-		public bool Equals (TransientVertexBuffer other) {
-			return handle == other.handle && data == other.data;
-		}
-
-		/// <summary>
-		/// Determines whether the specified <see cref="System.Object" /> is equal to this instance.
-		/// </summary>
-		/// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
-		/// <returns>
-		///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
-		/// </returns>
-		public override bool Equals (object obj) {
-			var other = obj as TransientVertexBuffer?;
-			if (other == null)
-				return false;
-
-			return Equals(other);
-		}
-
-		/// <summary>
-		/// Returns a hash code for this instance.
-		/// </summary>
-		/// <returns>
-		/// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
-		/// </returns>
-		public override int GetHashCode () {
-			return handle.GetHashCode() >> 13 ^ data.GetHashCode();
-		}
-
-        /// <summary>
-        /// Returns a <see cref="System.String"/> that represents this instance.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="System.String"/> that represents this instance.
-        /// </returns>
-        public override string ToString () => $"Count: {Count}";
-
-        /// <summary>
-        /// Implements the equality operator.
-        /// </summary>
-        /// <param name="left">The left side of the operator.</param>
-        /// <param name="right">The right side of the operator.</param>
-        /// <returns>
-        /// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool operator ==(TransientVertexBuffer left, TransientVertexBuffer right) {
-			return left.Equals(right);
-		}
-
-		/// <summary>
-		/// Implements the inequality operator.
-		/// </summary>
-		/// <param name="left">The left side of the operator.</param>
-		/// <param name="right">The right side of the operator.</param>
-		/// <returns>
-		/// <c>true</c> if the two objects are not equal; otherwise, <c>false</c>.
-		/// </returns>
-		public static bool operator !=(TransientVertexBuffer left, TransientVertexBuffer right) {
-			return !left.Equals(right);
-		}
-	}
-}
-
-namespace SharpBgfx {
-    /// <summary>
-    /// Represents a shader uniform.
-    /// </summary>
-    public struct Uniform : IDisposable, IEquatable<Uniform> {
-        internal ushort handle;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Uniform"/> struct.
-        /// </summary>
-        /// <param name="name">The name of the uniform.</param>
-        /// <param name="type">The type of data represented by the uniform.</param>
-        /// <param name="arraySize">Size of the array, if the uniform is an array type.</param>
-        /// <remarks>
-        /// Predefined uniform names:
-        /// u_viewRect vec4(x, y, width, height) - view rectangle for current view.
-        /// u_viewTexel vec4 (1.0/width, 1.0/height, undef, undef) - inverse width and height
-        /// u_view mat4 - view matrix
-        /// u_invView mat4 - inverted view matrix
-        /// u_proj mat4 - projection matrix
-        /// u_invProj mat4 - inverted projection matrix
-        /// u_viewProj mat4 - concatenated view projection matrix
-        /// u_invViewProj mat4 - concatenated inverted view projection matrix
-        /// u_model mat4[BGFX_CONFIG_MAX_BONES] - array of model matrices.
-        /// u_modelView mat4 - concatenated model view matrix, only first model matrix from array is used.
-        /// u_modelViewProj mat4 - concatenated model view projection matrix.
-        /// u_alphaRef float - alpha reference value for alpha test.
-        /// </remarks>
-        public Uniform (string name, UniformType type, int arraySize = 1) {
-            handle = NativeMethods.bgfx_create_uniform(name, type, (ushort)arraySize);
-        }
-
-        /// <summary>
-        /// Releases the uniform.
-        /// </summary>
-        public void Dispose () {
-            NativeMethods.bgfx_destroy_uniform(handle);
-        }
-
-        /// <summary>
-        /// Determines whether the specified object is equal to this instance.
-        /// </summary>
-        /// <param name="other">The object to compare with this instance.</param>
-        /// <returns><c>true</c> if the specified object is equal to this instance; otherwise, <c>false</c>.</returns>
-        public bool Equals (Uniform other) {
-            return handle == other.handle;
-        }
-
-        /// <summary>
-        /// Determines whether the specified <see cref="System.Object" /> is equal to this instance.
-        /// </summary>
-        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
-        /// <returns>
-        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
-        public override bool Equals (object obj) {
-            var other = obj as Uniform?;
-            if (other == null)
-                return false;
-
-            return Equals(other);
-        }
-
-        /// <summary>
-        /// Returns a hash code for this instance.
-        /// </summary>
-        /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
-        /// </returns>
-        public override int GetHashCode () {
-            return handle.GetHashCode();
-        }
-
-        /// <summary>
-        /// Returns a <see cref="System.String"/> that represents this instance.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="System.String"/> that represents this instance.
-        /// </returns>
-        public override string ToString () => $"Handle: {handle}";
-
-        /// <summary>
-        /// Implements the equality operator.
-        /// </summary>
-        /// <param name="left">The left side of the operator.</param>
-        /// <param name="right">The right side of the operator.</param>
-        /// <returns>
-        /// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool operator ==(Uniform left, Uniform right) {
-            return left.Equals(right);
-        }
-
-        /// <summary>
-        /// Implements the inequality operator.
-        /// </summary>
-        /// <param name="left">The left side of the operator.</param>
-        /// <param name="right">The right side of the operator.</param>
-        /// <returns>
-        /// <c>true</c> if the two objects are not equal; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool operator !=(Uniform left, Uniform right) {
-            return !left.Equals(right);
-        }
-    }
-}
-
-namespace SharpBgfx {
-    /// <summary>
-    /// Represents a static vertex buffer.
-    /// </summary>
-    public unsafe struct VertexBuffer : IDisposable, IEquatable<VertexBuffer> {
-        internal ushort handle;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="VertexBuffer"/> struct.
-        /// </summary>
-        /// <param name="memory">The vertex data with which to populate the buffer.</param>
-        /// <param name="layout">The layout of the vertex data.</param>
-        /// <param name="flags">Flags used to control buffer behavior.</param>
-        public VertexBuffer (MemoryBlock memory, VertexLayout layout, BufferFlags flags = BufferFlags.None) {
-            handle = NativeMethods.bgfx_create_vertex_buffer(memory.ptr, ref layout.data, flags);
-        }
-
-        /// <summary>
-        /// Releases the vertex buffer.
-        /// </summary>
-        public void Dispose () {
-            NativeMethods.bgfx_destroy_vertex_buffer(handle);
-        }
-
-        /// <summary>
-        /// Determines whether the specified object is equal to this instance.
-        /// </summary>
-        /// <param name="other">The object to compare with this instance.</param>
-        /// <returns><c>true</c> if the specified object is equal to this instance; otherwise, <c>false</c>.</returns>
-        public bool Equals (VertexBuffer other) {
-            return handle == other.handle;
-        }
-
-        /// <summary>
-        /// Determines whether the specified <see cref="System.Object" /> is equal to this instance.
-        /// </summary>
-        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
-        /// <returns>
-        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
-        public override bool Equals (object obj) {
-            var other = obj as VertexBuffer?;
-            if (other == null)
-                return false;
-
-            return Equals(other);
-        }
-
-        /// <summary>
-        /// Returns a hash code for this instance.
-        /// </summary>
-        /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
-        /// </returns>
-        public override int GetHashCode () {
-            return handle.GetHashCode();
-        }
-
-        /// <summary>
-        /// Returns a <see cref="System.String"/> that represents this instance.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="System.String"/> that represents this instance.
-        /// </returns>
-        public override string ToString () => $"Handle: {handle}";
-
-        /// <summary>
-        /// Implements the equality operator.
-        /// </summary>
-        /// <param name="left">The left side of the operator.</param>
-        /// <param name="right">The right side of the operator.</param>
-        /// <returns>
-        /// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool operator ==(VertexBuffer left, VertexBuffer right) {
-            return left.Equals(right);
-        }
-
-        /// <summary>
-        /// Implements the inequality operator.
-        /// </summary>
-        /// <param name="left">The left side of the operator.</param>
-        /// <param name="right">The right side of the operator.</param>
-        /// <returns>
-        /// <c>true</c> if the two objects are not equal; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool operator !=(VertexBuffer left, VertexBuffer right) {
-            return !left.Equals(right);
-        }
-    }
-}
-
-namespace SharpBgfx {
-	/// <summary>
-	/// Describes the layout of data in a vertex stream.
-	/// </summary>
-	public sealed class VertexLayout {
-		internal Data data;
-
-		/// <summary>
-		/// The stride of a single vertex using this layout.
-		/// </summary>
-		public int Stride {
-			get { return data.Stride; }
-		}
-
-        /// <summary>
-        /// Starts a stream of vertex attribute additions to the layout.
-        /// </summary>
-        /// <param name="backend">The rendering backend with which to associate the attributes.</param>
-        /// <returns>This instance, for use in a fluent API.</returns>
-        public VertexLayout Begin (RendererBackend backend = RendererBackend.Null) {
-            NativeMethods.bgfx_vertex_decl_begin(ref data, backend);
-            return this;
-        }
-
-        /// <summary>
-        /// Starts a stream of vertex attribute additions to the layout.
-        /// </summary>
-        /// <param name="attribute">The kind of attribute to add.</param>
-        /// <param name="count">The number of elements in the attribute (1, 2, 3, or 4).</param>
-        /// <param name="type">The type of data described by the attribute.</param>
-        /// <param name="normalized">if set to <c>true</c>, values will be normalized from a 0-255 range to 0.0 - 0.1 in the shader.</param>
-        /// <param name="asInt">if set to <c>true</c>, the attribute is packaged as an integer in the shader.</param>
-        /// <returns>
-        /// This instance, for use in a fluent API.
-        /// </returns>
-        public VertexLayout Add (VertexAttributeUsage attribute, int count, VertexAttributeType type, bool normalized = false, bool asInt = false) {
-            NativeMethods.bgfx_vertex_decl_add(ref data, attribute, (byte)count, type, normalized, asInt);
-            return this;
-        }
-
-        /// <summary>
-        /// Skips the specified number of bytes in the vertex stream.
-        /// </summary>
-        /// <param name="count">The number of bytes to skip.</param>
-        /// <returns>This instance, for use in a fluent API.</returns>
-        public VertexLayout Skip (int count) {
-            NativeMethods.bgfx_vertex_decl_skip(ref data, (byte)count);
-            return this;
-        }
-
-		/// <summary>
-		/// Marks the end of the vertex stream.
-		/// </summary>
-		/// <returns>This instance, for use in a fluent API.</returns>
-		public VertexLayout End () {
-            NativeMethods.bgfx_vertex_decl_end(ref data);
-			return this;
-        }
-
-        /// <summary>
-        /// Gets the byte offset of a particular attribute in the layout.
-        /// </summary>
-        /// <param name="attribute">The attribute for which to get the offset.</param>
-        /// <returns>The offset of the attribute, in bytes.</returns>
-        public unsafe int GetOffset (VertexAttributeUsage attribute) {
-            fixed (Data* ptr = &data)
-                return ptr->Offset[(int)attribute];
-        }
-
-        /// <summary>
-        /// Determines whether the layout contains the given attribute.
-        /// </summary>
-        /// <param name="attribute">The attribute to check/</param>
-        /// <returns><c>true</c> if the layout contains the attribute; otherwise, <c>false</c>.</returns>
-        public unsafe bool HasAttribute (VertexAttributeUsage attribute) {
-            fixed (Data* ptr = &data)
-                return ptr->Attributes[(int)attribute] != 0xff;
-        }
-
-        internal unsafe struct Data {
-            const int MaxAttribCount = 16;
-
-            public uint Hash;
-            public ushort Stride;
-            public fixed ushort Offset[MaxAttribCount];
-            public fixed byte Attributes[MaxAttribCount];
-        }
-    }
-}
-
