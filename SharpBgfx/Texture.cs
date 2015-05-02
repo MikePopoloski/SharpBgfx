@@ -5,7 +5,7 @@ namespace SharpBgfx {
     /// Represents a loaded texture.
     /// </summary>
     public unsafe sealed class Texture : IDisposable, IEquatable<Texture> {
-        internal ushort handle;
+        internal readonly ushort handle;
 
         /// <summary>
         /// The width of the texture.
@@ -111,9 +111,10 @@ namespace SharpBgfx {
         /// The newly created texture handle.
         /// </returns>
         public static Texture Create2D (BackbufferRatio ratio, int mipCount, TextureFormat format, TextureFlags flags = TextureFlags.None) {
-            var info = new TextureInfo();
-            info.Format = format;
-            info.MipCount = (byte)mipCount;
+            var info = new TextureInfo {
+                Format = format,
+                MipCount = (byte)mipCount
+            };
 
             var handle = NativeMethods.bgfx_create_texture_2d_scaled(ratio, info.MipCount, format, flags);
             return new Texture(handle, ref info);
@@ -236,7 +237,7 @@ namespace SharpBgfx {
         /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
         /// </returns>
         public override int GetHashCode () {
             return handle.GetHashCode();

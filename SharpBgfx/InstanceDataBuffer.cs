@@ -5,7 +5,7 @@ namespace SharpBgfx {
     /// Maintains a data buffer that contains instancing data.
     /// </summary>
     public unsafe struct InstanceDataBuffer : IEquatable<InstanceDataBuffer> {
-        internal NativeStruct* ptr;
+        internal readonly NativeStruct* ptr;
 
         /// <summary>
         /// A pointer that can be filled with instance data.

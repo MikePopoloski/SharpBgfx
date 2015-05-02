@@ -10,7 +10,7 @@ namespace SharpBgfx {
         const ulong AlphaRefMask = 0x0000ff0000000000;
         const ulong PointSizeMask = 0x0ff0000000000000;
 
-        ulong value;
+        readonly ulong value;
 
         /// <summary>
         /// No state bits set.
@@ -226,42 +226,42 @@ namespace SharpBgfx {
         /// <summary>
         /// Predefined blend effect: additive blending.
         /// </summary>
-        public static readonly RenderState BlendAdd = BlendFunction(RenderState.BlendOne, RenderState.BlendOne);
+        public static readonly RenderState BlendAdd = BlendFunction(BlendOne, BlendOne);
 
         /// <summary>
         /// Predefined blend effect: alpha blending.
         /// </summary>
-        public static readonly RenderState BlendAlpha = BlendFunction(RenderState.BlendSourceAlpha, RenderState.BlendInverseSourceAlpha);
+        public static readonly RenderState BlendAlpha = BlendFunction(BlendSourceAlpha, BlendInverseSourceAlpha);
 
         /// <summary>
         /// Predefined blend effect: "darken" blending.
         /// </summary>
-        public static readonly RenderState BlendDarken = BlendFunction(RenderState.BlendOne, RenderState.BlendOne) | BlendEquation(RenderState.BlendEquationMin);
+        public static readonly RenderState BlendDarken = BlendFunction(BlendOne, BlendOne) | BlendEquation(BlendEquationMin);
 
         /// <summary>
         /// Predefined blend effect: "lighten" blending.
         /// </summary>
-        public static readonly RenderState BlendLighten = BlendFunction(RenderState.BlendOne, RenderState.BlendOne) | BlendEquation(RenderState.BlendEquationMax);
+        public static readonly RenderState BlendLighten = BlendFunction(BlendOne, BlendOne) | BlendEquation(BlendEquationMax);
 
         /// <summary>
         /// Predefined blend effect: multiplicative blending.
         /// </summary>
-        public static readonly RenderState BlendMultiply = BlendFunction(RenderState.BlendDestinationColor, RenderState.BlendZero);
+        public static readonly RenderState BlendMultiply = BlendFunction(BlendDestinationColor, BlendZero);
 
         /// <summary>
         /// Predefined blend effect: normal blending based on alpha.
         /// </summary>
-        public static readonly RenderState BlendNormal = BlendFunction(RenderState.BlendOne, RenderState.BlendInverseSourceAlpha);
+        public static readonly RenderState BlendNormal = BlendFunction(BlendOne, BlendInverseSourceAlpha);
 
         /// <summary>
         /// Predefined blend effect: "screen" blending.
         /// </summary>
-        public static readonly RenderState BlendScreen = BlendFunction(RenderState.BlendOne, RenderState.BlendInverseSourceColor);
+        public static readonly RenderState BlendScreen = BlendFunction(BlendOne, BlendInverseSourceColor);
 
         /// <summary>
         /// Predefined blend effect: "linear burn" blending.
         /// </summary>
-        public static readonly RenderState BlendLinearBurn = BlendFunction(RenderState.BlendDestinationColor, RenderState.BlendInverseDestinationColor) | BlendEquation(RenderState.BlendEquationSub);
+        public static readonly RenderState BlendLinearBurn = BlendFunction(BlendDestinationColor, BlendInverseDestinationColor) | BlendEquation(BlendEquationSub);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RenderState"/> struct.

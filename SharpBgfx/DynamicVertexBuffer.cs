@@ -5,7 +5,7 @@ namespace SharpBgfx {
     /// Represents a dynamically updateable vertex buffer.
     /// </summary>
     public unsafe struct DynamicVertexBuffer : IDisposable, IEquatable<DynamicVertexBuffer> {
-        internal ushort handle;
+        internal readonly ushort handle;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DynamicVertexBuffer"/> struct.

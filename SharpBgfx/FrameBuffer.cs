@@ -5,7 +5,7 @@ namespace SharpBgfx {
     /// An aggregated frame buffer, with one or more attached texture surfaces.
     /// </summary>
     public unsafe struct FrameBuffer : IDisposable, IEquatable<FrameBuffer> {
-        internal ushort handle;
+        internal readonly ushort handle;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FrameBuffer"/> struct.

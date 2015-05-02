@@ -9,7 +9,7 @@ namespace SharpBgfx {
         const uint RefMask = 0x000000ff;
         const uint ReadMaskMask = 0x0000ff00;
 
-        uint value;
+        readonly uint value;
 
         /// <summary>
         /// No state bits set.

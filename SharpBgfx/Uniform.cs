@@ -5,7 +5,7 @@ namespace SharpBgfx {
     /// Represents a shader uniform.
     /// </summary>
     public struct Uniform : IDisposable, IEquatable<Uniform> {
-        internal ushort handle;
+        internal readonly ushort handle;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Uniform"/> struct.

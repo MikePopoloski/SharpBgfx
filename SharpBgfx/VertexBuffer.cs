@@ -5,7 +5,7 @@ namespace SharpBgfx {
     /// Represents a static vertex buffer.
     /// </summary>
     public unsafe struct VertexBuffer : IDisposable, IEquatable<VertexBuffer> {
-        internal ushort handle;
+        internal readonly ushort handle;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="VertexBuffer"/> struct.

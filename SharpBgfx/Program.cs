@@ -5,7 +5,7 @@ namespace SharpBgfx {
     /// Represents a compiled and linked shader program.
     /// </summary>
     public struct Program : IDisposable, IEquatable<Program> {
-        internal ushort handle;
+        internal readonly ushort handle;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Program"/> struct.

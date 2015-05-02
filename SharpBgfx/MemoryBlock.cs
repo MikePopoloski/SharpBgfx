@@ -13,7 +13,7 @@ namespace SharpBgfx {
     /// Represents a block of memory managed by the graphics API.
     /// </summary>
     public unsafe struct MemoryBlock : IEquatable<MemoryBlock> {
-        internal DataPtr* ptr;
+        internal readonly DataPtr* ptr;
 
         /// <summary>
         /// The pointer to the raw data.
@@ -27,6 +27,10 @@ namespace SharpBgfx {
         /// </summary>
         public int Size {
             get { return ptr == null ? 0 : ptr->Size; }
+        }
+
+        MemoryBlock (DataPtr* ptr) {
+            this.ptr = ptr;
         }
 
         /// <summary>
@@ -93,10 +97,7 @@ namespace SharpBgfx {
         /// or released until the callback fires.
         /// </remarks>
         public static MemoryBlock MakeRef (IntPtr data, int size, IntPtr userData, ReleaseCallback callback) {
-            var result = new MemoryBlock();
-            result.ptr = NativeMethods.bgfx_make_ref_release(data, size, Marshal.GetFunctionPointerForDelegate(callback), userData);
-
-            return result;
+            return new MemoryBlock(NativeMethods.bgfx_make_ref_release(data, size, Marshal.GetFunctionPointerForDelegate(callback), userData));
         }
 
         /// <summary>
@@ -127,7 +128,7 @@ namespace SharpBgfx {
         /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
         /// </returns>
         public override int GetHashCode () {
             return new IntPtr(ptr).GetHashCode();

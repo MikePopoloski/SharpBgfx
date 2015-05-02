@@ -9,10 +9,10 @@ namespace SharpBgfx {
 	/// You must call SetVertexBuffer with the buffer or a leak could occur.
 	/// </remarks>
 	public unsafe struct TransientIndexBuffer : IEquatable<TransientIndexBuffer> {
-		IntPtr data;
+        readonly IntPtr data;
 		int size;
 		int startIndex;
-		ushort handle;
+        readonly ushort handle;
 
 		/// <summary>
 		/// A pointer that can be filled with index data.

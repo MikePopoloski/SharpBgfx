@@ -7,7 +7,7 @@ namespace SharpBgfx {
     /// </summary>
     public unsafe struct Shader : IDisposable, IEquatable<Shader> {
         Uniform[] uniforms;
-        internal ushort handle;
+        internal readonly ushort handle;
 
         /// <summary>
         /// The set of uniforms exposed by the shader.
