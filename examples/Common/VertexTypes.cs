@@ -33,11 +33,11 @@ namespace Common {
         float x;
         float y;
         float z;
-        int normal;
+        uint normal;
         float u;
         float v;
 
-        public PosNormalTexcoordVertex (float x, float y, float z, int normal, float u, float v) {
+        public PosNormalTexcoordVertex (float x, float y, float z, uint normal, float u, float v) {
             this.x = x;
             this.y = y;
             this.z = z;

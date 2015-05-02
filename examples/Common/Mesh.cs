@@ -1,84 +1,105 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.Collections.ObjectModel;
-//using System.IO;
-//using System.Linq;
-//using System.Text;
-//using SharpBgfx;
-//using SlimMath;
+﻿using SharpBgfx;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Numerics;
 
-//namespace Common {
-//    public interface IUniformGroup {
-//        void SubmitPerDrawUniforms();
-//    }
+namespace Common {
+    public interface IUniformGroup {
+        void SubmitPerDrawUniforms ();
+    }
 
-//    public class Mesh : IDisposable {
-//        VertexDeclaration vertexDecl;
-//        List<MeshGroup> groups;
+    public class RenderStateGroup {
+        public RenderState State;
+        public uint BlendFactorRgba;
+        public StencilFlags FrontFace;
+        public StencilFlags BackFace;
 
-//        public Mesh (MemoryBuffer vertices, VertexDeclaration decl, ushort[] indices) {
-//            var group = new MeshGroup();
-//            group.VertexBuffer = Bgfx.CreateVertexBuffer(vertices, decl);
-//            group.IndexBuffer = Bgfx.CreateIndexBuffer(MemoryBuffer.FromArray(indices));
+        public RenderStateGroup (RenderState state, uint blendFactor, StencilFlags frontFace, StencilFlags backFace) {
+            State = state;
+            BlendFactorRgba = blendFactor;
+            FrontFace = frontFace;
+            BackFace = backFace;
+        }
+    }
 
-//            vertexDecl = decl;
-//            groups = new List<MeshGroup> { group };
-//        }
+    public class Mesh : IDisposable {
+        VertexLayout vertexDecl;
+        List<MeshGroup> groups;
 
-//        internal Mesh (VertexDeclaration decl, List<MeshGroup> groups) {
-//            vertexDecl = decl;
-//            this.groups = groups;
-//        }
+        public Mesh (MemoryBlock vertices, VertexLayout decl, ushort[] indices) {
+            var group = new MeshGroup();
+            group.VertexBuffer = new VertexBuffer(vertices, decl);
+            group.IndexBuffer = new IndexBuffer(MemoryBlock.FromArray(indices));
 
-//        public unsafe void Submit (byte viewId, ProgramHandle program, Matrix transform, RenderState state, IUniformGroup uniforms) {
-//            foreach (var group in groups) {
-//                if (uniforms != null)
-//                    uniforms.SubmitPerDrawUniforms();
+            vertexDecl = decl;
+            groups = new List<MeshGroup> { group };
+        }
 
-//                Bgfx.SetTransform(&transform.M11, 1);
-//                Bgfx.SetProgram(program);
-//                Bgfx.SetIndexBuffer(group.IndexBuffer, 0, -1);
-//                Bgfx.SetVertexBuffer(group.VertexBuffer, 0, -1);
-//                Bgfx.SetRenderState(state, 0);
-//                Bgfx.Submit(viewId, 0);
-//            }
-//        }
+        internal Mesh (VertexLayout decl, List<MeshGroup> groups) {
+            vertexDecl = decl;
+            this.groups = groups;
+        }
 
-//        public void Dispose () {
-//            foreach (var group in groups) {
-//                Bgfx.DestroyVertexBuffer(group.VertexBuffer);
-//                Bgfx.DestroyIndexBuffer(group.IndexBuffer);
-//            }
+        public unsafe void Submit (byte viewId, Program program, Matrix4x4* transform, RenderStateGroup renderStateGroup, IUniformGroup uniforms) {
+            Submit(viewId, program, transform, renderStateGroup, uniforms, null, default(Uniform));
+        }
 
-//            groups.Clear();
-//        }
-//    }
+        public unsafe void Submit (byte viewId, Program program, Matrix4x4* transform, RenderStateGroup renderStateGroup, IUniformGroup uniforms, Texture texture, Uniform textureSampler) {
+            foreach (var group in groups) {
+                if (uniforms != null)
+                    uniforms.SubmitPerDrawUniforms();
 
-//    class MeshGroup {
-//        public VertexBufferHandle VertexBuffer {
-//            get;
-//            set;
-//        }
+                if (texture != null)
+                    Bgfx.SetTexture(0, textureSampler, texture);
 
-//        public IndexBufferHandle IndexBuffer {
-//            get;
-//            set;
-//        }
+                Bgfx.SetTransform((float*)transform);
+                Bgfx.SetProgram(program);
+                Bgfx.SetIndexBuffer(group.IndexBuffer);
+                Bgfx.SetVertexBuffer(group.VertexBuffer);
+                Bgfx.SetRenderState(renderStateGroup.State, (int)renderStateGroup.BlendFactorRgba);
+                Bgfx.SetStencil(renderStateGroup.FrontFace, renderStateGroup.BackFace);
+                Bgfx.Submit(viewId);
+            }
+        }
 
-//        public Collection<Primitive> Primitives {
-//            get;
-//            private set;
-//        }
+        public void Dispose () {
+            foreach (var group in groups) {
+                group.VertexBuffer.Dispose();
+                group.IndexBuffer.Dispose();
+            }
 
-//        public MeshGroup () {
-//            Primitives = new Collection<Primitive>();
-//        }
-//    }
+            groups.Clear();
+        }
+    }
 
-//    struct Primitive {
-//        public int StartIndex;
-//        public int IndexCount;
-//        public int StartVertex;
-//        public int VertexCount;
-//    }
-//}
+    class MeshGroup {
+        public VertexBuffer VertexBuffer {
+            get;
+            set;
+        }
+
+        public IndexBuffer IndexBuffer {
+            get;
+            set;
+        }
+
+        public Collection<Primitive> Primitives {
+            get;
+            private set;
+        }
+
+        public MeshGroup () {
+            Primitives = new Collection<Primitive>();
+        }
+    }
+
+#pragma warning disable 649  // Field 'Primitive.StartIndex' is never assigned to, and will always have its default value 0
+    struct Primitive {
+        public int StartIndex;
+        public int IndexCount;
+        public int StartVertex;
+        public int VertexCount;
+    }
+#pragma warning restore 649
+}

@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
 
 class Camera {
     Matrix4x4 projection;
@@ -36,5 +33,9 @@ class Camera {
 
     public Matrix4x4 GetViewMatrix () {
         return Matrix4x4.CreateLookAt(Position, target, up);
+    }
+
+    public Matrix4x4 GetProjectionMatrix () {
+        return projection;
     }
 }

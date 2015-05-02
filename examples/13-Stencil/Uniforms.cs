@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
+﻿using Common;
 using SharpBgfx;
-using Common;
+using System;
+using System.Numerics;
 
-unsafe class Uniforms : IDisposable {
+unsafe class Uniforms : IDisposable, IUniformGroup {
     const int MaxLights = 5;
 
     Uniform parametersHandle;
@@ -33,15 +30,13 @@ unsafe class Uniforms : IDisposable {
         set;
     }
 
-    public Color4 Color {
+    public Vector4 Color {
         get;
         set;
     }
 
-    public Lights Lights {
-        get;
-        set;
-    }
+    public Vector4[] LightPosRadius { get; set; }
+    public Vector4[] LightColor { get; set; }
 
     public Uniforms () {
         parametersHandle = new Uniform("u_params", UniformType.Float4Array);
@@ -52,22 +47,32 @@ unsafe class Uniforms : IDisposable {
         timeHandle = new Uniform("u_time", UniformType.Float);
         lightPosRadiusHandle = new Uniform("u_lightPosRadius", UniformType.Float4Array, MaxLights);
         lightRgbInnerRHandle = new Uniform("u_lightRgbInnerR", UniformType.Float4Array, MaxLights);
+
+        LightPosRadius = new Vector4[MaxLights];
+        LightColor = new Vector4[MaxLights];
+        for (int i = 0; i < MaxLights; i++) {
+            LightPosRadius[i] = new Vector4(0.0f, 0.0f, 0.0f, 1.0f);
+            LightColor[i] = new Vector4(1.0f);
+        }
+
+        Color = new Vector4(1.0f);
     }
 
-    public void SetConstUniforms () {
-        var color = new Vector4(0.02f, 0.02f, 0.02f, 0.0f);
+    public void SubmitConstUniforms () {
+        var ambient = new Vector4(0.02f, 0.02f, 0.02f, 0.0f);
+        var diffuse = new Vector4(0.2f, 0.2f, 0.2f, 0.0f);
         var shininess = new Vector4(1.0f, 1.0f, 1.0f, 10.0f);
 
-        Bgfx.SetUniform(ambientHandle, &color);
-        Bgfx.SetUniform(diffuseHandle, &color);
+        Bgfx.SetUniform(ambientHandle, &ambient);
+        Bgfx.SetUniform(diffuseHandle, &diffuse);
         Bgfx.SetUniform(specularHandle, &shininess);
     }
 
-    public void SetPerFrameUniforms (float time) {
+    public void SubmitPerFrameUniforms (float time) {
         Bgfx.SetUniform(timeHandle, time);
     }
 
-    public void SetPerDrawUniforms () {
+    public void SubmitPerDrawUniforms () {
         var color = Color;
         var param = new Vector4(
             AmbientPass ? 1.0f : 0.0f,
@@ -78,6 +83,11 @@ unsafe class Uniforms : IDisposable {
 
         Bgfx.SetUniform(parametersHandle, &param);
         Bgfx.SetUniform(colorHandle, &color);
+
+        fixed (Vector4* ptr = LightPosRadius)
+            Bgfx.SetUniform(lightPosRadiusHandle, ptr, MaxLights);
+        fixed (Vector4* ptr = LightColor)
+            Bgfx.SetUniform(lightRgbInnerRHandle, ptr, MaxLights);
     }
 
     public void Dispose () {

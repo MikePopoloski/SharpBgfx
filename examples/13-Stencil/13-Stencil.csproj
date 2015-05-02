@@ -46,10 +46,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Camera.cs" />
-    <Compile Include="Lights.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RenderStateGroup.cs" />
     <Compile Include="StaticMeshes.cs" />
     <Compile Include="Uniforms.cs" />
   </ItemGroup>
