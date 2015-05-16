@@ -24,5 +24,10 @@ namespace SharpBgfx {
         /// Backbuffer pointer to use instead of letting the library create its own.
         /// </summary>
         public IntPtr Backbuffer;
+
+        /// <summary>
+        /// Depth-stencil pointer to use instead of letting the library create its own.
+        /// </summary>
+        public IntPtr BackbufferDepthStencil;
     }
 }

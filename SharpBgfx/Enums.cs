@@ -33,7 +33,12 @@ namespace SharpBgfx {
         /// <summary>
         /// OpenGL
         /// </summary>
-        OpenGL
+        OpenGL,
+
+        /// <summary>
+        /// Vulkan
+        /// </summary>
+        Vulkan
     }
 
     /// <summary>
@@ -512,9 +517,19 @@ namespace SharpBgfx {
         HeadMountedDisplayRecenter = 0x1000,
 
         /// <summary>
+        /// Flush all commands to the device after rendering.
+        /// </summary>
+        FlushAfterRender = 0x2000,
+
+        /// <summary>
         /// Flip the backbuffer immediately after rendering for reduced latency.
         /// </summary>
-        FlipAfterRender = 0x2000
+        FlipAfterRender = 0x4000,
+
+        /// <summary>
+        /// Write data to the backbuffer in non-linear sRGB format.
+        /// </summary>
+        SrgbBackbuffer = 0x8000
     }
 
     /// <summary>
@@ -722,19 +737,24 @@ namespace SharpBgfx {
         Color = 0x1,
 
         /// <summary>
+        /// The format is supported for sRGB operations.
+        /// </summary>
+        ColorSrgb = 0x2,
+
+        /// <summary>
         /// The format is supported through library emulation.
         /// </summary>
-        Emulated = 0x2,
+        Emulated = 0x4,
 
         /// <summary>
         /// The format is supported for vertex texturing.
         /// </summary>
-        Vertex = 0x4,
+        Vertex = 0x8,
 
         /// <summary>
         /// The format is supported for compute image operations.
         /// </summary>
-        Image = 0x8
+        Image = 0x10
     }
 
     /// <summary>
@@ -871,6 +891,16 @@ namespace SharpBgfx {
         /// Always compare two textures as equal.
         /// </summary>
         CompareAlways = 0x00080000,
+
+        /// <summary>
+        /// Texture is the target of compute shader writes.
+        /// </summary>
+        ComputeWrite = 0x00100000,
+
+        /// <summary>
+        /// Texture data is in non-linear sRGB format.
+        /// </summary>
+        Srgb = 0x00200000
     }
 
     /// <summary>
@@ -1002,31 +1032,101 @@ namespace SharpBgfx {
     /// Specifies various flags that control vertex and index buffer behavior.
     /// </summary>
     [Flags]
-    public enum BufferFlags : byte {
+    public enum BufferFlags : short {
         /// <summary>
         /// No flags specified.
         /// </summary>
         None,
 
         /// <summary>
+        /// Specifies the format of data in a compute buffer as being 8x1.
+        /// </summary>
+        ComputeFormat8x1 = 0x1,
+
+        /// <summary>
+        /// Specifies the format of data in a compute buffer as being 8x2.
+        /// </summary>
+        ComputeFormat8x2 = 0x2,
+
+        /// <summary>
+        /// Specifies the format of data in a compute buffer as being 8x4.
+        /// </summary>
+        ComputeFormat8x4 = 0x3,
+
+        /// <summary>
+        /// Specifies the format of data in a compute buffer as being 16x1.
+        /// </summary>
+        ComputeFormat16x1 = 0x4,
+
+        /// <summary>
+        /// Specifies the format of data in a compute buffer as being 16x2.
+        /// </summary>
+        ComputeFormat16x2 = 0x5,
+
+        /// <summary>
+        /// Specifies the format of data in a compute buffer as being 16x4.
+        /// </summary>
+        ComputeFormat16x4 = 0x6,
+
+        /// <summary>
+        /// Specifies the format of data in a compute buffer as being 32x1.
+        /// </summary>
+        ComputeFormat32x1 = 0x7,
+
+        /// <summary>
+        /// Specifies the format of data in a compute buffer as being 32x2.
+        /// </summary>
+        ComputeFormat32x2 = 0x8,
+
+        /// <summary>
+        /// Specifies the format of data in a compute buffer as being 32x4.
+        /// </summary>
+        ComputeFormat32x4 = 0x9,
+
+        /// <summary>
+        /// Specifies the type of data in a compute buffer as being unsigned integers.
+        /// </summary>
+        ComputeTypeUInt = 0x10,
+
+        /// <summary>
+        /// Specifies the type of data in a compute buffer as being signed integers.
+        /// </summary>
+        ComputeTypeInt = 0x20,
+
+        /// <summary>
+        /// Specifies the type of data in a compute buffer as being floating point values.
+        /// </summary>
+        ComputeTypeFloat = 0x30,
+
+        /// <summary>
         /// Buffer will be read by a compute shader.
         /// </summary>
-        ComputeRead = 0x1,
+        ComputeRead = 0x100,
 
         /// <summary>
         /// Buffer will be written into by a compute shader. It cannot be accessed by the CPU.
         /// </summary>
-        ComputeWrite = 0x2,
+        ComputeWrite = 0x200,
+
+        /// <summary>
+        /// Buffer is the source of indirect draw commands.
+        /// </summary>
+        DrawIndirect = 0x400,
 
         /// <summary>
         /// Buffer will resize on update if a different quantity of data is passed. If this flag is not set
         /// the data will be trimmed to fit in the existing buffer size. Effective only for dynamic buffers.
         /// </summary>
-        AllowResize = 0x4,
+        AllowResize = 0x800,
 
         /// <summary>
         /// Buffer is using 32-bit indices. Useful only for index buffers.
         /// </summary>
-        Index32 = 0x8
+        Index32 = 0x1000,
+
+        /// <summary>
+        /// Buffer will be read and written by a compute shader.
+        /// </summary>
+        ComputeReadWrite = ComputeRead | ComputeWrite
     }
 }
