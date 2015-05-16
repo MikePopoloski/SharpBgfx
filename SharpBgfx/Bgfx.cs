@@ -333,7 +333,7 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="id">The index of the view.</param>
         /// <param name="targets">The target surfaces that should be cleared.</param>
-        /// <param name="color">The clear color.</param>
+        /// <param name="colorRgba">The clear color.</param>
         /// <param name="depth">The value to fill the depth buffer.</param>
         /// <param name="stencil">The value to fill the stencil buffer.</param>
         public static void SetViewClear (byte id, ClearTargets targets, int colorRgba, float depth = 1.0f, byte stencil = 0) {
@@ -814,7 +814,7 @@ namespace SharpBgfx {
         /// Set rendering states used to draw primitives.
         /// </summary>
         /// <param name="state">The set of states to set.</param>
-        /// <param name="color">The color used for "factor" blending modes.</param>
+        /// <param name="colorRgba">The color used for "factor" blending modes.</param>
         public static void SetRenderState (RenderState state, int colorRgba) {
             NativeMethods.bgfx_set_state((ulong)state, colorRgba);
         }
