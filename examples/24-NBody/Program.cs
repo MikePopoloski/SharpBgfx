@@ -6,7 +6,7 @@ using SharpBgfx;
 static class Program {
     static void Main () {
         // create a UI thread and kick off a separate render thread
-        var sample = new Sample("Cubes", 1280, 720);
+        var sample = new Sample("NBody", 1280, 720);
         sample.Run(RenderThread);
     }
 
@@ -21,13 +21,79 @@ static class Program {
         // set view 0 clear state
         Bgfx.SetViewClear(0, ClearTargets.Color | ClearTargets.Depth, 0x303030ff);
 
-        // create vertex and index buffers
-        PosColorVertex.Init();
-        var vbh = new VertexBuffer(MemoryBlock.FromArray(cubeVertices), PosColorVertex.Layout);
-        var ibh = new IndexBuffer(MemoryBlock.FromArray(cubeIndices));
+        // check capabilities
+        var caps = Bgfx.GetCaps();
+        var computeSupported = caps.SupportedFeatures.HasFlag(DeviceFeatures.Compute);
+        var indirectSupported = caps.SupportedFeatures.HasFlag(DeviceFeatures.DrawIndirect);
+
+        if (computeSupported)
+            RunCompute(sample, indirectSupported);
+        else
+            RunUnsupported(sample);
+
+        // clean up
+        Bgfx.Shutdown();
+    }
+
+    static unsafe void RunCompute (Sample sample, bool indirectSupported) {
+        // build vertex layouts
+        var quadLayout = new VertexLayout();
+        quadLayout.Begin()
+            .Add(VertexAttributeUsage.Position, 2, VertexAttributeType.Float)
+            .End();
+
+        var computeLayout = new VertexLayout();
+        computeLayout.Begin()
+            .Add(VertexAttributeUsage.TexCoord0, 4, VertexAttributeType.Float)
+            .End();
+
+        // static quad data
+        var vb = new VertexBuffer(MemoryBlock.FromArray(QuadVertices), quadLayout);
+        var ib = new IndexBuffer(MemoryBlock.FromArray(QuadIndices));
+
+        // create compute buffers
+        var currPositionBuffer0 = new DynamicVertexBuffer(1 << 15, computeLayout, BufferFlags.ComputeReadWrite);
+        var currPositionBuffer1 = new DynamicVertexBuffer(1 << 15, computeLayout, BufferFlags.ComputeReadWrite);
+        var prevPositionBuffer0 = new DynamicVertexBuffer(1 << 15, computeLayout, BufferFlags.ComputeReadWrite);
+        var prevPositionBuffer1 = new DynamicVertexBuffer(1 << 15, computeLayout, BufferFlags.ComputeReadWrite);
 
         // load shaders
-        var program = ResourceLoader.LoadProgram("vs_cubes", "fs_cubes");
+        var particleProgram = ResourceLoader.LoadProgram("vs_particle", "fs_particle");
+        var initInstancesProgram = ResourceLoader.LoadProgram("cs_init_instances");
+        var updateInstancesProgram = ResourceLoader.LoadProgram("cs_update_instances");
+
+        // indirect rendering support
+        var indirectProgram = SharpBgfx.Program.Invalid;
+        var indirectBuffer = IndirectBuffer.Invalid;
+        bool useIndirect = false;
+
+        if (indirectSupported) {
+            indirectProgram = ResourceLoader.LoadProgram("cs_indirect");
+            indirectBuffer = new IndirectBuffer(2);
+            useIndirect = true;
+        }
+
+        // setup params uniforms
+        var paramData = new ParamsData {
+            TimeStep = 0.0157f,
+            DispatchSize = 32,
+            Gravity = 0.109f,
+            Damping = 0.25f,
+            ParticleIntensity = 0.64f,
+            ParticleSize = 0.279f,
+            BaseSeed = 57,
+            ParticlePower = 3.5f,
+            InitialSpeed = 3.2f,
+            InitialShape = 1,
+            MaxAccel = 100.0f
+        };
+
+        // have the compute shader run initialization
+        var u_params = new Uniform("u_params", UniformType.Float4Array, 3);
+        Bgfx.SetUniform(u_params, &paramData, 3);
+        Bgfx.SetComputeBuffer(0, prevPositionBuffer0, ComputeBufferAccess.Write);
+        Bgfx.SetComputeBuffer(1, currPositionBuffer0, ComputeBufferAccess.Write);
+        Bgfx.Dispatch(0, initInstancesProgram, MaxParticleCount / ThreadGroupUpdateSize);
 
         // start the frame clock
         var clock = new Clock();
@@ -35,83 +101,104 @@ static class Program {
 
         // main loop
         while (sample.ProcessEvents(ResetFlags.Vsync)) {
-            // set view 0 viewport
-            Bgfx.SetViewRect(0, 0, 0, sample.WindowWidth, sample.WindowHeight);
-
-            // view transforms
-            var viewMatrix = Matrix4x4.CreateLookAt(new Vector3(0.0f, 0.0f, -35.0f), Vector3.Zero, Vector3.UnitY);
-            var projMatrix = Matrix4x4.CreatePerspectiveFieldOfView((float)Math.PI / 3, (float)sample.WindowWidth / sample.WindowHeight, 0.1f, 100.0f);
-            Bgfx.SetViewTransform(0, viewMatrix, projMatrix);
-
-            // dummy draw call to make sure view 0 is cleared if no other draw calls are submitted
-            Bgfx.Submit(0);
-
             // tick the clock
             var elapsed = clock.Frame();
             var time = clock.TotalTime();
 
             // write some debug text
             Bgfx.DebugTextClear();
-            Bgfx.DebugTextWrite(0, 1, 0x4f, "SharpBgfx/Samples/01-Cubes");
-            Bgfx.DebugTextWrite(0, 2, 0x6f, "Description: Rendering simple static mesh.");
+            Bgfx.DebugTextWrite(0, 1, 0x4f, "SharpBgfx/Samples/24-NBody");
+            Bgfx.DebugTextWrite(0, 2, 0x6f, "Description: N-body simulation with compute shaders using buffers.");
             Bgfx.DebugTextWrite(0, 3, 0x6f, string.Format("Frame: {0:F3} ms", elapsed * 1000));
 
-            // submit 11x11 cubes
-            for (int y = 0; y < 11; y++) {
-                for (int x = 0; x < 11; x++) {
-                    // model matrix
-                    var transform = Matrix4x4.CreateFromYawPitchRoll(time + x * 0.21f, time + y * 0.37f, 0.0f);
-                    transform.M41 = -15.0f + x * 3.0f;
-                    transform.M42 = -15.0f + y * 3.0f;
-                    transform.M43 = 0.0f;
-                    Bgfx.SetTransform(transform);
-
-                    // set pipeline states
-                    Bgfx.SetProgram(program);
-                    Bgfx.SetVertexBuffer(vbh);
-                    Bgfx.SetIndexBuffer(ibh);
-                    Bgfx.SetRenderState(RenderState.Default);
-
-                    // submit primitives
-                    Bgfx.Submit(0);
-                }
+            // fill the indirect buffer if we're using it
+            if (useIndirect) {
+                Bgfx.SetUniform(u_params, &paramData, 3);
+                Bgfx.SetComputeBuffer(0, indirectBuffer, ComputeBufferAccess.Write);
+                Bgfx.Dispatch(0, indirectProgram);
             }
 
-            // advance to the next frame. Rendering thread will be kicked to
-            // process submitted rendering primitives.
+            // update particle positions
+            Bgfx.SetComputeBuffer(0, prevPositionBuffer0, ComputeBufferAccess.Read);
+            Bgfx.SetComputeBuffer(1, currPositionBuffer0, ComputeBufferAccess.Read);
+            Bgfx.SetComputeBuffer(2, prevPositionBuffer1, ComputeBufferAccess.Write);
+            Bgfx.SetComputeBuffer(3, currPositionBuffer1, ComputeBufferAccess.Write);
+            Bgfx.SetUniform(u_params, &paramData, 3);
+            if (useIndirect)
+                Bgfx.Dispatch(0, updateInstancesProgram, indirectBuffer, 1);
+            else
+                Bgfx.Dispatch(0, updateInstancesProgram, paramData.DispatchSize);
+
+            // ping-pong the buffers for next frame
+            Swap(ref currPositionBuffer0, ref currPositionBuffer1);
+            Swap(ref prevPositionBuffer0, ref prevPositionBuffer1);
+
+            // view transforms for particle rendering
+            var viewMatrix = Matrix4x4.CreateLookAt(new Vector3(0.0f, 0.0f, -45.0f), -Vector3.UnitZ, Vector3.UnitY);
+            var projMatrix = Matrix4x4.CreatePerspectiveFieldOfView((float)Math.PI / 4, (float)sample.WindowWidth / sample.WindowHeight, 0.1f, 10000.0f);
+            Bgfx.SetViewTransform(0, viewMatrix, projMatrix);
+            Bgfx.SetViewRect(0, 0, 0, sample.WindowWidth, sample.WindowHeight);
+
+            // draw the particles
+            Bgfx.SetProgram(particleProgram);
+            Bgfx.SetVertexBuffer(vb);
+            Bgfx.SetIndexBuffer(ib);
+            Bgfx.SetInstanceDataBuffer(currPositionBuffer0, 0, paramData.DispatchSize * ThreadGroupUpdateSize);
+            Bgfx.SetRenderState(RenderState.ColorWrite | RenderState.BlendAdd | RenderState.DepthTestAlways);
+            if (useIndirect)
+                Bgfx.Submit(0, indirectBuffer);
+            else
+                Bgfx.Submit(0);
+
+            // done with frame
             Bgfx.Frame();
         }
-
-        // clean up
-        ibh.Dispose();
-        vbh.Dispose();
-        program.Dispose();
-        Bgfx.Shutdown();
     }
 
-    static readonly PosColorVertex[] cubeVertices = {
-        new PosColorVertex(-1.0f,  1.0f,  1.0f, 0xff000000),
-        new PosColorVertex( 1.0f,  1.0f,  1.0f, 0xff0000ff),
-        new PosColorVertex(-1.0f, -1.0f,  1.0f, 0xff00ff00),
-        new PosColorVertex( 1.0f, -1.0f,  1.0f, 0xff00ffff),
-        new PosColorVertex(-1.0f,  1.0f, -1.0f, 0xffff0000),
-        new PosColorVertex( 1.0f,  1.0f, -1.0f, 0xffff00ff),
-        new PosColorVertex(-1.0f, -1.0f, -1.0f, 0xffffff00),
-        new PosColorVertex( 1.0f, -1.0f, -1.0f, 0xffffffff)
+    static void RunUnsupported (Sample sample) {
+        // main loop
+        while (sample.ProcessEvents(ResetFlags.Vsync)) {
+            Bgfx.SetViewRect(0, 0, 0, sample.WindowWidth, sample.WindowHeight);
+
+            Bgfx.DebugTextClear();
+            Bgfx.DebugTextWrite(0, 1, 0x4f, "SharpBgfx/Samples/24-NBody");
+            Bgfx.DebugTextWrite(0, 2, 0x6f, "Description: N-body simulation with compute shaders using buffers.");
+            Bgfx.DebugTextWrite(0, 5, 0x1f, "Compute is not supported by your GPU.");
+
+            Bgfx.Submit(0);
+            Bgfx.Frame();
+        }
+    }
+
+    static void Swap<T>(ref T left, ref T right) {
+        var temp = left;
+        left = right;
+        right = temp;
+    }
+
+    struct ParamsData {
+        public float TimeStep;
+        public int DispatchSize;
+        public float Gravity;
+        public float Damping;
+        public float ParticleIntensity;
+        public float ParticleSize;
+        public int BaseSeed;
+        public float ParticlePower;
+        public float InitialSpeed;
+        public int InitialShape;
+        public float MaxAccel;
     };
 
-    static readonly ushort[] cubeIndices = {
-        0, 1, 2, // 0
-        1, 3, 2,
-        4, 6, 5, // 2
-        5, 6, 7,
-        0, 2, 4, // 4
-        4, 2, 6,
-        1, 5, 3, // 6
-        5, 7, 3,
-        0, 4, 1, // 8
-        4, 5, 1,
-        2, 3, 6, // 10
-        6, 3, 7
+    const int ThreadGroupUpdateSize = 512;
+    const int MaxParticleCount = 32 * 1024;
+
+    static readonly float[] QuadVertices = {
+         1.0f,  1.0f,
+        -1.0f,  1.0f,
+        -1.0f, -1.0f,
+         1.0f, -1.0f,
     };
+
+    static readonly ushort[] QuadIndices = { 0, 1, 2, 2, 3, 0, };
 }

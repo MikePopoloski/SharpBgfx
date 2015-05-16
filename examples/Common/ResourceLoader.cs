@@ -41,6 +41,11 @@ namespace Common {
             return new Program(vsh, fsh, true);
         }
 
+        public static Program LoadProgram (string csName) {
+            var csh = LoadShader(csName);
+            return new Program(csh, true);
+        }
+
         public static Texture LoadTexture (string name) {
             var path = Path.Combine(RootPath, "textures/", name);
             var mem = MemoryBlock.FromArray(File.ReadAllBytes(path));
