@@ -88,7 +88,7 @@ namespace SharpBgfx {
         /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
         /// </returns>
         public override int GetHashCode () {
             return handle.GetHashCode();
@@ -100,7 +100,9 @@ namespace SharpBgfx {
         /// <returns>
         /// A <see cref="System.String"/> that represents this instance.
         /// </returns>
-        public override string ToString () => $"Handle: {handle}";
+        public override string ToString () {
+            return string.Format("Handle: {0}", handle);
+        }
 
         /// <summary>
         /// Implements the equality operator.

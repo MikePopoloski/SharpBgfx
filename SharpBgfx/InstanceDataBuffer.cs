@@ -10,12 +10,12 @@ namespace SharpBgfx {
         /// <summary>
         /// A pointer that can be filled with instance data.
         /// </summary>
-        public IntPtr Data => ptr->data;
+        public IntPtr Data { get { return ptr->data; } }
 
         /// <summary>
         /// The size of the data buffer.
         /// </summary>
-        public int Size => ptr->size;
+        public int Size { get { return ptr->size; } }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InstanceDataBuffer" /> struct.
@@ -64,7 +64,7 @@ namespace SharpBgfx {
         /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
         /// </returns>
         public override int GetHashCode () {
             return new IntPtr(ptr).GetHashCode();
@@ -76,7 +76,9 @@ namespace SharpBgfx {
         /// <returns>
         /// A <see cref="System.String"/> that represents this instance.
         /// </returns>
-        public override string ToString () => $"Size: {Size}";
+        public override string ToString () {
+            return string.Format("Size: {0}", Size);
+        }
 
         /// <summary>
         /// Implements the equality operator.

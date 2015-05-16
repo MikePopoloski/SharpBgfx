@@ -189,7 +189,9 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="reference">The stencil reference value.</param>
         /// <returns>The encoded stencil state.</returns>
-        public static StencilFlags ReferenceValue (byte reference) => reference & RefMask;
+        public static StencilFlags ReferenceValue (byte reference) {
+            return reference & RefMask;
+        }
 
         /// <summary>
         /// Encodes a read mask in a stencil state.
@@ -198,22 +200,28 @@ namespace SharpBgfx {
         /// <returns>
         /// The encoded stencil state.
         /// </returns>
-        public static StencilFlags ReadMask (byte mask) => (((uint)mask) << ReadMaskShift) & ReadMaskMask;
+        public static StencilFlags ReadMask (byte mask) {
+            return (((uint)mask) << ReadMaskShift) & ReadMaskMask;
+        }
 
         /// <summary>
         /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
         /// </returns>
-        public override int GetHashCode () => value.GetHashCode();
+        public override int GetHashCode () {
+            return value.GetHashCode();
+        }
 
         /// <summary>
         /// Determines whether the specific value is equal to this instance.
         /// </summary>
         /// <param name="other">The value to compare with this instance.</param>
         /// <returns><c>true</c> if the value is equal to this instance; otherwise, <c>false</c>.</returns>
-        public bool Equals (StencilFlags other) => value == other.value;
+        public bool Equals (StencilFlags other) {
+            return value == other.value;
+        }
 
         /// <summary>
         /// Determines whether the specified <see cref="System.Object" /> is equal to this instance.
@@ -238,7 +246,9 @@ namespace SharpBgfx {
         /// <returns>
         /// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
         /// </returns>
-        public static bool operator ==(StencilFlags left, StencilFlags right) => left.Equals(right);
+        public static bool operator ==(StencilFlags left, StencilFlags right) {
+            return left.Equals(right);
+        }
 
         /// <summary>
         /// Implements the inequality operator.
@@ -248,21 +258,27 @@ namespace SharpBgfx {
         /// <returns>
         /// <c>true</c> if the two objects are not equal; otherwise, <c>false</c>.
         /// </returns>
-        public static bool operator !=(StencilFlags left, StencilFlags right) => !left.Equals(right);
+        public static bool operator !=(StencilFlags left, StencilFlags right) {
+            return !left.Equals(right);
+        }
 
         /// <summary>
         /// Performs an implicit conversion from uint.
         /// </summary>
         /// <param name="value">The value to convert.</param>
         [CLSCompliant(false)]
-        public static implicit operator StencilFlags (uint value) => new StencilFlags((int)value);
+        public static implicit operator StencilFlags (uint value) {
+            return new StencilFlags((int)value);
+        }
 
         /// <summary>
         /// Performs an explicit conversion to uint.
         /// </summary>
         /// <param name="state">The value to convert.</param>
         [CLSCompliant(false)]
-        public static explicit operator uint (StencilFlags state) => state.value;
+        public static explicit operator uint (StencilFlags state) {
+            return state.value;
+        }
 
         /// <summary>
         /// Implements the bitwise-or operator.
@@ -272,7 +288,9 @@ namespace SharpBgfx {
         /// <returns>
         /// The result of the operator.
         /// </returns>
-        public static StencilFlags operator |(StencilFlags left, StencilFlags right) => left.value | right.value;
+        public static StencilFlags operator |(StencilFlags left, StencilFlags right) {
+            return left.value | right.value;
+        }
 
         /// <summary>
         /// Implements the bitwise-and operator.
@@ -282,7 +300,9 @@ namespace SharpBgfx {
         /// <returns>
         /// The result of the operator.
         /// </returns>
-        public static StencilFlags operator &(StencilFlags left, StencilFlags right) => left.value & right.value;
+        public static StencilFlags operator &(StencilFlags left, StencilFlags right) {
+            return left.value & right.value;
+        }
 
         /// <summary>
         /// Implements the bitwise-complement operator.
@@ -291,7 +311,9 @@ namespace SharpBgfx {
         /// <returns>
         /// The result of the operator.
         /// </returns>
-        public static StencilFlags operator ~(StencilFlags state) => ~state.value;
+        public static StencilFlags operator ~(StencilFlags state) {
+            return ~state.value;
+        }
 
         /// <summary>
         /// Implements the left shift operator.
@@ -301,7 +323,9 @@ namespace SharpBgfx {
         /// <returns>
         /// The result of the operator.
         /// </returns>
-        public static StencilFlags operator <<(StencilFlags state, int amount) => state.value << amount;
+        public static StencilFlags operator <<(StencilFlags state, int amount) {
+            return state.value << amount;
+        }
 
         /// <summary>
         /// Implements the right shift operator.
@@ -311,6 +335,8 @@ namespace SharpBgfx {
         /// <returns>
         /// The result of the operator.
         /// </returns>
-        public static StencilFlags operator >>(StencilFlags state, int amount) => state.value >> amount;
+        public static StencilFlags operator >>(StencilFlags state, int amount) {
+            return state.value >> amount;
+        }
     }
 }

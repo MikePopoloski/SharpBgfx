@@ -139,6 +139,8 @@
         /// <returns>
         /// A <see cref="System.String"/> that represents this instance.
         /// </returns>
-        public override string ToString () => $"Vendor: {Vendor}, Device: {DeviceId}";
+        public override string ToString () {
+            return string.Format("Vendor: {0}, Device: {0}", Vendor, DeviceId);
+        }
     }
 }

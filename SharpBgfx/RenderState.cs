@@ -276,14 +276,18 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="alpha">The alpha reference value.</param>
         /// <returns>The encoded render state.</returns>
-        public static RenderState AlphaRef (byte alpha) => (((ulong)alpha) << AlphaRefShift) & AlphaRefMask;
+        public static RenderState AlphaRef (byte alpha) {
+            return (((ulong)alpha) << AlphaRefShift) & AlphaRefMask;
+        }
 
         /// <summary>
         /// Encodes a point size value in a render state.
         /// </summary>
         /// <param name="size">The point size.</param>
         /// <returns>The encoded render state.</returns>
-        public static RenderState PointSize (byte size) => (((ulong)size) << PointSizeShift) & PointSizeMask;
+        public static RenderState PointSize (byte size) {
+            return (((ulong)size) << PointSizeShift) & PointSizeMask;
+        }
 
         /// <summary>
         /// Builds a render state for a blend function.
@@ -291,7 +295,9 @@ namespace SharpBgfx {
         /// <param name="source">The source blend operation.</param>
         /// <param name="destination">The destination blend operation.</param>
         /// <returns>The render state for the blend function.</returns>
-        public static RenderState BlendFunction (RenderState source, RenderState destination) => BlendFunction(source, destination, source, destination);
+        public static RenderState BlendFunction (RenderState source, RenderState destination) {
+            return BlendFunction(source, destination, source, destination);
+        }
 
         /// <summary>
         /// Builds a render state for a blend function.
@@ -314,7 +320,9 @@ namespace SharpBgfx {
         /// <returns>
         /// The render state for the blend equation.
         /// </returns>
-        public static RenderState BlendEquation (RenderState equation) => BlendEquation(equation, equation);
+        public static RenderState BlendEquation (RenderState equation) {
+            return BlendEquation(equation, equation);
+        }
 
         /// <summary>
         /// Builds a render state for a blend equation.
@@ -324,22 +332,28 @@ namespace SharpBgfx {
         /// <returns>
         /// The render state for the blend equation.
         /// </returns>
-        public static RenderState BlendEquation (RenderState sourceEquation, RenderState alphaEquation) => sourceEquation | (alphaEquation << 3);
+        public static RenderState BlendEquation (RenderState sourceEquation, RenderState alphaEquation) {
+            return sourceEquation | (alphaEquation << 3);
+        }
 
         /// <summary>
         /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
         /// </returns>
-        public override int GetHashCode () => value.GetHashCode();
+        public override int GetHashCode () {
+            return value.GetHashCode();
+        }
 
         /// <summary>
         /// Determines whether the specific value is equal to this instance.
         /// </summary>
         /// <param name="other">The value to compare with this instance.</param>
         /// <returns><c>true</c> if the value is equal to this instance; otherwise, <c>false</c>.</returns>
-        public bool Equals (RenderState other) => value == other.value;
+        public bool Equals (RenderState other) {
+            return value == other.value;
+        }
 
         /// <summary>
         /// Determines whether the specified <see cref="System.Object" /> is equal to this instance.
@@ -364,7 +378,9 @@ namespace SharpBgfx {
         /// <returns>
         /// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
         /// </returns>
-        public static bool operator ==(RenderState left, RenderState right) => left.Equals(right);
+        public static bool operator ==(RenderState left, RenderState right) {
+            return left.Equals(right);
+        }
 
         /// <summary>
         /// Implements the inequality operator.
@@ -374,21 +390,27 @@ namespace SharpBgfx {
         /// <returns>
         /// <c>true</c> if the two objects are not equal; otherwise, <c>false</c>.
         /// </returns>
-        public static bool operator !=(RenderState left, RenderState right) => !left.Equals(right);
+        public static bool operator !=(RenderState left, RenderState right) {
+            return !left.Equals(right);
+        }
 
         /// <summary>
         /// Performs an implicit conversion from ulong.
         /// </summary>
         /// <param name="value">The value to convert.</param>
         [CLSCompliant(false)]
-        public static implicit operator RenderState (ulong value) => new RenderState((long)value);
+        public static implicit operator RenderState (ulong value) {
+            return new RenderState((long)value);
+        }
 
         /// <summary>
         /// Performs an explicit conversion to ulong.
         /// </summary>
         /// <param name="state">The value to convert.</param>
         [CLSCompliant(false)]
-        public static explicit operator ulong (RenderState state) => state.value;
+        public static explicit operator ulong (RenderState state) {
+            return state.value;
+        }
 
         /// <summary>
         /// Implements the bitwise-or operator.
@@ -398,7 +420,9 @@ namespace SharpBgfx {
         /// <returns>
         /// The result of the operator.
         /// </returns>
-        public static RenderState operator |(RenderState left, RenderState right) => left.value | right.value;
+        public static RenderState operator |(RenderState left, RenderState right) {
+            return left.value | right.value;
+        }
 
         /// <summary>
         /// Implements the bitwise-and operator.
@@ -408,7 +432,9 @@ namespace SharpBgfx {
         /// <returns>
         /// The result of the operator.
         /// </returns>
-        public static RenderState operator &(RenderState left, RenderState right) => left.value & right.value;
+        public static RenderState operator &(RenderState left, RenderState right) {
+            return left.value & right.value;
+        }
 
         /// <summary>
         /// Implements the bitwise-complement operator.
@@ -417,7 +443,9 @@ namespace SharpBgfx {
         /// <returns>
         /// The result of the operator.
         /// </returns>
-        public static RenderState operator ~(RenderState state) => ~state.value;
+        public static RenderState operator ~(RenderState state) {
+            return ~state.value;
+        }
 
         /// <summary>
         /// Implements the left shift operator.
@@ -427,7 +455,9 @@ namespace SharpBgfx {
         /// <returns>
         /// The result of the operator.
         /// </returns>
-        public static RenderState operator <<(RenderState state, int amount) => state.value << amount;
+        public static RenderState operator <<(RenderState state, int amount) {
+            return state.value << amount;
+        }
 
         /// <summary>
         /// Implements the right shift operator.
@@ -437,6 +467,8 @@ namespace SharpBgfx {
         /// <returns>
         /// The result of the operator.
         /// </returns>
-        public static RenderState operator >>(RenderState state, int amount) => state.value >> amount;
+        public static RenderState operator >>(RenderState state, int amount) {
+            return state.value >> amount;
+        }
     }
 }

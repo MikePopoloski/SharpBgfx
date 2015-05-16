@@ -29,3 +29,8 @@ ipch/
 _ReSharper*/
 [Tt]est[Rr]esult*
 *.sln.ide/
+*.ide/
+*.psess
+*.vsp
+*.vspx
+packages/*

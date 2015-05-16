@@ -58,7 +58,7 @@ namespace SharpBgfx {
         /// <returns>The native memory block containing the copied data.</returns>
         public static MemoryBlock FromArray<T>(T[] data) where T : struct {
             if (data == null || data.Length == 0)
-                throw new ArgumentNullException(nameof(data));
+                throw new ArgumentNullException("data");
 
             var gcHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
             var block = new MemoryBlock(gcHandle.AddrOfPinnedObject(), Marshal.SizeOf(typeof(T)) * data.Length);
@@ -78,7 +78,7 @@ namespace SharpBgfx {
         /// </remarks>
         public static MemoryBlock MakeRef<T>(T[] data) where T : struct {
             if (data == null || data.Length == 0)
-                throw new ArgumentNullException(nameof(data));
+                throw new ArgumentNullException("data");
 
             var gcHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
             return MakeRef(gcHandle.AddrOfPinnedObject(), Marshal.SizeOf(typeof(T)) * data.Length, GCHandle.ToIntPtr(gcHandle), ReleaseHandleCallback);
@@ -140,7 +140,9 @@ namespace SharpBgfx {
         /// <returns>
         /// A <see cref="System.String"/> that represents this instance.
         /// </returns>
-        public override string ToString () => $"Size: {Size}";
+        public override string ToString () {
+            return string.Format("Size: {0}", Size);
+        }
 
         /// <summary>
         /// Implements the equality operator.

@@ -27,6 +27,7 @@
     <CodeAnalysisRuleSet>Analysis\analysis.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>false</Prefer32Bit>
     <UseVSHostingProcess>true</UseVSHostingProcess>
+    <LangVersion>4</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -90,7 +91,7 @@
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\codecracker.CSharp.1.0.0-alpha5\tools\analyzers\CodeCracker.CSharp.dll" />
-    <Analyzer Include="..\packages\NR6Pack.0.8.0.0\tools\analyzers\NR6Pack.dll" />
+    <Analyzer Include="..\packages\NR6Pack.0.9.0\tools\analyzers\NR6Pack.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

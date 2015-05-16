@@ -161,7 +161,9 @@ namespace SharpBgfx {
         /// <summary>
         /// Releases the texture.
         /// </summary>
-        public void Dispose () => NativeMethods.bgfx_destroy_texture(handle);
+        public void Dispose () {
+            NativeMethods.bgfx_destroy_texture(handle);
+        }
 
         /// <summary>
         /// Updates the data in a 2D texture.
@@ -249,7 +251,9 @@ namespace SharpBgfx {
         /// <returns>
         /// A <see cref="System.String"/> that represents this instance.
         /// </returns>
-        public override string ToString () => $"Handle: {handle}";
+        public override string ToString () {
+            return string.Format("Handle: {0}", handle);
+        }
 
         /// <summary>
         /// Implements the equality operator.

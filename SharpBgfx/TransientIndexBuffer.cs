@@ -17,12 +17,12 @@ namespace SharpBgfx {
         /// <summary>
         /// A pointer that can be filled with index data.
         /// </summary>
-        public IntPtr Data => data;
+        public IntPtr Data { get { return data; } }
 
         /// <summary>
         /// The size of the buffer.
         /// </summary>
-        public int Count => size;
+        public int Count { get { return size; } }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TransientIndexBuffer"/> struct.
@@ -69,7 +69,7 @@ namespace SharpBgfx {
         /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
         /// </returns>
         public override int GetHashCode () {
             return handle.GetHashCode() >> 13 ^ data.GetHashCode();
@@ -81,7 +81,9 @@ namespace SharpBgfx {
         /// <returns>
         /// A <see cref="System.String"/> that represents this instance.
         /// </returns>
-        public override string ToString () => $"Count: {Count}";
+        public override string ToString () {
+            return string.Format("Count: {0}", Count);
+        }
 
         /// <summary>
         /// Implements the equality operator.
