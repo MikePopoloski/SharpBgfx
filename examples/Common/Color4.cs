@@ -68,13 +68,17 @@ namespace Common {
         /// Converts the color into a packed ARGB integer.
         /// </summary>
         /// <returns>A packed integer containing all four color components.</returns>
-        public int ToArgb () => (int)(((uint)Alpha << 24) | ((uint)Red << 16) | ((uint)Green << 8) | Blue);
+        public int ToArgb () {
+            return (int)(((uint)Alpha << 24) | ((uint)Red << 16) | ((uint)Green << 8) | Blue);
+        }
 
         /// <summary>
         /// Converts the color into a packed RGBA integer.
         /// </summary>
         /// <returns>A packed integer containing all four color components.</returns>
-        public int ToRgba () => (int)(((uint)Red << 24) | ((uint)Green << 16) | ((uint)Blue << 8) | Alpha);
+        public int ToRgba () {
+            return (int)(((uint)Red << 24) | ((uint)Green << 16) | ((uint)Blue << 8) | Alpha);
+        }
 
         /// <summary>
         /// Adds two colors.
@@ -82,7 +86,9 @@ namespace Common {
         /// <param name="left">The first color to add.</param>
         /// <param name="right">The second color to add.</param>
         /// <returns>The sum of the two colors.</returns>
-        public static Color4 Add (Color4 left, Color4 right) => new Color4(left.Red + right.Red, left.Green + right.Green, left.Blue + right.Blue, left.Alpha + right.Alpha);
+        public static Color4 Add (Color4 left, Color4 right) {
+            return new Color4(left.Red + right.Red, left.Green + right.Green, left.Blue + right.Blue, left.Alpha + right.Alpha);
+        }
 
         /// <summary>
         /// Subtracts two colors.
@@ -90,7 +96,9 @@ namespace Common {
         /// <param name="left">The first color to subtract.</param>
         /// <param name="right">The second color to subtract</param>
         /// <returns>The difference of the two colors.</returns>
-        public static Color4 Subtract (Color4 left, Color4 right) => new Color4(left.Red - right.Red, left.Green - right.Green, left.Blue - right.Blue, left.Alpha - right.Alpha);
+        public static Color4 Subtract (Color4 left, Color4 right) {
+            return new Color4(left.Red - right.Red, left.Green - right.Green, left.Blue - right.Blue, left.Alpha - right.Alpha);
+        }
 
         /// <summary>
         /// Modulates two colors.
@@ -98,7 +106,9 @@ namespace Common {
         /// <param name="left">The first color to modulate.</param>
         /// <param name="right">The second color to modulate.</param>
         /// <returns>The modulated color.</returns>
-        public static Color4 Modulate (Color4 left, Color4 right) => new Color4(left.Red * right.Red, left.Green * right.Green, left.Blue * right.Blue, left.Alpha * right.Alpha);
+        public static Color4 Modulate (Color4 left, Color4 right) {
+            return new Color4(left.Red * right.Red, left.Green * right.Green, left.Blue * right.Blue, left.Alpha * right.Alpha);
+        }
 
         /// <summary>
         /// Scales a color.
@@ -120,14 +130,18 @@ namespace Common {
         /// </summary>
         /// <param name="value">The color to negate.</param>
         /// <returns>The negated color.</returns>
-        public static Color4 Negate (Color4 value) => new Color4(-value.Red, -value.Green, -value.Blue, -value.Alpha);
+        public static Color4 Negate (Color4 value) {
+            return new Color4(-value.Red, -value.Green, -value.Blue, -value.Alpha);
+        }
 
         /// <summary>
         /// Inverts the color (takes the complement of the color).
         /// </summary>
         /// <param name="value">The color to invert.</param>
         /// <returns>The inverted color.</returns>
-        public static Color4 Invert (Color4 value) => new Color4(-value.Red, -value.Green, -value.Blue, -value.Alpha);
+        public static Color4 Invert (Color4 value) {
+            return new Color4(-value.Red, -value.Green, -value.Blue, -value.Alpha);
+        }
 
         /// <summary>
         /// Restricts a value to be within a specified range.
@@ -247,7 +261,9 @@ namespace Common {
         /// </summary>
         /// <param name="value">The color to invert.</param>
         /// <returns>The inverted color.</returns>
-        public static Color4 operator ~(Color4 value) => Invert(value);
+        public static Color4 operator ~(Color4 value) {
+            return Invert(value);
+        }
 
         /// <summary>
         /// Adds two colors.
@@ -255,14 +271,18 @@ namespace Common {
         /// <param name="left">The first color to add.</param>
         /// <param name="right">The second color to add.</param>
         /// <returns>The sum of the two colors.</returns>
-        public static Color4 operator +(Color4 left, Color4 right) => Add(left, right);
+        public static Color4 operator +(Color4 left, Color4 right) {
+            return Add(left, right);
+        }
 
         /// <summary>
         /// Assert a color (return it unchanged).
         /// </summary>
         /// <param name="value">The color to assert (unchange).</param>
         /// <returns>The asserted (unchanged) color.</returns>
-        public static Color4 operator +(Color4 value) => value;
+        public static Color4 operator +(Color4 value) {
+            return value;
+        }
 
         /// <summary>
         /// Subtracts two colors.
@@ -270,14 +290,18 @@ namespace Common {
         /// <param name="left">The first color to subtract.</param>
         /// <param name="right">The second color to subtract.</param>
         /// <returns>The difference of the two colors.</returns>
-        public static Color4 operator -(Color4 left, Color4 right) => Subtract(left, right);
+        public static Color4 operator -(Color4 left, Color4 right) {
+            return Subtract(left, right);
+        }
 
         /// <summary>
         /// Negates a color.
         /// </summary>
         /// <param name="value">The color to negate.</param>
         /// <returns>A negated color.</returns>
-        public static Color4 operator -(Color4 value) => Negate(value);
+        public static Color4 operator -(Color4 value) {
+            return Negate(value);
+        }
 
         /// <summary>
         /// Tests for equality between two objects.
@@ -285,7 +309,9 @@ namespace Common {
         /// <param name="left">The first value to compare.</param>
         /// <param name="right">The second value to compare.</param>
         /// <returns><c>true</c> if <paramref name="left"/> has the same value as <paramref name="right"/>; otherwise, <c>false</c>.</returns>
-        public static bool operator ==(Color4 left, Color4 right) => left.Equals(right);
+        public static bool operator ==(Color4 left, Color4 right) {
+            return left.Equals(right);
+        }
 
         /// <summary>
         /// Tests for inequality between two objects.
@@ -293,14 +319,18 @@ namespace Common {
         /// <param name="left">The first value to compare.</param>
         /// <param name="right">The second value to compare.</param>
         /// <returns><c>true</c> if <paramref name="left"/> has a different value than <paramref name="right"/>; otherwise, <c>false</c>.</returns>
-        public static bool operator !=(Color4 left, Color4 right) => !left.Equals(right);
+        public static bool operator !=(Color4 left, Color4 right) {
+            return !left.Equals(right);
+        }
 
         /// <summary>
         /// Performs an explicit conversion from <see cref="System.Int32"/> to <see cref="Color4"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        public static implicit operator Color4 (int value) => new Color4(value);
+        public static implicit operator Color4 (int value) {
+            return new Color4(value);
+        }
 
         /// <summary>
         /// Performs an implicit conversion from <see cref="Color4"/> to <see cref="System.Int32"/>.
@@ -309,7 +339,9 @@ namespace Common {
         /// <returns>
         /// The result of the conversion.
         /// </returns>
-        public static implicit operator int (Color4 value) => value.ToArgb();
+        public static implicit operator int (Color4 value) {
+            return value.ToArgb();
+        }
 
         /// <summary>
         /// Returns a <see cref="System.String"/> that represents this instance.
@@ -317,7 +349,9 @@ namespace Common {
         /// <returns>
         /// A <see cref="System.String"/> that represents this instance.
         /// </returns>
-        public override string ToString () => ToString(CultureInfo.CurrentCulture);
+        public override string ToString () {
+            return ToString(CultureInfo.CurrentCulture);
+        }
 
         /// <summary>
         /// Returns a <see cref="System.String"/> that represents this instance.
@@ -326,7 +360,9 @@ namespace Common {
         /// <returns>
         /// A <see cref="System.String"/> that represents this instance.
         /// </returns>
-        public string ToString (IFormatProvider formatProvider) => string.Format(formatProvider, "Red:{0} Green:{1} Blue:{2} Alpha:{3}", Red, Green, Blue, Alpha);
+        public string ToString (IFormatProvider formatProvider) {
+            return string.Format(formatProvider, "Red:{0} Green:{1} Blue:{2} Alpha:{3}", Red, Green, Blue, Alpha);
+        }
 
         /// <summary>
         /// Returns a <see cref="System.String"/> that represents this instance.
@@ -335,7 +371,9 @@ namespace Common {
         /// <returns>
         /// A <see cref="System.String"/> that represents this instance.
         /// </returns>
-        public string ToString (string format) => ToString(format, CultureInfo.CurrentCulture);
+        public string ToString (string format) {
+            return ToString(format, CultureInfo.CurrentCulture);
+        }
 
         /// <summary>
         /// Returns a <see cref="System.String"/> that represents this instance.
@@ -363,7 +401,9 @@ namespace Common {
         /// <returns>
         /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
         /// </returns>
-        public override int GetHashCode () => Alpha.GetHashCode() + Red.GetHashCode() + Green.GetHashCode() + Blue.GetHashCode();
+        public override int GetHashCode () {
+            return Alpha.GetHashCode() + Red.GetHashCode() + Green.GetHashCode() + Blue.GetHashCode();
+        }
 
         /// <summary>
         /// Determines whether the specified <see cref="Color4"/> is equal to this instance.
