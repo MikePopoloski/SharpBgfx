@@ -8,6 +8,11 @@ namespace SharpBgfx {
         internal readonly ushort handle;
 
         /// <summary>
+        /// Represents an invalid handle.
+        /// </summary>
+        public static readonly DynamicVertexBuffer Invalid = new DynamicVertexBuffer();
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="DynamicVertexBuffer"/> struct.
         /// </summary>
         /// <param name="vertexCount">The number of vertices that fit in the buffer.</param>

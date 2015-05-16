@@ -16,6 +16,11 @@ namespace SharpBgfx {
         internal readonly DataPtr* ptr;
 
         /// <summary>
+        /// Represents an invalid handle.
+        /// </summary>
+        public static readonly MemoryBlock Invalid = new MemoryBlock();
+
+        /// <summary>
         /// The pointer to the raw data.
         /// </summary>
         public IntPtr Data {

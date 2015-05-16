@@ -10,6 +10,11 @@ namespace SharpBgfx {
         internal readonly ushort handle;
 
         /// <summary>
+        /// Represents an invalid handle.
+        /// </summary>
+        public static readonly Shader Invalid = new Shader();
+
+        /// <summary>
         /// The set of uniforms exposed by the shader.
         /// </summary>
         public IReadOnlyList<Uniform> Uniforms {

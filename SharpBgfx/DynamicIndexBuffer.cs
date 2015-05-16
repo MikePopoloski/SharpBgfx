@@ -8,6 +8,11 @@ namespace SharpBgfx {
         internal readonly ushort handle;
 
         /// <summary>
+        /// Represents an invalid handle.
+        /// </summary>
+        public static readonly DynamicIndexBuffer Invalid = new DynamicIndexBuffer();
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="DynamicIndexBuffer"/> struct.
         /// </summary>
         /// <param name="indexCount">The number of indices that can fit in the buffer.</param>

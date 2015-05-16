@@ -17,6 +17,11 @@ namespace SharpBgfx {
         ushort decl;
 
         /// <summary>
+        /// Represents an invalid handle.
+        /// </summary>
+        public static readonly TransientVertexBuffer Invalid = new TransientVertexBuffer();
+
+        /// <summary>
         /// A pointer that can be filled with vertex data.
         /// </summary>
         public IntPtr Data { get { return data; } }

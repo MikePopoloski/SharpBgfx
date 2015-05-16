@@ -8,6 +8,11 @@ namespace SharpBgfx {
         internal readonly ushort handle;
 
         /// <summary>
+        /// Represents an invalid handle.
+        /// </summary>
+        public static readonly IndexBuffer Invalid = new IndexBuffer();
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="IndexBuffer"/> struct.
         /// </summary>
         /// <param name="memory">The 16-bit index data used to populate the buffer.</param>

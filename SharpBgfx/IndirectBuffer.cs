@@ -8,6 +8,11 @@ namespace SharpBgfx {
         internal readonly ushort handle;
 
         /// <summary>
+        /// Represents an invalid handle.
+        /// </summary>
+        public static readonly IndirectBuffer Invalid = new IndirectBuffer();
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="IndirectBuffer"/> struct.
         /// </summary>
         /// <param name="size">The number of commands that can fit in the buffer.</param>

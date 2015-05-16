@@ -15,6 +15,11 @@ namespace SharpBgfx {
         readonly ushort handle;
 
         /// <summary>
+        /// Represents an invalid handle.
+        /// </summary>
+        public static readonly TransientIndexBuffer Invalid = new TransientIndexBuffer();
+
+        /// <summary>
         /// A pointer that can be filled with index data.
         /// </summary>
         public IntPtr Data { get { return data; } }

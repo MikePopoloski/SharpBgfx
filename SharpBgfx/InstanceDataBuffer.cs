@@ -8,6 +8,11 @@ namespace SharpBgfx {
         internal readonly NativeStruct* ptr;
 
         /// <summary>
+        /// Represents an invalid handle.
+        /// </summary>
+        public static readonly InstanceDataBuffer Invalid = new InstanceDataBuffer();
+
+        /// <summary>
         /// A pointer that can be filled with instance data.
         /// </summary>
         public IntPtr Data { get { return ptr->data; } }

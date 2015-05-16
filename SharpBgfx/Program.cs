@@ -8,6 +8,11 @@ namespace SharpBgfx {
         internal readonly ushort handle;
 
         /// <summary>
+        /// Represents an invalid handle.
+        /// </summary>
+        public static readonly Program Invalid = new Program();
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="Program"/> struct.
         /// </summary>
         /// <param name="vertexShader">The vertex shader.</param>

@@ -8,6 +8,11 @@ namespace SharpBgfx {
         internal readonly ushort handle;
 
         /// <summary>
+        /// Represents an invalid handle.
+        /// </summary>
+        public static readonly Uniform Invalid = new Uniform();
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="Uniform"/> struct.
         /// </summary>
         /// <param name="name">The name of the uniform.</param>
