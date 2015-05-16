@@ -566,6 +566,26 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// Sets instance data to use for drawing primitives.
+        /// </summary>
+        /// <param name="vertexBuffer">The vertex buffer containing instance data.</param>
+        /// <param name="firstVertex">The index of the first vertex to use.</param>
+        /// <param name="count">The number of vertices to pull from the buffer.</param>
+        public static void SetInstanceDataBuffer (VertexBuffer vertexBuffer, int firstVertex, int count) {
+            NativeMethods.bgfx_set_instance_data_from_vertex_buffer(vertexBuffer.handle, firstVertex, count);
+        }
+
+        /// <summary>
+        /// Sets instance data to use for drawing primitives.
+        /// </summary>
+        /// <param name="vertexBuffer">The vertex buffer containing instance data.</param>
+        /// <param name="firstVertex">The index of the first vertex to use.</param>
+        /// <param name="count">The number of vertices to pull from the buffer.</param>
+        public static void SetInstanceDataBuffer (DynamicVertexBuffer vertexBuffer, int firstVertex, int count) {
+            NativeMethods.bgfx_set_instance_data_from_dynamic_vertex_buffer(vertexBuffer.handle, firstVertex, count);
+        }
+
+        /// <summary>
         /// Sets the value of a uniform parameter.
         /// </summary>
         /// <param name="uniform">The uniform to set.</param>
@@ -641,29 +661,79 @@ namespace SharpBgfx {
         }
 
         /// <summary>
-        /// Sets a texture mip as a compute buffer.
+        /// Sets a texture mip as a compute image.
         /// </summary>
-        /// <param name="textureUnit">The texture unit to set.</param>
+        /// <param name="stage">The buffer stage to set.</param>
         /// <param name="sampler">The sampler uniform.</param>
         /// <param name="texture">The texture to set.</param>
         /// <param name="mip">The index of the mip level within the texture to set.</param>
         /// <param name="format">The format of the buffer data.</param>
         /// <param name="access">Access control flags.</param>
-        public static void SetComputeBuffer (byte textureUnit, Uniform sampler, Texture texture, byte mip, TextureFormat format, ComputeBufferAccess access) {
-            NativeMethods.bgfx_set_image(textureUnit, sampler.handle, texture.handle, mip, format, access);
+        public static void SetComputeImage (byte stage, Uniform sampler, Texture texture, byte mip, ComputeBufferAccess access, TextureFormat format = TextureFormat.Unknown) {
+            NativeMethods.bgfx_set_image(stage, sampler.handle, texture.handle, mip, format, access);
         }
 
         /// <summary>
-        /// Sets a frame buffer attachment as a compute buffer.
+        /// Sets a frame buffer attachment as a compute image.
         /// </summary>
-        /// <param name="textureUnit">The texture unit to set.</param>
+        /// <param name="stage">The buffer stage to set.</param>
         /// <param name="sampler">The sampler uniform.</param>
         /// <param name="frameBuffer">The frame buffer.</param>
         /// <param name="attachment">The attachment index.</param>
         /// <param name="format">The format of the buffer data.</param>
         /// <param name="access">Access control flags.</param>
-        public static void SetComputeBuffer (byte textureUnit, Uniform sampler, FrameBuffer frameBuffer, byte attachment, TextureFormat format, ComputeBufferAccess access) {
-            NativeMethods.bgfx_set_image_from_frame_buffer(textureUnit, sampler.handle, frameBuffer.handle, attachment, format, access);
+        public static void SetComputeImage (byte stage, Uniform sampler, FrameBuffer frameBuffer, byte attachment, ComputeBufferAccess access, TextureFormat format = TextureFormat.Unknown) {
+            NativeMethods.bgfx_set_image_from_frame_buffer(stage, sampler.handle, frameBuffer.handle, attachment, format, access);
+        }
+
+        /// <summary>
+        /// Sets an index buffer as a compute resource.
+        /// </summary>
+        /// <param name="stage">The resource stage to set.</param>
+        /// <param name="buffer">The buffer to set.</param>
+        /// <param name="access">Access control flags.</param>
+        public static void SetComputeBuffer (byte stage, IndexBuffer buffer, ComputeBufferAccess access) {
+            NativeMethods.bgfx_set_compute_index_buffer(stage, buffer.handle, access);
+        }
+
+        /// <summary>
+        /// Sets a verterx buffer as a compute resource.
+        /// </summary>
+        /// <param name="stage">The resource stage to set.</param>
+        /// <param name="buffer">The buffer to set.</param>
+        /// <param name="access">Access control flags.</param>
+        public static void SetComputeBuffer (byte stage, VertexBuffer buffer, ComputeBufferAccess access) {
+            NativeMethods.bgfx_set_compute_vertex_buffer(stage, buffer.handle, access);
+        }
+
+        /// <summary>
+        /// Sets a dynamic index buffer as a compute resource.
+        /// </summary>
+        /// <param name="stage">The resource stage to set.</param>
+        /// <param name="buffer">The buffer to set.</param>
+        /// <param name="access">Access control flags.</param>
+        public static void SetComputeBuffer (byte stage, DynamicIndexBuffer buffer, ComputeBufferAccess access) {
+            NativeMethods.bgfx_set_compute_dynamic_index_buffer(stage, buffer.handle, access);
+        }
+
+        /// <summary>
+        /// Sets a dynamic vertex buffer as a compute resource.
+        /// </summary>
+        /// <param name="stage">The resource stage to set.</param>
+        /// <param name="buffer">The buffer to set.</param>
+        /// <param name="access">Access control flags.</param>
+        public static void SetComputeBuffer (byte stage, DynamicVertexBuffer buffer, ComputeBufferAccess access) {
+            NativeMethods.bgfx_set_compute_dynamic_vertex_buffer(stage, buffer.handle, access);
+        }
+
+        /// <summary>
+        /// Sets an indirect buffer as a compute resource.
+        /// </summary>
+        /// <param name="stage">The resource stage to set.</param>
+        /// <param name="buffer">The buffer to set.</param>
+        /// <param name="access">Access control flags.</param>
+        public static void SetComputeBuffer (byte stage, IndirectBuffer buffer, ComputeBufferAccess access) {
+            NativeMethods.bgfx_set_compute_indirect_buffer(stage, buffer.handle, access);
         }
 
         /// <summary>
@@ -677,6 +747,19 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// Submits an indirect batch of drawing commands to be used for rendering.
+        /// </summary>
+        /// <param name="id">The index of the view to submit.</param>
+        /// <param name="indirectBuffer">The buffer containing drawing commands.</param>
+        /// <param name="startIndex">The index of the first command to process.</param>
+        /// <param name="count">The number of commands to process from the buffer.</param>
+        /// <param name="depth">A depth value to use for sorting the batch.</param>
+        /// <returns>The number of draw calls.</returns>
+        public static int Submit (byte id, IndirectBuffer indirectBuffer, int startIndex = 0, int count = 1, int depth = 0) {
+            return NativeMethods.bgfx_submit(id, depth);
+        }
+
+        /// <summary>
         /// Discards all previously set state for the draw call.
         /// </summary>
         public static void Discard () {
@@ -686,13 +769,29 @@ namespace SharpBgfx {
         /// <summary>
         /// Dispatches a compute job.
         /// </summary>
-        /// <param name="id">The index of the view.</param>
+        /// <param name="id">The index of the view to dispatch.</param>
         /// <param name="program">The shader program to use.</param>
         /// <param name="xCount">The size of the job in the first dimension.</param>
         /// <param name="yCount">The size of the job in the second dimension.</param>
         /// <param name="zCount">The size of the job in the third dimension.</param>
         public static void Dispatch (byte id, Program program, int xCount = 1, int yCount = 1, int zCount = 1) {
-            NativeMethods.bgfx_dispatch(id, program.handle, (ushort)xCount, (ushort)yCount, (ushort)zCount);
+            // TODO: unused
+            byte unused = 0;
+            NativeMethods.bgfx_dispatch(id, program.handle, (ushort)xCount, (ushort)yCount, (ushort)zCount, unused);
+        }
+
+        /// <summary>
+        /// Dispatches an indirect compute job.
+        /// </summary>
+        /// <param name="id">The index of the view to dispatch.</param>
+        /// <param name="program">The shader program to use.</param>
+        /// <param name="indirectBuffer">The buffer containing drawing commands.</param>
+        /// <param name="startIndex">The index of the first command to process.</param>
+        /// <param name="count">The number of commands to process from the buffer.</param>
+        public static void Dispatch (byte id, Program program, IndirectBuffer indirectBuffer, int startIndex = 0, int count = 1) {
+            // TODO: unused
+            byte unused = 0;
+            NativeMethods.bgfx_dispatch_indirect(id, program.handle, indirectBuffer.handle, (ushort)startIndex, (ushort)count, unused);
         }
 
         /// <summary>

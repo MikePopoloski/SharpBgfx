@@ -54,6 +54,7 @@
   <ItemGroup>
     <Compile Include="Bgfx.cs" />
     <Compile Include="Capabilities.cs" />
+    <Compile Include="IndirectBuffer.cs" />
     <Compile Include="DynamicIndexBuffer.cs" />
     <Compile Include="DynamicVertexBuffer.cs" />
     <Compile Include="Enums.cs" />

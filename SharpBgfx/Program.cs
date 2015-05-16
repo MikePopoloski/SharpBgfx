@@ -18,6 +18,15 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="Program"/> struct.
+        /// </summary>
+        /// <param name="computeShader">The compute shader.</param>
+        /// <param name="destroyShaders">if set to <c>true</c>, the compute shader will be released after creating the program.</param>
+        public Program (Shader computeShader, bool destroyShaders = false) {
+            handle = NativeMethods.bgfx_create_compute_program(computeShader.handle, destroyShaders);
+        }
+
+        /// <summary>
         /// Releases the program.
         /// </summary>
         public void Dispose () {

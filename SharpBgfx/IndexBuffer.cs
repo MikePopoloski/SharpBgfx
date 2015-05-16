@@ -4,7 +4,6 @@ namespace SharpBgfx {
     /// <summary>
     /// Represents a static index buffer.
     /// </summary>
-    /// <remarks>Indices are always 16-bits.</remarks>
     public unsafe struct IndexBuffer : IDisposable, IEquatable<IndexBuffer> {
         internal readonly ushort handle;
 

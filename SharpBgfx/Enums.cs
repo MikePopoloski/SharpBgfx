@@ -718,7 +718,12 @@ namespace SharpBgfx {
         /// <summary>
         /// Device supports 32-bit indices.
         /// </summary>
-        Index32 = 0x1000
+        Index32 = 0x1000,
+
+        /// <summary>
+        /// Device supports indirect drawing via GPU buffers.
+        /// </summary>
+        DrawIndirect = 0x2000
     }
 
     /// <summary>

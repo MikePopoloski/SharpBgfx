@@ -2,42 +2,24 @@
 
 namespace SharpBgfx {
     /// <summary>
-    /// Represents a dynamically updateable index buffer.
+    /// Represents a buffer that can contain indirect drawing commands created and processed entirely on the GPU.
     /// </summary>
-    public unsafe struct DynamicIndexBuffer : IDisposable, IEquatable<DynamicIndexBuffer> {
+    public unsafe struct IndirectBuffer : IDisposable, IEquatable<IndirectBuffer> {
         internal readonly ushort handle;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DynamicIndexBuffer"/> struct.
+        /// Initializes a new instance of the <see cref="IndirectBuffer"/> struct.
         /// </summary>
-        /// <param name="indexCount">The number of indices that can fit in the buffer.</param>
-        /// <param name="flags">Flags used to control buffer behavior.</param>
-        public DynamicIndexBuffer (int indexCount, BufferFlags flags = BufferFlags.None) {
-            handle = NativeMethods.bgfx_create_dynamic_index_buffer(indexCount, flags);
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DynamicIndexBuffer"/> struct.
-        /// </summary>
-        /// <param name="memory">The initial index data with which to populate the buffer.</param>
-        /// <param name="flags">Flags used to control buffer behavior.</param>
-        public DynamicIndexBuffer (MemoryBlock memory, BufferFlags flags = BufferFlags.None) {
-            handle = NativeMethods.bgfx_create_dynamic_index_buffer_mem(memory.ptr, flags);
-        }
-
-        /// <summary>
-        /// Updates the data in the buffer.
-        /// </summary>
-        /// <param name="memory">The new index data with which to fill the buffer.</param>
-        public void Update (MemoryBlock memory) {
-            NativeMethods.bgfx_update_dynamic_index_buffer(handle, memory.ptr);
+        /// <param name="size">The number of commands that can fit in the buffer.</param>
+        public IndirectBuffer (int size) {
+            handle = NativeMethods.bgfx_create_indirect_buffer(size);
         }
 
         /// <summary>
         /// Releases the index buffer.
         /// </summary>
         public void Dispose () {
-            NativeMethods.bgfx_destroy_dynamic_index_buffer(handle);
+            NativeMethods.bgfx_destroy_indirect_buffer(handle);
         }
 
         /// <summary>
@@ -45,7 +27,7 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="other">The object to compare with this instance.</param>
         /// <returns><c>true</c> if the specified object is equal to this instance; otherwise, <c>false</c>.</returns>
-        public bool Equals (DynamicIndexBuffer other) {
+        public bool Equals (IndirectBuffer other) {
             return handle == other.handle;
         }
 
@@ -57,7 +39,7 @@ namespace SharpBgfx {
         ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
         public override bool Equals (object obj) {
-            var other = obj as DynamicIndexBuffer?;
+            var other = obj as IndirectBuffer?;
             if (other == null)
                 return false;
 
@@ -92,7 +74,7 @@ namespace SharpBgfx {
         /// <returns>
         /// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
         /// </returns>
-        public static bool operator ==(DynamicIndexBuffer left, DynamicIndexBuffer right) {
+        public static bool operator ==(IndirectBuffer left, IndirectBuffer right) {
             return left.Equals(right);
         }
 
@@ -104,7 +86,7 @@ namespace SharpBgfx {
         /// <returns>
         /// <c>true</c> if the two objects are not equal; otherwise, <c>false</c>.
         /// </returns>
-        public static bool operator !=(DynamicIndexBuffer left, DynamicIndexBuffer right) {
+        public static bool operator !=(IndirectBuffer left, IndirectBuffer right) {
             return !left.Equals(right);
         }
     }
