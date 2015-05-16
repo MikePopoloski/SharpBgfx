@@ -1,3 +1,23 @@
+// Copyright (c) 2015 Michael Popoloski
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -1008,7 +1028,9 @@ namespace SharpBgfx {
         /// <summary>
         /// Releases the texture.
         /// </summary>
-        public void Dispose () => NativeMethods.bgfx_destroy_texture(handle);
+        public void Dispose () {
+            NativeMethods.bgfx_destroy_texture(handle);
+        }
 
         /// <summary>
         /// Updates the data in a 2D texture.
@@ -1096,7 +1118,9 @@ namespace SharpBgfx {
         /// <returns>
         /// A <see cref="System.String"/> that represents this instance.
         /// </returns>
-        public override string ToString () => $"Handle: {handle}";
+        public override string ToString () {
+            return string.Format("Handle: {0}", handle);
+        }
 
         /// <summary>
         /// Implements the equality operator.
@@ -1260,7 +1284,9 @@ namespace SharpBgfx {
         /// <returns>
         /// A <see cref="System.String"/> that represents this instance.
         /// </returns>
-        public override string ToString () => $"Vendor: {Vendor}, Device: {DeviceId}";
+        public override string ToString () {
+            return string.Format("Vendor: {0}, Device: {0}", Vendor, DeviceId);
+        }
     }
 
     /// <summary>
@@ -1331,7 +1357,7 @@ namespace SharpBgfx {
         /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
         /// </returns>
         public override int GetHashCode () {
             return handle.GetHashCode();
@@ -1343,7 +1369,9 @@ namespace SharpBgfx {
         /// <returns>
         /// A <see cref="System.String"/> that represents this instance.
         /// </returns>
-        public override string ToString () => $"Handle: {handle}";
+        public override string ToString () {
+            return string.Format("Handle: {0}", handle);
+        }
 
         /// <summary>
         /// Implements the equality operator.
@@ -1439,7 +1467,7 @@ namespace SharpBgfx {
         /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
         /// </returns>
         public override int GetHashCode () {
             return handle.GetHashCode();
@@ -1451,7 +1479,9 @@ namespace SharpBgfx {
         /// <returns>
         /// A <see cref="System.String"/> that represents this instance.
         /// </returns>
-        public override string ToString () => $"Handle: {handle}";
+        public override string ToString () {
+            return string.Format("Handle: {0}", handle);
+        }
 
         /// <summary>
         /// Implements the equality operator.
@@ -1565,7 +1595,7 @@ namespace SharpBgfx {
         /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
         /// </returns>
         public override int GetHashCode () {
             return handle.GetHashCode();
@@ -1577,7 +1607,9 @@ namespace SharpBgfx {
         /// <returns>
         /// A <see cref="System.String"/> that represents this instance.
         /// </returns>
-        public override string ToString () => $"Handle: {handle}";
+        public override string ToString () {
+            return string.Format("Handle: {0}", handle);
+        }
 
         /// <summary>
         /// Implements the equality operator.
@@ -1655,7 +1687,7 @@ namespace SharpBgfx {
         /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
         /// </returns>
         public override int GetHashCode () {
             return handle.GetHashCode();
@@ -1667,7 +1699,9 @@ namespace SharpBgfx {
         /// <returns>
         /// A <see cref="System.String"/> that represents this instance.
         /// </returns>
-        public override string ToString () => $"Handle: {handle}";
+        public override string ToString () {
+            return string.Format("Handle: {0}", handle);
+        }
 
         /// <summary>
         /// Implements the equality operator.
@@ -1703,12 +1737,12 @@ namespace SharpBgfx {
         /// <summary>
         /// A pointer that can be filled with instance data.
         /// </summary>
-        public IntPtr Data => ptr->data;
+        public IntPtr Data { get { return ptr->data; } }
 
         /// <summary>
         /// The size of the data buffer.
         /// </summary>
-        public int Size => ptr->size;
+        public int Size { get { return ptr->size; } }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InstanceDataBuffer" /> struct.
@@ -1757,7 +1791,7 @@ namespace SharpBgfx {
         /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
         /// </returns>
         public override int GetHashCode () {
             return new IntPtr(ptr).GetHashCode();
@@ -1769,7 +1803,9 @@ namespace SharpBgfx {
         /// <returns>
         /// A <see cref="System.String"/> that represents this instance.
         /// </returns>
-        public override string ToString () => $"Size: {Size}";
+        public override string ToString () {
+            return string.Format("Size: {0}", Size);
+        }
 
         /// <summary>
         /// Implements the equality operator.
@@ -1856,7 +1892,7 @@ namespace SharpBgfx {
         /// <returns>The native memory block containing the copied data.</returns>
         public static MemoryBlock FromArray<T>(T[] data) where T : struct {
             if (data == null || data.Length == 0)
-                throw new ArgumentNullException(nameof(data));
+                throw new ArgumentNullException("data");
 
             var gcHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
             var block = new MemoryBlock(gcHandle.AddrOfPinnedObject(), Marshal.SizeOf(typeof(T)) * data.Length);
@@ -1876,7 +1912,7 @@ namespace SharpBgfx {
         /// </remarks>
         public static MemoryBlock MakeRef<T>(T[] data) where T : struct {
             if (data == null || data.Length == 0)
-                throw new ArgumentNullException(nameof(data));
+                throw new ArgumentNullException("data");
 
             var gcHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
             return MakeRef(gcHandle.AddrOfPinnedObject(), Marshal.SizeOf(typeof(T)) * data.Length, GCHandle.ToIntPtr(gcHandle), ReleaseHandleCallback);
@@ -1938,7 +1974,9 @@ namespace SharpBgfx {
         /// <returns>
         /// A <see cref="System.String"/> that represents this instance.
         /// </returns>
-        public override string ToString () => $"Size: {Size}";
+        public override string ToString () {
+            return string.Format("Size: {0}", Size);
+        }
 
         /// <summary>
         /// Implements the equality operator.
@@ -2054,7 +2092,7 @@ namespace SharpBgfx {
         /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
         /// </returns>
         public override int GetHashCode () {
             return handle.GetHashCode();
@@ -2066,7 +2104,9 @@ namespace SharpBgfx {
         /// <returns>
         /// A <see cref="System.String"/> that represents this instance.
         /// </returns>
-        public override string ToString () => $"Handle: {handle}";
+        public override string ToString () {
+            return string.Format("Handle: {0}", handle);
+        }
 
         /// <summary>
         /// Implements the equality operator.
@@ -2368,14 +2408,18 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="alpha">The alpha reference value.</param>
         /// <returns>The encoded render state.</returns>
-        public static RenderState AlphaRef (byte alpha) => (((ulong)alpha) << AlphaRefShift) & AlphaRefMask;
+        public static RenderState AlphaRef (byte alpha) {
+            return (((ulong)alpha) << AlphaRefShift) & AlphaRefMask;
+        }
 
         /// <summary>
         /// Encodes a point size value in a render state.
         /// </summary>
         /// <param name="size">The point size.</param>
         /// <returns>The encoded render state.</returns>
-        public static RenderState PointSize (byte size) => (((ulong)size) << PointSizeShift) & PointSizeMask;
+        public static RenderState PointSize (byte size) {
+            return (((ulong)size) << PointSizeShift) & PointSizeMask;
+        }
 
         /// <summary>
         /// Builds a render state for a blend function.
@@ -2383,7 +2427,9 @@ namespace SharpBgfx {
         /// <param name="source">The source blend operation.</param>
         /// <param name="destination">The destination blend operation.</param>
         /// <returns>The render state for the blend function.</returns>
-        public static RenderState BlendFunction (RenderState source, RenderState destination) => BlendFunction(source, destination, source, destination);
+        public static RenderState BlendFunction (RenderState source, RenderState destination) {
+            return BlendFunction(source, destination, source, destination);
+        }
 
         /// <summary>
         /// Builds a render state for a blend function.
@@ -2406,7 +2452,9 @@ namespace SharpBgfx {
         /// <returns>
         /// The render state for the blend equation.
         /// </returns>
-        public static RenderState BlendEquation (RenderState equation) => BlendEquation(equation, equation);
+        public static RenderState BlendEquation (RenderState equation) {
+            return BlendEquation(equation, equation);
+        }
 
         /// <summary>
         /// Builds a render state for a blend equation.
@@ -2416,22 +2464,28 @@ namespace SharpBgfx {
         /// <returns>
         /// The render state for the blend equation.
         /// </returns>
-        public static RenderState BlendEquation (RenderState sourceEquation, RenderState alphaEquation) => sourceEquation | (alphaEquation << 3);
+        public static RenderState BlendEquation (RenderState sourceEquation, RenderState alphaEquation) {
+            return sourceEquation | (alphaEquation << 3);
+        }
 
         /// <summary>
         /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
         /// </returns>
-        public override int GetHashCode () => value.GetHashCode();
+        public override int GetHashCode () {
+            return value.GetHashCode();
+        }
 
         /// <summary>
         /// Determines whether the specific value is equal to this instance.
         /// </summary>
         /// <param name="other">The value to compare with this instance.</param>
         /// <returns><c>true</c> if the value is equal to this instance; otherwise, <c>false</c>.</returns>
-        public bool Equals (RenderState other) => value == other.value;
+        public bool Equals (RenderState other) {
+            return value == other.value;
+        }
 
         /// <summary>
         /// Determines whether the specified <see cref="System.Object" /> is equal to this instance.
@@ -2456,7 +2510,9 @@ namespace SharpBgfx {
         /// <returns>
         /// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
         /// </returns>
-        public static bool operator ==(RenderState left, RenderState right) => left.Equals(right);
+        public static bool operator ==(RenderState left, RenderState right) {
+            return left.Equals(right);
+        }
 
         /// <summary>
         /// Implements the inequality operator.
@@ -2466,21 +2522,27 @@ namespace SharpBgfx {
         /// <returns>
         /// <c>true</c> if the two objects are not equal; otherwise, <c>false</c>.
         /// </returns>
-        public static bool operator !=(RenderState left, RenderState right) => !left.Equals(right);
+        public static bool operator !=(RenderState left, RenderState right) {
+            return !left.Equals(right);
+        }
 
         /// <summary>
         /// Performs an implicit conversion from ulong.
         /// </summary>
         /// <param name="value">The value to convert.</param>
         [CLSCompliant(false)]
-        public static implicit operator RenderState (ulong value) => new RenderState((long)value);
+        public static implicit operator RenderState (ulong value) {
+            return new RenderState((long)value);
+        }
 
         /// <summary>
         /// Performs an explicit conversion to ulong.
         /// </summary>
         /// <param name="state">The value to convert.</param>
         [CLSCompliant(false)]
-        public static explicit operator ulong (RenderState state) => state.value;
+        public static explicit operator ulong (RenderState state) {
+            return state.value;
+        }
 
         /// <summary>
         /// Implements the bitwise-or operator.
@@ -2490,7 +2552,9 @@ namespace SharpBgfx {
         /// <returns>
         /// The result of the operator.
         /// </returns>
-        public static RenderState operator |(RenderState left, RenderState right) => left.value | right.value;
+        public static RenderState operator |(RenderState left, RenderState right) {
+            return left.value | right.value;
+        }
 
         /// <summary>
         /// Implements the bitwise-and operator.
@@ -2500,7 +2564,9 @@ namespace SharpBgfx {
         /// <returns>
         /// The result of the operator.
         /// </returns>
-        public static RenderState operator &(RenderState left, RenderState right) => left.value & right.value;
+        public static RenderState operator &(RenderState left, RenderState right) {
+            return left.value & right.value;
+        }
 
         /// <summary>
         /// Implements the bitwise-complement operator.
@@ -2509,7 +2575,9 @@ namespace SharpBgfx {
         /// <returns>
         /// The result of the operator.
         /// </returns>
-        public static RenderState operator ~(RenderState state) => ~state.value;
+        public static RenderState operator ~(RenderState state) {
+            return ~state.value;
+        }
 
         /// <summary>
         /// Implements the left shift operator.
@@ -2519,7 +2587,9 @@ namespace SharpBgfx {
         /// <returns>
         /// The result of the operator.
         /// </returns>
-        public static RenderState operator <<(RenderState state, int amount) => state.value << amount;
+        public static RenderState operator <<(RenderState state, int amount) {
+            return state.value << amount;
+        }
 
         /// <summary>
         /// Implements the right shift operator.
@@ -2529,7 +2599,9 @@ namespace SharpBgfx {
         /// <returns>
         /// The result of the operator.
         /// </returns>
-        public static RenderState operator >>(RenderState state, int amount) => state.value >> amount;
+        public static RenderState operator >>(RenderState state, int amount) {
+            return state.value >> amount;
+        }
     }
 
     /// <summary>
@@ -2598,7 +2670,7 @@ namespace SharpBgfx {
         /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
         /// </returns>
         public override int GetHashCode () {
             return handle.GetHashCode();
@@ -2610,7 +2682,9 @@ namespace SharpBgfx {
         /// <returns>
         /// A <see cref="System.String"/> that represents this instance.
         /// </returns>
-        public override string ToString () => $"Handle: {handle}";
+        public override string ToString () {
+            return string.Format("Handle: {0}", handle);
+        }
 
         /// <summary>
         /// Implements the equality operator.
@@ -2825,7 +2899,9 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="reference">The stencil reference value.</param>
         /// <returns>The encoded stencil state.</returns>
-        public static StencilFlags ReferenceValue (byte reference) => reference & RefMask;
+        public static StencilFlags ReferenceValue (byte reference) {
+            return reference & RefMask;
+        }
 
         /// <summary>
         /// Encodes a read mask in a stencil state.
@@ -2834,22 +2910,28 @@ namespace SharpBgfx {
         /// <returns>
         /// The encoded stencil state.
         /// </returns>
-        public static StencilFlags ReadMask (byte mask) => (((uint)mask) << ReadMaskShift) & ReadMaskMask;
+        public static StencilFlags ReadMask (byte mask) {
+            return (((uint)mask) << ReadMaskShift) & ReadMaskMask;
+        }
 
         /// <summary>
         /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
         /// </returns>
-        public override int GetHashCode () => value.GetHashCode();
+        public override int GetHashCode () {
+            return value.GetHashCode();
+        }
 
         /// <summary>
         /// Determines whether the specific value is equal to this instance.
         /// </summary>
         /// <param name="other">The value to compare with this instance.</param>
         /// <returns><c>true</c> if the value is equal to this instance; otherwise, <c>false</c>.</returns>
-        public bool Equals (StencilFlags other) => value == other.value;
+        public bool Equals (StencilFlags other) {
+            return value == other.value;
+        }
 
         /// <summary>
         /// Determines whether the specified <see cref="System.Object" /> is equal to this instance.
@@ -2874,7 +2956,9 @@ namespace SharpBgfx {
         /// <returns>
         /// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
         /// </returns>
-        public static bool operator ==(StencilFlags left, StencilFlags right) => left.Equals(right);
+        public static bool operator ==(StencilFlags left, StencilFlags right) {
+            return left.Equals(right);
+        }
 
         /// <summary>
         /// Implements the inequality operator.
@@ -2884,21 +2968,27 @@ namespace SharpBgfx {
         /// <returns>
         /// <c>true</c> if the two objects are not equal; otherwise, <c>false</c>.
         /// </returns>
-        public static bool operator !=(StencilFlags left, StencilFlags right) => !left.Equals(right);
+        public static bool operator !=(StencilFlags left, StencilFlags right) {
+            return !left.Equals(right);
+        }
 
         /// <summary>
         /// Performs an implicit conversion from uint.
         /// </summary>
         /// <param name="value">The value to convert.</param>
         [CLSCompliant(false)]
-        public static implicit operator StencilFlags (uint value) => new StencilFlags((int)value);
+        public static implicit operator StencilFlags (uint value) {
+            return new StencilFlags((int)value);
+        }
 
         /// <summary>
         /// Performs an explicit conversion to uint.
         /// </summary>
         /// <param name="state">The value to convert.</param>
         [CLSCompliant(false)]
-        public static explicit operator uint (StencilFlags state) => state.value;
+        public static explicit operator uint (StencilFlags state) {
+            return state.value;
+        }
 
         /// <summary>
         /// Implements the bitwise-or operator.
@@ -2908,7 +2998,9 @@ namespace SharpBgfx {
         /// <returns>
         /// The result of the operator.
         /// </returns>
-        public static StencilFlags operator |(StencilFlags left, StencilFlags right) => left.value | right.value;
+        public static StencilFlags operator |(StencilFlags left, StencilFlags right) {
+            return left.value | right.value;
+        }
 
         /// <summary>
         /// Implements the bitwise-and operator.
@@ -2918,7 +3010,9 @@ namespace SharpBgfx {
         /// <returns>
         /// The result of the operator.
         /// </returns>
-        public static StencilFlags operator &(StencilFlags left, StencilFlags right) => left.value & right.value;
+        public static StencilFlags operator &(StencilFlags left, StencilFlags right) {
+            return left.value & right.value;
+        }
 
         /// <summary>
         /// Implements the bitwise-complement operator.
@@ -2927,7 +3021,9 @@ namespace SharpBgfx {
         /// <returns>
         /// The result of the operator.
         /// </returns>
-        public static StencilFlags operator ~(StencilFlags state) => ~state.value;
+        public static StencilFlags operator ~(StencilFlags state) {
+            return ~state.value;
+        }
 
         /// <summary>
         /// Implements the left shift operator.
@@ -2937,7 +3033,9 @@ namespace SharpBgfx {
         /// <returns>
         /// The result of the operator.
         /// </returns>
-        public static StencilFlags operator <<(StencilFlags state, int amount) => state.value << amount;
+        public static StencilFlags operator <<(StencilFlags state, int amount) {
+            return state.value << amount;
+        }
 
         /// <summary>
         /// Implements the right shift operator.
@@ -2947,7 +3045,9 @@ namespace SharpBgfx {
         /// <returns>
         /// The result of the operator.
         /// </returns>
-        public static StencilFlags operator >>(StencilFlags state, int amount) => state.value >> amount;
+        public static StencilFlags operator >>(StencilFlags state, int amount) {
+            return state.value >> amount;
+        }
     }
 
     /// <summary>
@@ -2966,12 +3066,12 @@ namespace SharpBgfx {
         /// <summary>
         /// A pointer that can be filled with index data.
         /// </summary>
-        public IntPtr Data => data;
+        public IntPtr Data { get { return data; } }
 
         /// <summary>
         /// The size of the buffer.
         /// </summary>
-        public int Count => size;
+        public int Count { get { return size; } }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TransientIndexBuffer"/> struct.
@@ -3018,7 +3118,7 @@ namespace SharpBgfx {
         /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
         /// </returns>
         public override int GetHashCode () {
             return handle.GetHashCode() >> 13 ^ data.GetHashCode();
@@ -3030,7 +3130,9 @@ namespace SharpBgfx {
         /// <returns>
         /// A <see cref="System.String"/> that represents this instance.
         /// </returns>
-        public override string ToString () => $"Count: {Count}";
+        public override string ToString () {
+            return string.Format("Count: {0}", Count);
+        }
 
         /// <summary>
         /// Implements the equality operator.
@@ -3075,12 +3177,12 @@ namespace SharpBgfx {
         /// <summary>
         /// A pointer that can be filled with vertex data.
         /// </summary>
-        public IntPtr Data => data;
+        public IntPtr Data { get { return data; } }
 
         /// <summary>
         /// The size of the buffer.
         /// </summary>
-        public int Count => size;
+        public int Count { get { return size; } }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TransientVertexBuffer"/> struct.
@@ -3131,7 +3233,7 @@ namespace SharpBgfx {
         /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
         /// </returns>
         public override int GetHashCode () {
             return handle.GetHashCode() >> 13 ^ data.GetHashCode();
@@ -3143,7 +3245,9 @@ namespace SharpBgfx {
         /// <returns>
         /// A <see cref="System.String"/> that represents this instance.
         /// </returns>
-        public override string ToString () => $"Count: {Count}";
+        public override string ToString () {
+            return string.Format("Handle: {0}", handle);
+        }
 
         /// <summary>
         /// Implements the equality operator.
@@ -3236,7 +3340,7 @@ namespace SharpBgfx {
         /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
         /// </returns>
         public override int GetHashCode () {
             return handle.GetHashCode();
@@ -3248,7 +3352,9 @@ namespace SharpBgfx {
         /// <returns>
         /// A <see cref="System.String"/> that represents this instance.
         /// </returns>
-        public override string ToString () => $"Handle: {handle}";
+        public override string ToString () {
+            return string.Format("Handle: {0}", handle);
+        }
 
         /// <summary>
         /// Implements the equality operator.
@@ -3326,7 +3432,7 @@ namespace SharpBgfx {
         /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
         /// </returns>
         public override int GetHashCode () {
             return handle.GetHashCode();
@@ -3338,7 +3444,9 @@ namespace SharpBgfx {
         /// <returns>
         /// A <see cref="System.String"/> that represents this instance.
         /// </returns>
-        public override string ToString () => $"Handle: {handle}";
+        public override string ToString () {
+            return string.Format("Handle: {0}", handle);
+        }
 
         /// <summary>
         /// Implements the equality operator.
