@@ -154,6 +154,7 @@ namespace SharpBgfx {
         /// </summary>
         public static void Shutdown () {
             NativeMethods.bgfx_shutdown();
+            CallbackShim.FreeShim();
         }
 
         /// <summary>
@@ -188,27 +189,19 @@ namespace SharpBgfx {
         }
 
         /// <summary>
-        /// Initializes the graphics library with a default backend.
-        /// </summary>
-        public static void Init () {
-            Init((RendererBackend)RendererCount);
-        }
-
-        /// <summary>
-        /// Initializes the graphics library with a specific backend API.
-        /// </summary>
-        /// <param name="backend">The backend API to use for rendering.</param>
-        public static void Init (RendererBackend backend) {
-            Init(backend, new Adapter(Vendor.None, 0));
-        }
-
-        /// <summary>
 		/// Initializes the graphics library on the specified adapter.
 		/// </summary>
 		/// <param name="backend">The backend API to use for rendering.</param>
         /// <param name="adapter">The adapter on which to create the device.</param>
-		public static void Init (RendererBackend backend, Adapter adapter) {
-            NativeMethods.bgfx_init(backend, (ushort)adapter.Vendor, (ushort)adapter.DeviceId, IntPtr.Zero, IntPtr.Zero);
+        /// <param name="callbackHandler">A set of handlers for various library callbacks.</param>
+		public static void Init (RendererBackend backend = RendererBackend.Default, Adapter adapter = default(Adapter), ICallbackHandler callbackHandler = null) {
+            NativeMethods.bgfx_init(
+                backend,
+                (ushort)adapter.Vendor,
+                (ushort)adapter.DeviceId,
+                CallbackShim.CreateShim(callbackHandler),
+                IntPtr.Zero
+            );
         }
 
         /// <summary>
@@ -216,7 +209,7 @@ namespace SharpBgfx {
         /// </summary>
         /// <returns></returns>
         public static RendererBackend[] GetSupportedBackends () {
-            var types = new RendererBackend[RendererCount];
+            var types = new RendererBackend[(int)RendererBackend.Default];
             var count = NativeMethods.bgfx_get_supported_renderers(types);
 
             return types.Take(count).ToArray();
@@ -835,7 +828,5 @@ namespace SharpBgfx {
         public static void SetStencil (StencilFlags frontFace, StencilFlags backFace) {
             NativeMethods.bgfx_set_stencil((uint)frontFace, (uint)backFace);
         }
-
-        const int RendererCount = 6;
     }
 }

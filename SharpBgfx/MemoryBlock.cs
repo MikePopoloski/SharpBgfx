@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Security;
 
 namespace SharpBgfx {
     /// <summary>
     /// Delegate type for callback functions.
     /// </summary>
     /// <param name="userData">User-provided data to the original allocation call.</param>
+    [SuppressUnmanagedCodeSecurity]
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public delegate void ReleaseCallback (IntPtr userData);
 

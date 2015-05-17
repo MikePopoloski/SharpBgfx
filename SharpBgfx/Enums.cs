@@ -38,7 +38,13 @@ namespace SharpBgfx {
         /// <summary>
         /// Vulkan
         /// </summary>
-        Vulkan
+        Vulkan,
+
+        /// <summary>
+        /// Used during initialization; specifies that the library should
+        /// pick the best renderer for the running hardware and OS.
+        /// </summary>
+        Default
     }
 
     /// <summary>
@@ -1133,5 +1139,40 @@ namespace SharpBgfx {
         /// Buffer will be read and written by a compute shader.
         /// </summary>
         ComputeReadWrite = ComputeRead | ComputeWrite
+    }
+
+    /// <summary>
+    /// Specifies various error types that can be reported by bgfx.
+    /// </summary>
+    public enum ErrorType {
+        /// <summary>
+        /// A debug check failed; the program can safely continue, but the issue should be investigated.
+        /// </summary>
+        DebugCheck,
+
+        /// <summary>
+        /// The user's hardware failed checks for the minimum required specs.
+        /// </summary>
+        MinimumRequiredSpecs,
+
+        /// <summary>
+        /// The program tried to compile an invalid shader.
+        /// </summary>
+        InvalidShader,
+
+        /// <summary>
+        /// An error occurred during bgfx library initialization.
+        /// </summary>
+        UnableToInitialize,
+
+        /// <summary>
+        /// Failed while trying to create a texture.
+        /// </summary>
+        UnableToCreateTexture,
+
+        /// <summary>
+        /// The graphics device was lost and the library was unable to recover.
+        /// </summary>
+        DeviceLost
     }
 }
