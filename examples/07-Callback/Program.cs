@@ -2,20 +2,52 @@
 using System.Numerics;
 using Common;
 using SharpBgfx;
+using System.Diagnostics;
+using System.IO;
+using System.Runtime.InteropServices;
 
 class CallbackHandler : ICallbackHandler {
     public void ReportError (ErrorType errorType, string message) {
+        // break if the debugger is attached so we can look at the message
+        Debugger.Break();
+
+        // if this wasn't a debug check, the app is dead
+        if (errorType != ErrorType.DebugCheck)
+            Environment.Exit(1);
     }
 
     public int GetCachedSize (long id) {
-        return 0;
+        var file = GetCacheFile(id);
+        if (!file.Exists)
+            return 0;
+
+        return (int)file.Length;
     }
 
     public bool GetCacheEntry (long id, IntPtr data, int size) {
-        return false;
+        var file = GetCacheFile(id);
+        if (!file.Exists)
+            return false;
+
+        var bytes = new byte[size];
+        using (var stream = file.OpenRead()) {
+            var read = stream.Read(bytes, 0, size);
+            if (read != size)
+                return false;
+        }
+
+        // we could avoid this extra copy with some more work, but I'm lazy
+        Marshal.Copy(bytes, 0, data, size);
+        return true;
     }
 
     public void SetCacheEntry (long id, IntPtr data, int size) {
+        var bytes = new byte[size];
+        Marshal.Copy(data, bytes, 0, size);
+
+        var file = GetCacheFile(id);
+        using (var stream = file.OpenWrite())
+            stream.Write(bytes, 0, size);
     }
 
     public void SaveScreenShot (string path, int width, int height, int pitch, IntPtr data, int size, bool flipVertical) {
@@ -29,6 +61,11 @@ class CallbackHandler : ICallbackHandler {
 
     public void CaptureFinished () {
     }
+
+    static FileInfo GetCacheFile (long id) {
+        // we use the cache id as the filename, and just dump in the current directory
+        return new FileInfo(id.ToString("x"));
+    }
 }
 
 static class Program {
@@ -40,7 +77,7 @@ static class Program {
 
     static unsafe void RenderThread (Sample sample) {
         // initialize the renderer
-        Bgfx.Init(callbackHandler: new CallbackHandler());
+        Bgfx.Init(RendererBackend.OpenGL, callbackHandler: new CallbackHandler());
         Bgfx.Reset(sample.WindowWidth, sample.WindowHeight, ResetFlags.Vsync);
 
         // enable debug text
@@ -104,7 +141,7 @@ static class Program {
             }
 
             // take a screenshot at frame 150
-            if (frame == 50)
+            if (frame == 150)
                 Bgfx.SaveScreenShot("frame150");
 
             // advance to next frame
