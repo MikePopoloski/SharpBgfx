@@ -153,6 +153,23 @@ static class Program {
             // done with frame
             Bgfx.Frame();
         }
+
+        // cleanup
+        if (indirectSupported) {
+            indirectProgram.Dispose();
+            indirectBuffer.Dispose();
+        }
+
+        u_params.Dispose();
+        currPositionBuffer0.Dispose();
+        currPositionBuffer1.Dispose();
+        prevPositionBuffer0.Dispose();
+        prevPositionBuffer1.Dispose();
+        updateInstancesProgram.Dispose();
+        initInstancesProgram.Dispose();
+        particleProgram.Dispose();
+        ib.Dispose();
+        vb.Dispose();
     }
 
     static void RunUnsupported (Sample sample) {
