@@ -67,9 +67,9 @@ static class Program {
 
             // write some debug text
             Bgfx.DebugTextClear();
-            Bgfx.DebugTextWrite(0, 1, 0x4f, "SharpBgfx/Samples/13-Stencil");
-            Bgfx.DebugTextWrite(0, 2, 0x6f, "Description: Stencil reflections.");
-            Bgfx.DebugTextWrite(0, 3, 0x6f, string.Format("Frame: {0:F3} ms", elapsed * 1000));
+            Bgfx.DebugTextWrite(0, 1, DebugColor.White, DebugColor.Blue, "SharpBgfx/Samples/13-Stencil");
+            Bgfx.DebugTextWrite(0, 2, DebugColor.White, DebugColor.Cyan, "Description: Stencil reflections.");
+            Bgfx.DebugTextWrite(0, 3, DebugColor.White, DebugColor.Cyan, "Frame: {0:F3} ms", elapsed * 1000);
 
             // clear the background
             Bgfx.SetViewClear(BaseId, ClearTargets.Color | ClearTargets.Depth | ClearTargets.Stencil, 0x30303000);

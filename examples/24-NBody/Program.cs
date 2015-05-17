@@ -107,9 +107,9 @@ static class Program {
 
             // write some debug text
             Bgfx.DebugTextClear();
-            Bgfx.DebugTextWrite(0, 1, 0x4f, "SharpBgfx/Samples/24-NBody");
-            Bgfx.DebugTextWrite(0, 2, 0x6f, "Description: N-body simulation with compute shaders using buffers.");
-            Bgfx.DebugTextWrite(0, 3, 0x6f, string.Format("Frame: {0:F3} ms", elapsed * 1000));
+            Bgfx.DebugTextWrite(0, 1, DebugColor.White, DebugColor.Blue, "SharpBgfx/Samples/24-NBody");
+            Bgfx.DebugTextWrite(0, 2, DebugColor.White, DebugColor.Cyan, "Description: N-body simulation with compute shaders using buffers.");
+            Bgfx.DebugTextWrite(0, 3, DebugColor.White, DebugColor.Cyan, "Frame: {0:F3} ms", elapsed * 1000);
 
             // fill the indirect buffer if we're using it
             if (useIndirect) {
@@ -178,9 +178,9 @@ static class Program {
             Bgfx.SetViewRect(0, 0, 0, sample.WindowWidth, sample.WindowHeight);
 
             Bgfx.DebugTextClear();
-            Bgfx.DebugTextWrite(0, 1, 0x4f, "SharpBgfx/Samples/24-NBody");
-            Bgfx.DebugTextWrite(0, 2, 0x6f, "Description: N-body simulation with compute shaders using buffers.");
-            Bgfx.DebugTextWrite(0, 5, 0x1f, "Compute is not supported by your GPU.");
+            Bgfx.DebugTextWrite(0, 1, DebugColor.White, DebugColor.Blue, "SharpBgfx/Samples/24-NBody");
+            Bgfx.DebugTextWrite(0, 2, DebugColor.White, DebugColor.Cyan, "Description: N-body simulation with compute shaders using buffers.");
+            Bgfx.DebugTextWrite(0, 5, DebugColor.White, DebugColor.Red, "Compute is not supported by your GPU.");
 
             Bgfx.Submit(0);
             Bgfx.Frame();

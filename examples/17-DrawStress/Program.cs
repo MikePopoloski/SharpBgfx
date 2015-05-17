@@ -80,9 +80,9 @@ static class Program {
 
             // write some debug text
             Bgfx.DebugTextClear();
-            Bgfx.DebugTextWrite(0, 1, 0x4f, "Description: CPU/driver stress test, maximizing draw calls.");
-            Bgfx.DebugTextWrite(0, 2, 0x6f, string.Format("Draw Calls: {0}", cubeDim * cubeDim * cubeDim));
-            Bgfx.DebugTextWrite(0, 3, 0x6f, string.Format("Frame:      {0:F3} ms", elapsed * 1000));
+            Bgfx.DebugTextWrite(0, 1, DebugColor.White, DebugColor.Blue, "Description: CPU/driver stress test, maximizing draw calls.");
+            Bgfx.DebugTextWrite(0, 2, DebugColor.White, DebugColor.Cyan, "Draw Calls: {0}", cubeDim * cubeDim * cubeDim);
+            Bgfx.DebugTextWrite(0, 3, DebugColor.White, DebugColor.Cyan, "Frame:      {0:F3} ms", elapsed * 1000);
 
             for (int z = 0; z < cubeDim; z++) {
                 for (int y = 0; y < cubeDim; y++) {

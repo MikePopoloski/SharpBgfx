@@ -135,10 +135,10 @@ static class Program {
         for (int frame = 0; frame < 300; frame++) {
             // write some debug text
             Bgfx.DebugTextClear();
-            Bgfx.DebugTextWrite(0, 1, 0x4f, "SharpBgfx/Samples/07-Callback");
-            Bgfx.DebugTextWrite(0, 2, 0x6f, "Description: Implementing application specific callbacks for taking screen shots,");
-            Bgfx.DebugTextWrite(13, 3, 0x6f, "caching OpenGL binary shaders, and video capture.");
-            Bgfx.DebugTextWrite(0, 4, 0x6f, string.Format("Frame: {0}", frame));
+            Bgfx.DebugTextWrite(0, 1, DebugColor.White, DebugColor.Blue, "SharpBgfx/Samples/07-Callback");
+            Bgfx.DebugTextWrite(0, 2, DebugColor.White, DebugColor.Cyan, "Description: Implementing application specific callbacks for taking screen shots,");
+            Bgfx.DebugTextWrite(13, 3, DebugColor.White, DebugColor.Cyan, "caching OpenGL binary shaders, and video capture.");
+            Bgfx.DebugTextWrite(0, 4, DebugColor.White, DebugColor.Cyan, "Frame: {0}", frame);
 
             // view transforms
             var viewMatrix = Matrix4x4.CreateLookAt(new Vector3(0.0f, 0.0f, 35.0f), Vector3.Zero, Vector3.UnitY);

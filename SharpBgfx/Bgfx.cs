@@ -245,19 +245,9 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="color">The color with which to clear the background.</param>
         /// <param name="smallText"><c>true</c> to use a small font for debug output; <c>false</c> to use normal sized text.</param>
-        public static void DebugTextClear (byte color = 0, bool smallText = false) {
-            NativeMethods.bgfx_dbg_text_clear(color, smallText);
-        }
-
-        /// <summary>
-        /// Writes debug text to the screen.
-        /// </summary>
-        /// <param name="x">The X position, in cells.</param>
-        /// <param name="y">The Y position, in cells.</param>
-        /// <param name="color">The color of the text.</param>
-        /// <param name="message">The message to write.</param>
-        public static void DebugTextWrite (int x, int y, byte color, string message) {
-            NativeMethods.bgfx_dbg_text_printf((ushort)x, (ushort)y, color, "%s", message);
+        public static void DebugTextClear (DebugColor color = DebugColor.Transparent, bool smallText = false) {
+            var attr = (byte)((byte)color << 4);
+            NativeMethods.bgfx_dbg_text_clear(attr, smallText);
         }
 
         /// <summary>
@@ -268,8 +258,20 @@ namespace SharpBgfx {
         /// <param name="color">The color of the text.</param>
         /// <param name="format">The format of the message.</param>
         /// <param name="args">The arguments with which to format the message.</param>
-        public static void DebugTextWrite (int x, int y, byte color, string format, params object[] args) {
-            NativeMethods.bgfx_dbg_text_printf((ushort)x, (ushort)y, color, "%s", string.Format(CultureInfo.CurrentCulture, format, args));
+        public static void DebugTextWrite (int x, int y, DebugColor foreColor, DebugColor backColor, string format, params object[] args) {
+            DebugTextWrite(x, y, foreColor, backColor, string.Format(CultureInfo.CurrentCulture, format, args));
+        }
+
+        /// <summary>
+        /// Writes debug text to the screen.
+        /// </summary>
+        /// <param name="x">The X position, in cells.</param>
+        /// <param name="y">The Y position, in cells.</param>
+        /// <param name="color">The color of the text.</param>
+        /// <param name="message">The message to write.</param>
+        public static void DebugTextWrite (int x, int y, DebugColor foreColor, DebugColor backColor, string message) {
+            var attr = (byte)(((byte)backColor << 4) | (byte)foreColor);
+            NativeMethods.bgfx_dbg_text_printf((ushort)x, (ushort)y, attr, "%s", message);
         }
 
         /// <summary>

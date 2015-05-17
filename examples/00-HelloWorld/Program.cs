@@ -30,8 +30,8 @@ static class Program {
 
             // write some debug text
             Bgfx.DebugTextClear();
-            Bgfx.DebugTextWrite(0, 1, 0x4f, "SharpBgfx/Samples/00-HelloWorld");
-            Bgfx.DebugTextWrite(0, 2, 0x6f, "Description: Initialization and debug text.");
+            Bgfx.DebugTextWrite(0, 1, DebugColor.White, DebugColor.Blue, "SharpBgfx/Samples/00-HelloWorld");
+            Bgfx.DebugTextWrite(0, 2, DebugColor.White, DebugColor.Cyan, "Description: Initialization and debug text.");
 
             // advance to the next frame. Rendering thread will be kicked to
             // process submitted rendering primitives.

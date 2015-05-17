@@ -1175,4 +1175,89 @@ namespace SharpBgfx {
         /// </summary>
         DeviceLost
     }
+
+    /// <summary>
+    /// Specifies debug text colors.
+    /// </summary>
+    public enum DebugColor {
+        /// <summary>
+        /// Transparent.
+        /// </summary>
+        Transparent,
+
+        /// <summary>
+        /// Red.
+        /// </summary>
+        Red,
+
+        /// <summary>
+        /// Green.
+        /// </summary>
+        Green,
+
+        /// <summary>
+        /// Yellow.
+        /// </summary>
+        Yellow,
+
+        /// <summary>
+        /// Blue.
+        /// </summary>
+        Blue,
+
+        /// <summary>
+        /// Purple.
+        /// </summary>
+        Purple,
+
+        /// <summary>
+        /// Cyan.
+        /// </summary>
+        Cyan,
+
+        /// <summary>
+        /// Gray.
+        /// </summary>
+        Gray,
+
+        /// <summary>
+        /// Dark gray.
+        /// </summary>
+        DarkGray,
+
+        /// <summary>
+        /// Light red.
+        /// </summary>
+        LightRed,
+
+        /// <summary>
+        /// Light green.
+        /// </summary>
+        LightGreen,
+
+        /// <summary>
+        /// Light yellow.
+        /// </summary>
+        LightYellow,
+
+        /// <summary>
+        /// Light blue.
+        /// </summary>
+        LightBlue,
+
+        /// <summary>
+        /// Light purple.
+        /// </summary>
+        LightPurple,
+
+        /// <summary>
+        /// Light cyan.
+        /// </summary>
+        LightCyan,
+
+        /// <summary>
+        /// White.
+        /// </summary>
+        White
+    }
 }
