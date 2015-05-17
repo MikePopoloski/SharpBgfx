@@ -7,6 +7,8 @@ using System.IO;
 using System.Runtime.InteropServices;
 
 class CallbackHandler : ICallbackHandler {
+    AviWriter aviWriter;
+
     public void ReportError (ErrorType errorType, string message) {
         // break if the debugger is attached so we can look at the message
         Debugger.Break();
@@ -51,15 +53,49 @@ class CallbackHandler : ICallbackHandler {
     }
 
     public void SaveScreenShot (string path, int width, int height, int pitch, IntPtr data, int size, bool flipVertical) {
+        // save screenshot as TGA
+        var file = File.Create(Path.ChangeExtension(path, "tga"));
+        using (var writer = new BinaryWriter(file)) {
+            // write header
+            var header = new byte[18];
+            header[2] = 2;      // uncompressed RGB
+            header[12] = (byte)width;
+            header[13] = (byte)(width >> 8);
+            header[14] = (byte)height;
+            header[15] = (byte)(height >> 8);
+            header[16] = 32;    // bpp
+            header[17] = 32;    // origin upper-left
+            writer.Write(header);
+
+            var destPitch = width * 4;
+            var srcPitch = pitch;
+            var dataPtr = data;
+            if (flipVertical) {
+                dataPtr += srcPitch * (height - 1);
+                srcPitch = -srcPitch;
+            }
+
+            // write image data
+            var buffer = new byte[destPitch];
+            for (int y = 0; y < height; y++) {
+                Marshal.Copy(dataPtr, buffer, 0, destPitch);
+                writer.Write(buffer);
+                dataPtr += srcPitch;
+            }
+        }
     }
 
     public void CaptureStarted (int width, int height, int pitch, TextureFormat format, bool flipVertical) {
+        aviWriter = new AviWriter(File.Create("capture.avi", pitch * height), width, height, 60, !flipVertical);
     }
 
     public void CaptureFrame (IntPtr data, int size) {
+        aviWriter.WriteFrame(data, size);
     }
 
     public void CaptureFinished () {
+        aviWriter.Close();
+        aviWriter = null;
     }
 
     static FileInfo GetCacheFile (long id) {
@@ -78,7 +114,7 @@ static class Program {
     static unsafe void RenderThread (Sample sample) {
         // initialize the renderer
         Bgfx.Init(RendererBackend.OpenGL, callbackHandler: new CallbackHandler());
-        Bgfx.Reset(sample.WindowWidth, sample.WindowHeight, ResetFlags.Vsync);
+        Bgfx.Reset(sample.WindowWidth, sample.WindowHeight, ResetFlags.MSAA16x | ResetFlags.Capture);
 
         // enable debug text
         Bgfx.SetDebugFeatures(DebugFeatures.DisplayText);
@@ -94,22 +130,15 @@ static class Program {
         // load shaders
         var program = ResourceLoader.LoadProgram("vs_callback", "fs_callback");
 
-        // start the frame clock
-        var time = 0.0f;
-        var clock = new Clock();
-        clock.Start();
-
         // 5 seconds of 60 Hz video
+        var time = 0.0f;
         for (int frame = 0; frame < 300; frame++) {
-            // tick the clock
-            var elapsed = clock.Frame();
-
             // write some debug text
             Bgfx.DebugTextClear();
             Bgfx.DebugTextWrite(0, 1, 0x4f, "SharpBgfx/Samples/07-Callback");
             Bgfx.DebugTextWrite(0, 2, 0x6f, "Description: Implementing application specific callbacks for taking screen shots,");
             Bgfx.DebugTextWrite(13, 3, 0x6f, "caching OpenGL binary shaders, and video capture.");
-            Bgfx.DebugTextWrite(0, 4, 0x6f, string.Format("Frame: {0:F3} ms", elapsed * 1000));
+            Bgfx.DebugTextWrite(0, 4, 0x6f, string.Format("Frame: {0}", frame));
 
             // view transforms
             var viewMatrix = Matrix4x4.CreateLookAt(new Vector3(0.0f, 0.0f, 35.0f), Vector3.Zero, Vector3.UnitY);
