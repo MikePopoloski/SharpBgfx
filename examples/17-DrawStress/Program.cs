@@ -16,7 +16,7 @@ static class Program {
 
     static unsafe void RenderThread (Sample sample) {
         // initialize the renderer
-        Bgfx.Init(RendererBackend.OpenGL);
+        Bgfx.Init();
         Bgfx.Reset(sample.WindowWidth, sample.WindowHeight, ResetFlags.None);
 
         // enable debug text
@@ -26,9 +26,8 @@ static class Program {
         Bgfx.SetViewClear(0, ClearTargets.Color | ClearTargets.Depth, 0x303030ff);
 
         // create vertex and index buffers
-        PosColorVertex.Init();
-        var vbh = new VertexBuffer(MemoryBlock.FromArray(cubeVertices), PosColorVertex.Layout);
-        var ibh = new IndexBuffer(MemoryBlock.FromArray(cubeIndices));
+        var vbh = Cube.CreateVertexBuffer();
+        var ibh = Cube.CreateIndexBuffer();
 
         // load shaders
         var program = ResourceLoader.LoadProgram("vs_cubes", "fs_cubes");
@@ -118,30 +117,4 @@ static class Program {
         program.Dispose();
         Bgfx.Shutdown();
     }
-
-    static readonly PosColorVertex[] cubeVertices = {
-        new PosColorVertex(-0.25f,  0.25f,  0.25f, 0xff000000),
-        new PosColorVertex( 0.25f,  0.25f,  0.25f, 0xff0000ff),
-        new PosColorVertex(-0.25f, -0.25f,  0.25f, 0xff00ff00),
-        new PosColorVertex( 0.25f, -0.25f,  0.25f, 0xff00ffff),
-        new PosColorVertex(-0.25f,  0.25f, -0.25f, 0xffff0000),
-        new PosColorVertex( 0.25f,  0.25f, -0.25f, 0xffff00ff),
-        new PosColorVertex(-0.25f, -0.25f, -0.25f, 0xffffff00),
-        new PosColorVertex( 0.25f, -0.25f, -0.25f, 0xffffffff)
-    };
-
-    static readonly ushort[] cubeIndices = {
-        0, 1, 2, // 0
-        1, 3, 2,
-        4, 6, 5, // 2
-        5, 6, 7,
-        0, 2, 4, // 4
-        4, 2, 6,
-        1, 5, 3, // 6
-        5, 7, 3,
-        0, 4, 1, // 8
-        4, 5, 1,
-        2, 3, 6, // 10
-        6, 3, 7
-    };
 }

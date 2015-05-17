@@ -19,7 +19,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "examples\Common\C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "24-NBody", "examples\24-NBody\24-NBody.csproj", "{2BBD11C1-C556-4590-972D-A53ADF5E3570}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "07-Callback", "07-Callback\07-Callback.csproj", "{EC672F1C-A98C-4E7D-B00A-8FF1D5F41AB2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "07-Callback", "examples\07-Callback\07-Callback.csproj", "{EC672F1C-A98C-4E7D-B00A-8FF1D5F41AB2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

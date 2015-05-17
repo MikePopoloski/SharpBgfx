@@ -13,7 +13,7 @@ static class Program {
 
     static unsafe void RenderThread (Sample sample) {
         // initialize the renderer
-        Bgfx.Init(RendererBackend.Direct3D11);
+        Bgfx.Init();
         Bgfx.Reset(sample.WindowWidth, sample.WindowHeight, ResetFlags.Vsync);
 
         // enable debug text
@@ -27,7 +27,6 @@ static class Program {
         var programTexture = ResourceLoader.LoadProgram("vs_stencil_texture", "fs_stencil_texture");
 
         // load meshes
-        PosNormalTexcoordVertex.Init();
         var bunnyMesh = ResourceLoader.LoadMesh("bunny.bin");
         var columnMesh = ResourceLoader.LoadMesh("column.bin");
         var hplaneMesh = new Mesh(MemoryBlock.FromArray(StaticMeshes.HorizontalPlane), PosNormalTexcoordVertex.Layout, StaticMeshes.PlaneIndices);

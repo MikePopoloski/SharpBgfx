@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="Clock.cs" />
     <Compile Include="Color4.cs" />
+    <Compile Include="Cube.cs" />
     <Compile Include="EventQueue.cs" />
     <Compile Include="KnownColors.cs" />
     <Compile Include="MathHelpers.cs" />
