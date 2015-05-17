@@ -80,7 +80,7 @@ namespace SharpBgfx {
     }
 
     struct CallbackShim {
-        IntPtr unused;
+        IntPtr vtbl;
         IntPtr reportError;
         IntPtr getCachedSize;
         IntPtr getCacheEntry;
@@ -101,6 +101,11 @@ namespace SharpBgfx {
             var shim = (CallbackShim*)memory;
             var saver = new DelegateSaver(handler, shim);
 
+            // the shim uses the unnecessary ctor slot to act as a vtbl pointer to itself,
+            // so that the same block of memory can act as both bgfx_callback_interface_t and bgfx_callback_vtbl_t
+            shim->vtbl = memory;
+
+            // cache the data so we can free it later
             shimMemory = memory;
             savedDelegates = saver;
 
@@ -116,42 +121,43 @@ namespace SharpBgfx {
         }
 
         [SuppressUnmanagedCodeSecurity]
-        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        delegate void ReportErrorHandler (ErrorType errorType, string message);
+        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        delegate void ReportErrorHandler (IntPtr thisPtr, ErrorType errorType, string message);
 
         [SuppressUnmanagedCodeSecurity]
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        delegate int GetCachedSizeHandler (long id);
+        delegate int GetCachedSizeHandler (IntPtr thisPtr, long id);
 
         [SuppressUnmanagedCodeSecurity]
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        delegate bool GetCacheEntryHandler (long id, IntPtr data, int size);
+        delegate bool GetCacheEntryHandler (IntPtr thisPtr, long id, IntPtr data, int size);
 
         [SuppressUnmanagedCodeSecurity]
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        delegate void SetCacheEntryHandler (long id, IntPtr data, int size);
+        delegate void SetCacheEntryHandler (IntPtr thisPtr, long id, IntPtr data, int size);
+
+        [SuppressUnmanagedCodeSecurity]
+        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        delegate void SaveScreenShotHandler (IntPtr thisPtr, string path, int width, int height, int pitch, IntPtr data, int size, [MarshalAs(UnmanagedType.U1)] bool flipVertical);
 
         [SuppressUnmanagedCodeSecurity]
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        delegate void SaveScreenShotHandler (string path, int width, int height, int pitch, IntPtr data, int size, bool flipVertical);
+        delegate void CaptureStartedHandler (IntPtr thisPtr, int width, int height, int pitch, TextureFormat format, [MarshalAs(UnmanagedType.U1)] bool flipVertical);
 
         [SuppressUnmanagedCodeSecurity]
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        delegate void CaptureStartedHandler (int width, int height, int pitch, TextureFormat format, bool flipVertical);
+        delegate void CaptureFinishedHandler (IntPtr thisPtr);
 
         [SuppressUnmanagedCodeSecurity]
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        delegate void CaptureFinishedHandler ();
-
-        [SuppressUnmanagedCodeSecurity]
-        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        delegate void CaptureFrameHandler (IntPtr data, int size);
+        delegate void CaptureFrameHandler (IntPtr thisPtr, IntPtr data, int size);
 
         // We're creating delegates to a user's interface methods; we're then converting those delegates
         // to native pointers and passing them into native code. If we don't save the references to the
         // delegates in managed land somewhere, the GC will think they're unreference and clean them
         // up, leaving native holding a bag of pointers into nowhere land.
         class DelegateSaver {
+            ICallbackHandler handler;
             ReportErrorHandler reportError;
             GetCachedSizeHandler getCachedSize;
             GetCacheEntryHandler getCacheEntry;
@@ -162,16 +168,16 @@ namespace SharpBgfx {
             CaptureFrameHandler captureFrame;
 
             public unsafe DelegateSaver (ICallbackHandler handler, CallbackShim* shim) {
-                reportError = handler.ReportError;
-                getCachedSize = handler.GetCachedSize;
-                getCacheEntry = handler.GetCacheEntry;
-                setCacheEntry = handler.SetCacheEntry;
-                saveScreenShot = handler.SaveScreenShot;
-                captureStarted = handler.CaptureStarted;
-                captureFinished = handler.CaptureFinished;
-                captureFrame = handler.CaptureFrame;
+                this.handler = handler;
+                reportError = ReportError;
+                getCachedSize = GetCachedSize;
+                getCacheEntry = GetCacheEntry;
+                setCacheEntry = SetCacheEntry;
+                saveScreenShot = SaveScreenShot;
+                captureStarted = CaptureStarted;
+                captureFinished = CaptureFinished;
+                captureFrame = CaptureFrame;
 
-                shim->unused = IntPtr.Zero;
                 shim->reportError = Marshal.GetFunctionPointerForDelegate(reportError);
                 shim->getCachedSize = Marshal.GetFunctionPointerForDelegate(getCachedSize);
                 shim->getCacheEntry = Marshal.GetFunctionPointerForDelegate(getCacheEntry);
@@ -180,6 +186,38 @@ namespace SharpBgfx {
                 shim->captureStarted = Marshal.GetFunctionPointerForDelegate(captureStarted);
                 shim->captureFinished = Marshal.GetFunctionPointerForDelegate(captureFinished);
                 shim->captureFrame = Marshal.GetFunctionPointerForDelegate(captureFrame);
+            }
+
+            void ReportError (IntPtr thisPtr, ErrorType errorType, string message) {
+                handler.ReportError(errorType, message);
+            }
+
+            int GetCachedSize (IntPtr thisPtr, long id) {
+                return handler.GetCachedSize(id);
+            }
+
+            bool GetCacheEntry (IntPtr thisPtr, long id, IntPtr data, int size) {
+                return handler.GetCacheEntry(id, data, size);
+            }
+
+            void SetCacheEntry (IntPtr thisPtr, long id, IntPtr data, int size) {
+                handler.SetCacheEntry(id, data, size);
+            }
+
+            void SaveScreenShot (IntPtr thisPtr, string path, int width, int height, int pitch, IntPtr data, int size, bool flipVertical) {
+                handler.SaveScreenShot(path, width, height, pitch, data, size, flipVertical);
+            }
+
+            void CaptureStarted (IntPtr thisPtr, int width, int height, int pitch, TextureFormat format, bool flipVertical) {
+                handler.CaptureStarted(width, height, pitch, format, flipVertical);
+            }
+
+            void CaptureFinished (IntPtr thisPtr) {
+                handler.CaptureFinished();
+            }
+
+            void CaptureFrame (IntPtr thisPtr, IntPtr data, int size) {
+                handler.CaptureFrame(data, size);
             }
         }
 

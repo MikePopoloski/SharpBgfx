@@ -3,6 +3,34 @@ using System.Numerics;
 using Common;
 using SharpBgfx;
 
+class CallbackHandler : ICallbackHandler {
+    public void ReportError (ErrorType errorType, string message) {
+    }
+
+    public int GetCachedSize (long id) {
+        return 0;
+    }
+
+    public bool GetCacheEntry (long id, IntPtr data, int size) {
+        return false;
+    }
+
+    public void SetCacheEntry (long id, IntPtr data, int size) {
+    }
+
+    public void SaveScreenShot (string path, int width, int height, int pitch, IntPtr data, int size, bool flipVertical) {
+    }
+
+    public void CaptureStarted (int width, int height, int pitch, TextureFormat format, bool flipVertical) {
+    }
+
+    public void CaptureFrame (IntPtr data, int size) {
+    }
+
+    public void CaptureFinished () {
+    }
+}
+
 static class Program {
     static void Main () {
         // create a UI thread and kick off a separate render thread
@@ -12,7 +40,7 @@ static class Program {
 
     static unsafe void RenderThread (Sample sample) {
         // initialize the renderer
-        Bgfx.Init();
+        Bgfx.Init(callbackHandler: new CallbackHandler());
         Bgfx.Reset(sample.WindowWidth, sample.WindowHeight, ResetFlags.Vsync);
 
         // enable debug text
@@ -76,7 +104,7 @@ static class Program {
             }
 
             // take a screenshot at frame 150
-            if (frame == 150)
+            if (frame == 50)
                 Bgfx.SaveScreenShot("frame150");
 
             // advance to next frame
