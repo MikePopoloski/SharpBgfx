@@ -28,6 +28,82 @@ using System.Security;
 
 namespace SharpBgfx {
     /// <summary>
+    /// Provides an interface for programs to respond to callbacks from the bgfx library.
+    /// </summary>
+    public interface ICallbackHandler {
+        /// <summary>
+        /// Called when an error occurs in the library.
+        /// </summary>
+        /// <param name="errorType">The type of error that occurred.</param>
+        /// <param name="message">Message string detailing what went wrong.</param>
+        /// <remarks>
+        /// If the error type is not <see cref="ErrorType.DebugCheck"/>, bgfx is in an
+        /// unrecoverable state and the application should terminate.
+        /// 
+        /// This method can be called from any thread.
+        /// </remarks>
+        void ReportError (ErrorType errorType, string message);
+
+        /// <summary>
+        /// Queries the size of a cache item.
+        /// </summary>
+        /// <param name="id">The cache entry ID.</param>
+        /// <returns>The size of the cache item, or 0 if the item is not found.</returns>
+        int GetCachedSize (long id);
+
+        /// <summary>
+        /// Retrieves an entry from the cache.
+        /// </summary>
+        /// <param name="id">The cache entry ID.</param>
+        /// <param name="data">A pointer that should be filled with data from the cache.</param>
+        /// <param name="size">The size of the memory block pointed to be <paramref name="data"/>.</param>
+        /// <returns><c>true</c> if the item is found in the cache; otherwise, <c>false</c>.</returns>
+        bool GetCacheEntry (long id, IntPtr data, int size);
+
+        /// <summary>
+        /// Saves an entry in the cache.
+        /// </summary>
+        /// <param name="id">The cache entry ID.</param>
+        /// <param name="data">A pointer to the data to save in the cache.</param>
+        /// <param name="size">The size of the memory block pointed to be <paramref name="data"/>.</param>
+        void SetCacheEntry (long id, IntPtr data, int size);
+
+        /// <summary>
+        /// Save a captured screenshot.
+        /// </summary>
+        /// <param name="path">The path at which to save the image.</param>
+        /// <param name="width">The width of the image.</param>
+        /// <param name="height">The height of the image.</param>
+        /// <param name="pitch">The number of bytes between lines in the image.</param>
+        /// <param name="data">A pointer to the image data to save.</param>
+        /// <param name="size">The size of the image memory.</param>
+        /// <param name="flipVertical"><c>true</c> if the image origin is bottom left instead of top left; otherwise, <c>false</c>.</param>
+        void SaveScreenShot (string path, int width, int height, int pitch, IntPtr data, int size, bool flipVertical);
+
+        /// <summary>
+        /// Notifies that a frame capture has begun.
+        /// </summary>
+        /// <param name="width">The width of the capture surface.</param>
+        /// <param name="height">The height of the capture surface.</param>
+        /// <param name="pitch">The number of bytes between lines in the captured frames.</param>
+        /// <param name="format">The format of captured frames.</param>
+        /// <param name="flipVertical"><c>true</c> if the image origin is bottom left instead of top left; otherwise, <c>false</c>.</param>
+        void CaptureStarted (int width, int height, int pitch, TextureFormat format, bool flipVertical);
+
+        /// <summary>
+        /// Notifies that a frame capture has finished.
+        /// </summary>
+        void CaptureFinished ();
+
+        /// <summary>
+        /// Notifies that a frame has been captured.
+        /// </summary>
+        /// <param name="data">A pointer to the frame data.</param>
+        /// <param name="size">The size of the frame data.</param>
+        void CaptureFrame (IntPtr data, int size);
+    }
+
+    /// <summary>
     /// Managed interface to the bgfx graphics library.
     /// </summary>
     public unsafe static class Bgfx {
@@ -177,6 +253,7 @@ namespace SharpBgfx {
         /// </summary>
         public static void Shutdown () {
             NativeMethods.bgfx_shutdown();
+            CallbackShim.FreeShim();
         }
 
         /// <summary>
@@ -211,27 +288,19 @@ namespace SharpBgfx {
         }
 
         /// <summary>
-        /// Initializes the graphics library with a default backend.
-        /// </summary>
-        public static void Init () {
-            Init((RendererBackend)RendererCount);
-        }
-
-        /// <summary>
-        /// Initializes the graphics library with a specific backend API.
-        /// </summary>
-        /// <param name="backend">The backend API to use for rendering.</param>
-        public static void Init (RendererBackend backend) {
-            Init(backend, new Adapter(Vendor.None, 0));
-        }
-
-        /// <summary>
 		/// Initializes the graphics library on the specified adapter.
 		/// </summary>
 		/// <param name="backend">The backend API to use for rendering.</param>
         /// <param name="adapter">The adapter on which to create the device.</param>
-		public static void Init (RendererBackend backend, Adapter adapter) {
-            NativeMethods.bgfx_init(backend, (ushort)adapter.Vendor, (ushort)adapter.DeviceId, IntPtr.Zero, IntPtr.Zero);
+        /// <param name="callbackHandler">A set of handlers for various library callbacks.</param>
+		public static void Init (RendererBackend backend = RendererBackend.Default, Adapter adapter = default(Adapter), ICallbackHandler callbackHandler = null) {
+            NativeMethods.bgfx_init(
+                backend,
+                (ushort)adapter.Vendor,
+                (ushort)adapter.DeviceId,
+                CallbackShim.CreateShim(callbackHandler),
+                IntPtr.Zero
+            );
         }
 
         /// <summary>
@@ -239,7 +308,7 @@ namespace SharpBgfx {
         /// </summary>
         /// <returns></returns>
         public static RendererBackend[] GetSupportedBackends () {
-            var types = new RendererBackend[RendererCount];
+            var types = new RendererBackend[(int)RendererBackend.Default];
             var count = NativeMethods.bgfx_get_supported_renderers(types);
 
             return types.Take(count).ToArray();
@@ -275,19 +344,9 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="color">The color with which to clear the background.</param>
         /// <param name="smallText"><c>true</c> to use a small font for debug output; <c>false</c> to use normal sized text.</param>
-        public static void DebugTextClear (byte color = 0, bool smallText = false) {
-            NativeMethods.bgfx_dbg_text_clear(color, smallText);
-        }
-
-        /// <summary>
-        /// Writes debug text to the screen.
-        /// </summary>
-        /// <param name="x">The X position, in cells.</param>
-        /// <param name="y">The Y position, in cells.</param>
-        /// <param name="color">The color of the text.</param>
-        /// <param name="message">The message to write.</param>
-        public static void DebugTextWrite (int x, int y, byte color, string message) {
-            NativeMethods.bgfx_dbg_text_printf((ushort)x, (ushort)y, color, "%s", message);
+        public static void DebugTextClear (DebugColor color = DebugColor.Transparent, bool smallText = false) {
+            var attr = (byte)((byte)color << 4);
+            NativeMethods.bgfx_dbg_text_clear(attr, smallText);
         }
 
         /// <summary>
@@ -298,8 +357,36 @@ namespace SharpBgfx {
         /// <param name="color">The color of the text.</param>
         /// <param name="format">The format of the message.</param>
         /// <param name="args">The arguments with which to format the message.</param>
-        public static void DebugTextWrite (int x, int y, byte color, string format, params object[] args) {
-            NativeMethods.bgfx_dbg_text_printf((ushort)x, (ushort)y, color, "%s", string.Format(CultureInfo.CurrentCulture, format, args));
+        public static void DebugTextWrite (int x, int y, DebugColor foreColor, DebugColor backColor, string format, params object[] args) {
+            DebugTextWrite(x, y, foreColor, backColor, string.Format(CultureInfo.CurrentCulture, format, args));
+        }
+
+        /// <summary>
+        /// Writes debug text to the screen.
+        /// </summary>
+        /// <param name="x">The X position, in cells.</param>
+        /// <param name="y">The Y position, in cells.</param>
+        /// <param name="color">The color of the text.</param>
+        /// <param name="message">The message to write.</param>
+        public static void DebugTextWrite (int x, int y, DebugColor foreColor, DebugColor backColor, string message) {
+            var attr = (byte)(((byte)backColor << 4) | (byte)foreColor);
+            NativeMethods.bgfx_dbg_text_printf((ushort)x, (ushort)y, attr, "%s", message);
+        }
+
+        /// <summary>
+        /// Writes debug text to the screen.
+        /// </summary>
+        /// <param name="x">The X position, in cells.</param>
+        /// <param name="y">The Y position, in cells.</param>
+        /// <param name="color">The color of the text.</param>
+        /// <param name="message">The message to write.</param>
+        public static void DebugTextWrite (int x, int y, DebugColor foreColor, DebugColor backColor, IntPtr message) {
+            var attr = (byte)(((byte)backColor << 4) | (byte)foreColor);
+            var format = stackalloc byte[3];
+            format[0] = (byte)'%';
+            format[1] = (byte)'s';
+            format[2] = 0;
+            NativeMethods.bgfx_dbg_text_printf((ushort)x, (ushort)y, attr, format, message);
         }
 
         /// <summary>
@@ -356,7 +443,7 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="id">The index of the view.</param>
         /// <param name="targets">The target surfaces that should be cleared.</param>
-        /// <param name="color">The clear color.</param>
+        /// <param name="colorRgba">The clear color.</param>
         /// <param name="depth">The value to fill the depth buffer.</param>
         /// <param name="stencil">The value to fill the stencil buffer.</param>
         public static void SetViewClear (byte id, ClearTargets targets, int colorRgba, float depth = 1.0f, byte stencil = 0) {
@@ -589,6 +676,26 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// Sets instance data to use for drawing primitives.
+        /// </summary>
+        /// <param name="vertexBuffer">The vertex buffer containing instance data.</param>
+        /// <param name="firstVertex">The index of the first vertex to use.</param>
+        /// <param name="count">The number of vertices to pull from the buffer.</param>
+        public static void SetInstanceDataBuffer (VertexBuffer vertexBuffer, int firstVertex, int count) {
+            NativeMethods.bgfx_set_instance_data_from_vertex_buffer(vertexBuffer.handle, firstVertex, count);
+        }
+
+        /// <summary>
+        /// Sets instance data to use for drawing primitives.
+        /// </summary>
+        /// <param name="vertexBuffer">The vertex buffer containing instance data.</param>
+        /// <param name="firstVertex">The index of the first vertex to use.</param>
+        /// <param name="count">The number of vertices to pull from the buffer.</param>
+        public static void SetInstanceDataBuffer (DynamicVertexBuffer vertexBuffer, int firstVertex, int count) {
+            NativeMethods.bgfx_set_instance_data_from_dynamic_vertex_buffer(vertexBuffer.handle, firstVertex, count);
+        }
+
+        /// <summary>
         /// Sets the value of a uniform parameter.
         /// </summary>
         /// <param name="uniform">The uniform to set.</param>
@@ -664,29 +771,79 @@ namespace SharpBgfx {
         }
 
         /// <summary>
-        /// Sets a texture mip as a compute buffer.
+        /// Sets a texture mip as a compute image.
         /// </summary>
-        /// <param name="textureUnit">The texture unit to set.</param>
+        /// <param name="stage">The buffer stage to set.</param>
         /// <param name="sampler">The sampler uniform.</param>
         /// <param name="texture">The texture to set.</param>
         /// <param name="mip">The index of the mip level within the texture to set.</param>
         /// <param name="format">The format of the buffer data.</param>
         /// <param name="access">Access control flags.</param>
-        public static void SetComputeBuffer (byte textureUnit, Uniform sampler, Texture texture, byte mip, TextureFormat format, ComputeBufferAccess access) {
-            NativeMethods.bgfx_set_image(textureUnit, sampler.handle, texture.handle, mip, format, access);
+        public static void SetComputeImage (byte stage, Uniform sampler, Texture texture, byte mip, ComputeBufferAccess access, TextureFormat format = TextureFormat.Unknown) {
+            NativeMethods.bgfx_set_image(stage, sampler.handle, texture.handle, mip, format, access);
         }
 
         /// <summary>
-        /// Sets a frame buffer attachment as a compute buffer.
+        /// Sets a frame buffer attachment as a compute image.
         /// </summary>
-        /// <param name="textureUnit">The texture unit to set.</param>
+        /// <param name="stage">The buffer stage to set.</param>
         /// <param name="sampler">The sampler uniform.</param>
         /// <param name="frameBuffer">The frame buffer.</param>
         /// <param name="attachment">The attachment index.</param>
         /// <param name="format">The format of the buffer data.</param>
         /// <param name="access">Access control flags.</param>
-        public static void SetComputeBuffer (byte textureUnit, Uniform sampler, FrameBuffer frameBuffer, byte attachment, TextureFormat format, ComputeBufferAccess access) {
-            NativeMethods.bgfx_set_image_from_frame_buffer(textureUnit, sampler.handle, frameBuffer.handle, attachment, format, access);
+        public static void SetComputeImage (byte stage, Uniform sampler, FrameBuffer frameBuffer, byte attachment, ComputeBufferAccess access, TextureFormat format = TextureFormat.Unknown) {
+            NativeMethods.bgfx_set_image_from_frame_buffer(stage, sampler.handle, frameBuffer.handle, attachment, format, access);
+        }
+
+        /// <summary>
+        /// Sets an index buffer as a compute resource.
+        /// </summary>
+        /// <param name="stage">The resource stage to set.</param>
+        /// <param name="buffer">The buffer to set.</param>
+        /// <param name="access">Access control flags.</param>
+        public static void SetComputeBuffer (byte stage, IndexBuffer buffer, ComputeBufferAccess access) {
+            NativeMethods.bgfx_set_compute_index_buffer(stage, buffer.handle, access);
+        }
+
+        /// <summary>
+        /// Sets a verterx buffer as a compute resource.
+        /// </summary>
+        /// <param name="stage">The resource stage to set.</param>
+        /// <param name="buffer">The buffer to set.</param>
+        /// <param name="access">Access control flags.</param>
+        public static void SetComputeBuffer (byte stage, VertexBuffer buffer, ComputeBufferAccess access) {
+            NativeMethods.bgfx_set_compute_vertex_buffer(stage, buffer.handle, access);
+        }
+
+        /// <summary>
+        /// Sets a dynamic index buffer as a compute resource.
+        /// </summary>
+        /// <param name="stage">The resource stage to set.</param>
+        /// <param name="buffer">The buffer to set.</param>
+        /// <param name="access">Access control flags.</param>
+        public static void SetComputeBuffer (byte stage, DynamicIndexBuffer buffer, ComputeBufferAccess access) {
+            NativeMethods.bgfx_set_compute_dynamic_index_buffer(stage, buffer.handle, access);
+        }
+
+        /// <summary>
+        /// Sets a dynamic vertex buffer as a compute resource.
+        /// </summary>
+        /// <param name="stage">The resource stage to set.</param>
+        /// <param name="buffer">The buffer to set.</param>
+        /// <param name="access">Access control flags.</param>
+        public static void SetComputeBuffer (byte stage, DynamicVertexBuffer buffer, ComputeBufferAccess access) {
+            NativeMethods.bgfx_set_compute_dynamic_vertex_buffer(stage, buffer.handle, access);
+        }
+
+        /// <summary>
+        /// Sets an indirect buffer as a compute resource.
+        /// </summary>
+        /// <param name="stage">The resource stage to set.</param>
+        /// <param name="buffer">The buffer to set.</param>
+        /// <param name="access">Access control flags.</param>
+        public static void SetComputeBuffer (byte stage, IndirectBuffer buffer, ComputeBufferAccess access) {
+            NativeMethods.bgfx_set_compute_indirect_buffer(stage, buffer.handle, access);
         }
 
         /// <summary>
@@ -700,6 +857,19 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// Submits an indirect batch of drawing commands to be used for rendering.
+        /// </summary>
+        /// <param name="id">The index of the view to submit.</param>
+        /// <param name="indirectBuffer">The buffer containing drawing commands.</param>
+        /// <param name="startIndex">The index of the first command to process.</param>
+        /// <param name="count">The number of commands to process from the buffer.</param>
+        /// <param name="depth">A depth value to use for sorting the batch.</param>
+        /// <returns>The number of draw calls.</returns>
+        public static int Submit (byte id, IndirectBuffer indirectBuffer, int startIndex = 0, int count = 1, int depth = 0) {
+            return NativeMethods.bgfx_submit(id, depth);
+        }
+
+        /// <summary>
         /// Discards all previously set state for the draw call.
         /// </summary>
         public static void Discard () {
@@ -709,13 +879,29 @@ namespace SharpBgfx {
         /// <summary>
         /// Dispatches a compute job.
         /// </summary>
-        /// <param name="id">The index of the view.</param>
+        /// <param name="id">The index of the view to dispatch.</param>
         /// <param name="program">The shader program to use.</param>
         /// <param name="xCount">The size of the job in the first dimension.</param>
         /// <param name="yCount">The size of the job in the second dimension.</param>
         /// <param name="zCount">The size of the job in the third dimension.</param>
         public static void Dispatch (byte id, Program program, int xCount = 1, int yCount = 1, int zCount = 1) {
-            NativeMethods.bgfx_dispatch(id, program.handle, (ushort)xCount, (ushort)yCount, (ushort)zCount);
+            // TODO: unused
+            byte unused = 0;
+            NativeMethods.bgfx_dispatch(id, program.handle, (ushort)xCount, (ushort)yCount, (ushort)zCount, unused);
+        }
+
+        /// <summary>
+        /// Dispatches an indirect compute job.
+        /// </summary>
+        /// <param name="id">The index of the view to dispatch.</param>
+        /// <param name="program">The shader program to use.</param>
+        /// <param name="indirectBuffer">The buffer containing drawing commands.</param>
+        /// <param name="startIndex">The index of the first command to process.</param>
+        /// <param name="count">The number of commands to process from the buffer.</param>
+        public static void Dispatch (byte id, Program program, IndirectBuffer indirectBuffer, int startIndex = 0, int count = 1) {
+            // TODO: unused
+            byte unused = 0;
+            NativeMethods.bgfx_dispatch_indirect(id, program.handle, indirectBuffer.handle, (ushort)startIndex, (ushort)count, unused);
         }
 
         /// <summary>
@@ -738,7 +924,7 @@ namespace SharpBgfx {
         /// Set rendering states used to draw primitives.
         /// </summary>
         /// <param name="state">The set of states to set.</param>
-        /// <param name="color">The color used for "factor" blending modes.</param>
+        /// <param name="colorRgba">The color used for "factor" blending modes.</param>
         public static void SetRenderState (RenderState state, int colorRgba) {
             NativeMethods.bgfx_set_state((ulong)state, colorRgba);
         }
@@ -759,8 +945,6 @@ namespace SharpBgfx {
         public static void SetStencil (StencilFlags frontFace, StencilFlags backFace) {
             NativeMethods.bgfx_set_stencil((uint)frontFace, (uint)backFace);
         }
-
-        const int RendererCount = 6;
     }
 
     /// <summary>
@@ -1292,9 +1476,13 @@ namespace SharpBgfx {
     /// <summary>
     /// Represents a dynamically updateable index buffer.
     /// </summary>
-    /// <remarks>Indices are always 16-bits.</remarks>
     public unsafe struct DynamicIndexBuffer : IDisposable, IEquatable<DynamicIndexBuffer> {
         internal readonly ushort handle;
+
+        /// <summary>
+        /// Represents an invalid handle.
+        /// </summary>
+        public static readonly DynamicIndexBuffer Invalid = new DynamicIndexBuffer();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DynamicIndexBuffer"/> struct.
@@ -1405,6 +1593,11 @@ namespace SharpBgfx {
         internal readonly ushort handle;
 
         /// <summary>
+        /// Represents an invalid handle.
+        /// </summary>
+        public static readonly DynamicVertexBuffer Invalid = new DynamicVertexBuffer();
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="DynamicVertexBuffer"/> struct.
         /// </summary>
         /// <param name="vertexCount">The number of vertices that fit in the buffer.</param>
@@ -1513,6 +1706,11 @@ namespace SharpBgfx {
     /// </summary>
     public unsafe struct FrameBuffer : IDisposable, IEquatable<FrameBuffer> {
         internal readonly ushort handle;
+
+        /// <summary>
+        /// Represents an invalid handle.
+        /// </summary>
+        public static readonly FrameBuffer Invalid = new FrameBuffer();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FrameBuffer"/> struct.
@@ -1639,9 +1837,13 @@ namespace SharpBgfx {
     /// <summary>
     /// Represents a static index buffer.
     /// </summary>
-    /// <remarks>Indices are always 16-bits.</remarks>
     public unsafe struct IndexBuffer : IDisposable, IEquatable<IndexBuffer> {
         internal readonly ushort handle;
+
+        /// <summary>
+        /// Represents an invalid handle.
+        /// </summary>
+        public static readonly IndexBuffer Invalid = new IndexBuffer();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="IndexBuffer"/> struct.
@@ -1729,10 +1931,110 @@ namespace SharpBgfx {
     }
 
     /// <summary>
+    /// Represents a buffer that can contain indirect drawing commands created and processed entirely on the GPU.
+    /// </summary>
+    public unsafe struct IndirectBuffer : IDisposable, IEquatable<IndirectBuffer> {
+        internal readonly ushort handle;
+
+        /// <summary>
+        /// Represents an invalid handle.
+        /// </summary>
+        public static readonly IndirectBuffer Invalid = new IndirectBuffer();
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IndirectBuffer"/> struct.
+        /// </summary>
+        /// <param name="size">The number of commands that can fit in the buffer.</param>
+        public IndirectBuffer (int size) {
+            handle = NativeMethods.bgfx_create_indirect_buffer(size);
+        }
+
+        /// <summary>
+        /// Releases the index buffer.
+        /// </summary>
+        public void Dispose () {
+            NativeMethods.bgfx_destroy_indirect_buffer(handle);
+        }
+
+        /// <summary>
+        /// Determines whether the specified object is equal to this instance.
+        /// </summary>
+        /// <param name="other">The object to compare with this instance.</param>
+        /// <returns><c>true</c> if the specified object is equal to this instance; otherwise, <c>false</c>.</returns>
+        public bool Equals (IndirectBuffer other) {
+            return handle == other.handle;
+        }
+
+        /// <summary>
+        /// Determines whether the specified <see cref="System.Object" /> is equal to this instance.
+        /// </summary>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool Equals (object obj) {
+            var other = obj as IndirectBuffer?;
+            if (other == null)
+                return false;
+
+            return Equals(other);
+        }
+
+        /// <summary>
+        /// Returns a hash code for this instance.
+        /// </summary>
+        /// <returns>
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
+        /// </returns>
+        public override int GetHashCode () {
+            return handle.GetHashCode();
+        }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String"/> that represents this instance.
+        /// </returns>
+        public override string ToString () {
+            return string.Format("Handle: {0}", handle);
+        }
+
+        /// <summary>
+        /// Implements the equality operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator ==(IndirectBuffer left, IndirectBuffer right) {
+            return left.Equals(right);
+        }
+
+        /// <summary>
+        /// Implements the inequality operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// <c>true</c> if the two objects are not equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator !=(IndirectBuffer left, IndirectBuffer right) {
+            return !left.Equals(right);
+        }
+    }
+
+    /// <summary>
     /// Maintains a data buffer that contains instancing data.
     /// </summary>
     public unsafe struct InstanceDataBuffer : IEquatable<InstanceDataBuffer> {
         internal readonly NativeStruct* ptr;
+
+        /// <summary>
+        /// Represents an invalid handle.
+        /// </summary>
+        public static readonly InstanceDataBuffer Invalid = new InstanceDataBuffer();
 
         /// <summary>
         /// A pointer that can be filled with instance data.
@@ -1848,6 +2150,11 @@ namespace SharpBgfx {
     /// </summary>
     public unsafe struct MemoryBlock : IEquatable<MemoryBlock> {
         internal readonly DataPtr* ptr;
+
+        /// <summary>
+        /// Represents an invalid handle.
+        /// </summary>
+        public static readonly MemoryBlock Invalid = new MemoryBlock();
 
         /// <summary>
         /// The pointer to the raw data.
@@ -2039,6 +2346,11 @@ namespace SharpBgfx {
         /// Backbuffer pointer to use instead of letting the library create its own.
         /// </summary>
         public IntPtr Backbuffer;
+
+        /// <summary>
+        /// Depth-stencil pointer to use instead of letting the library create its own.
+        /// </summary>
+        public IntPtr BackbufferDepthStencil;
     }
 
     /// <summary>
@@ -2048,6 +2360,11 @@ namespace SharpBgfx {
         internal readonly ushort handle;
 
         /// <summary>
+        /// Represents an invalid handle.
+        /// </summary>
+        public static readonly Program Invalid = new Program();
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="Program"/> struct.
         /// </summary>
         /// <param name="vertexShader">The vertex shader.</param>
@@ -2055,6 +2372,15 @@ namespace SharpBgfx {
         /// <param name="destroyShaders">if set to <c>true</c>, the shaders will be released after creating the program.</param>
         public Program (Shader vertexShader, Shader fragmentShader, bool destroyShaders = false) {
             handle = NativeMethods.bgfx_create_program(vertexShader.handle, fragmentShader.handle, destroyShaders);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Program"/> struct.
+        /// </summary>
+        /// <param name="computeShader">The compute shader.</param>
+        /// <param name="destroyShaders">if set to <c>true</c>, the compute shader will be released after creating the program.</param>
+        public Program (Shader computeShader, bool destroyShaders = false) {
+            handle = NativeMethods.bgfx_create_compute_program(computeShader.handle, destroyShaders);
         }
 
         /// <summary>
@@ -2612,6 +2938,11 @@ namespace SharpBgfx {
         internal readonly ushort handle;
 
         /// <summary>
+        /// Represents an invalid handle.
+        /// </summary>
+        public static readonly Shader Invalid = new Shader();
+
+        /// <summary>
         /// The set of uniforms exposed by the shader.
         /// </summary>
         public IReadOnlyList<Uniform> Uniforms {
@@ -3064,6 +3395,11 @@ namespace SharpBgfx {
         readonly ushort handle;
 
         /// <summary>
+        /// Represents an invalid handle.
+        /// </summary>
+        public static readonly TransientIndexBuffer Invalid = new TransientIndexBuffer();
+
+        /// <summary>
         /// A pointer that can be filled with index data.
         /// </summary>
         public IntPtr Data { get { return data; } }
@@ -3175,6 +3511,11 @@ namespace SharpBgfx {
         ushort decl;
 
         /// <summary>
+        /// Represents an invalid handle.
+        /// </summary>
+        public static readonly TransientVertexBuffer Invalid = new TransientVertexBuffer();
+
+        /// <summary>
         /// A pointer that can be filled with vertex data.
         /// </summary>
         public IntPtr Data { get { return data; } }
@@ -3279,6 +3620,11 @@ namespace SharpBgfx {
     /// </summary>
     public struct Uniform : IDisposable, IEquatable<Uniform> {
         internal readonly ushort handle;
+
+        /// <summary>
+        /// Represents an invalid handle.
+        /// </summary>
+        public static readonly Uniform Invalid = new Uniform();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Uniform"/> struct.
@@ -3386,6 +3732,11 @@ namespace SharpBgfx {
     /// </summary>
     public unsafe struct VertexBuffer : IDisposable, IEquatable<VertexBuffer> {
         internal readonly ushort handle;
+
+        /// <summary>
+        /// Represents an invalid handle.
+        /// </summary>
+        public static readonly VertexBuffer Invalid = new VertexBuffer();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="VertexBuffer"/> struct.
@@ -3512,32 +3863,102 @@ namespace SharpBgfx {
     /// Specifies various flags that control vertex and index buffer behavior.
     /// </summary>
     [Flags]
-    public enum BufferFlags : byte {
+    public enum BufferFlags : short {
         /// <summary>
         /// No flags specified.
         /// </summary>
         None,
 
         /// <summary>
+        /// Specifies the format of data in a compute buffer as being 8x1.
+        /// </summary>
+        ComputeFormat8x1 = 0x1,
+
+        /// <summary>
+        /// Specifies the format of data in a compute buffer as being 8x2.
+        /// </summary>
+        ComputeFormat8x2 = 0x2,
+
+        /// <summary>
+        /// Specifies the format of data in a compute buffer as being 8x4.
+        /// </summary>
+        ComputeFormat8x4 = 0x3,
+
+        /// <summary>
+        /// Specifies the format of data in a compute buffer as being 16x1.
+        /// </summary>
+        ComputeFormat16x1 = 0x4,
+
+        /// <summary>
+        /// Specifies the format of data in a compute buffer as being 16x2.
+        /// </summary>
+        ComputeFormat16x2 = 0x5,
+
+        /// <summary>
+        /// Specifies the format of data in a compute buffer as being 16x4.
+        /// </summary>
+        ComputeFormat16x4 = 0x6,
+
+        /// <summary>
+        /// Specifies the format of data in a compute buffer as being 32x1.
+        /// </summary>
+        ComputeFormat32x1 = 0x7,
+
+        /// <summary>
+        /// Specifies the format of data in a compute buffer as being 32x2.
+        /// </summary>
+        ComputeFormat32x2 = 0x8,
+
+        /// <summary>
+        /// Specifies the format of data in a compute buffer as being 32x4.
+        /// </summary>
+        ComputeFormat32x4 = 0x9,
+
+        /// <summary>
+        /// Specifies the type of data in a compute buffer as being unsigned integers.
+        /// </summary>
+        ComputeTypeUInt = 0x10,
+
+        /// <summary>
+        /// Specifies the type of data in a compute buffer as being signed integers.
+        /// </summary>
+        ComputeTypeInt = 0x20,
+
+        /// <summary>
+        /// Specifies the type of data in a compute buffer as being floating point values.
+        /// </summary>
+        ComputeTypeFloat = 0x30,
+
+        /// <summary>
         /// Buffer will be read by a compute shader.
         /// </summary>
-        ComputeRead = 0x1,
+        ComputeRead = 0x100,
 
         /// <summary>
         /// Buffer will be written into by a compute shader. It cannot be accessed by the CPU.
         /// </summary>
-        ComputeWrite = 0x2,
+        ComputeWrite = 0x200,
+
+        /// <summary>
+        /// Buffer is the source of indirect draw commands.
+        /// </summary>
+        DrawIndirect = 0x400,
 
         /// <summary>
         /// Buffer will resize on update if a different quantity of data is passed. If this flag is not set
         /// the data will be trimmed to fit in the existing buffer size. Effective only for dynamic buffers.
         /// </summary>
-        AllowResize = 0x4,
+        AllowResize = 0x800,
 
         /// <summary>
         /// Buffer is using 32-bit indices. Useful only for index buffers.
         /// </summary>
-        Index32 = 0x8
+        Index32 = 0x1000,
+
+        /// <summary>
+        /// Buffer will be read and written by a compute shader.
+        /// </summary>
+        ComputeReadWrite = ComputeRead | ComputeWrite
     }
 
     /// <summary>
@@ -3672,6 +4093,91 @@ namespace SharpBgfx {
     }
 
     /// <summary>
+    /// Specifies debug text colors.
+    /// </summary>
+    public enum DebugColor {
+        /// <summary>
+        /// Transparent.
+        /// </summary>
+        Transparent,
+
+        /// <summary>
+        /// Red.
+        /// </summary>
+        Red,
+
+        /// <summary>
+        /// Green.
+        /// </summary>
+        Green,
+
+        /// <summary>
+        /// Yellow.
+        /// </summary>
+        Yellow,
+
+        /// <summary>
+        /// Blue.
+        /// </summary>
+        Blue,
+
+        /// <summary>
+        /// Purple.
+        /// </summary>
+        Purple,
+
+        /// <summary>
+        /// Cyan.
+        /// </summary>
+        Cyan,
+
+        /// <summary>
+        /// Gray.
+        /// </summary>
+        Gray,
+
+        /// <summary>
+        /// Dark gray.
+        /// </summary>
+        DarkGray,
+
+        /// <summary>
+        /// Light red.
+        /// </summary>
+        LightRed,
+
+        /// <summary>
+        /// Light green.
+        /// </summary>
+        LightGreen,
+
+        /// <summary>
+        /// Light yellow.
+        /// </summary>
+        LightYellow,
+
+        /// <summary>
+        /// Light blue.
+        /// </summary>
+        LightBlue,
+
+        /// <summary>
+        /// Light purple.
+        /// </summary>
+        LightPurple,
+
+        /// <summary>
+        /// Light cyan.
+        /// </summary>
+        LightCyan,
+
+        /// <summary>
+        /// White.
+        /// </summary>
+        White
+    }
+
+    /// <summary>
     /// Specifies various debug options.
     /// </summary>
     [Flags]
@@ -3781,7 +4287,47 @@ namespace SharpBgfx {
         /// <summary>
         /// Device supports 32-bit indices.
         /// </summary>
-        Index32 = 0x1000
+        Index32 = 0x1000,
+
+        /// <summary>
+        /// Device supports indirect drawing via GPU buffers.
+        /// </summary>
+        DrawIndirect = 0x2000
+    }
+
+    /// <summary>
+    /// Specifies various error types that can be reported by bgfx.
+    /// </summary>
+    public enum ErrorType {
+        /// <summary>
+        /// A debug check failed; the program can safely continue, but the issue should be investigated.
+        /// </summary>
+        DebugCheck,
+
+        /// <summary>
+        /// The user's hardware failed checks for the minimum required specs.
+        /// </summary>
+        MinimumRequiredSpecs,
+
+        /// <summary>
+        /// The program tried to compile an invalid shader.
+        /// </summary>
+        InvalidShader,
+
+        /// <summary>
+        /// An error occurred during bgfx library initialization.
+        /// </summary>
+        UnableToInitialize,
+
+        /// <summary>
+        /// Failed while trying to create a texture.
+        /// </summary>
+        UnableToCreateTexture,
+
+        /// <summary>
+        /// The graphics device was lost and the library was unable to recover.
+        /// </summary>
+        DeviceLost
     }
 
     /// <summary>
@@ -3816,7 +4362,18 @@ namespace SharpBgfx {
         /// <summary>
         /// OpenGL
         /// </summary>
-        OpenGL
+        OpenGL,
+
+        /// <summary>
+        /// Vulkan
+        /// </summary>
+        Vulkan,
+
+        /// <summary>
+        /// Used during initialization; specifies that the library should
+        /// pick the best renderer for the running hardware and OS.
+        /// </summary>
+        Default
     }
 
     /// <summary>
@@ -3885,9 +4442,19 @@ namespace SharpBgfx {
         HeadMountedDisplayRecenter = 0x1000,
 
         /// <summary>
+        /// Flush all commands to the device after rendering.
+        /// </summary>
+        FlushAfterRender = 0x2000,
+
+        /// <summary>
         /// Flip the backbuffer immediately after rendering for reduced latency.
         /// </summary>
-        FlipAfterRender = 0x2000
+        FlipAfterRender = 0x4000,
+
+        /// <summary>
+        /// Write data to the backbuffer in non-linear sRGB format.
+        /// </summary>
+        SrgbBackbuffer = 0x8000
     }
 
     /// <summary>
@@ -4024,6 +4591,16 @@ namespace SharpBgfx {
         /// Always compare two textures as equal.
         /// </summary>
         CompareAlways = 0x00080000,
+
+        /// <summary>
+        /// Texture is the target of compute shader writes.
+        /// </summary>
+        ComputeWrite = 0x00100000,
+
+        /// <summary>
+        /// Texture data is in non-linear sRGB format.
+        /// </summary>
+        Srgb = 0x00200000
     }
 
     /// <summary>
@@ -4292,19 +4869,29 @@ namespace SharpBgfx {
         Color = 0x1,
 
         /// <summary>
+        /// The format is supported for sRGB operations.
+        /// </summary>
+        ColorSrgb = 0x2,
+
+        /// <summary>
         /// The format is supported through library emulation.
         /// </summary>
-        Emulated = 0x2,
+        Emulated = 0x4,
 
         /// <summary>
         /// The format is supported for vertex texturing.
         /// </summary>
-        Vertex = 0x4,
+        Vertex = 0x8,
 
         /// <summary>
         /// The format is supported for compute image operations.
         /// </summary>
-        Image = 0x8
+        Image = 0x10,
+
+        /// <summary>
+        /// The format is supported for framebuffers.
+        /// </summary>
+        Framebuffer = 0x20
     }
 
     /// <summary>
@@ -4314,47 +4901,22 @@ namespace SharpBgfx {
         /// <summary>
         /// Single integer.
         /// </summary>
-        Int,
+        Int1,
 
         /// <summary>
-        /// Single float.
+        /// 4D vector.
         /// </summary>
-        Float,
+        Vector4 = 2,
 
         /// <summary>
-        /// Array of integers.
+        /// 3x3 matrix.
         /// </summary>
-        Int1Array = 3,
+        Matrix3x3,
 
         /// <summary>
-        /// Array of floats.
+        ///4x4 matrix.
         /// </summary>
-        Float1Array,
-
-        /// <summary>
-        /// Array of 2D vectors.
-        /// </summary>
-        Float2Array,
-
-        /// <summary>
-        /// Array of 3D vectors.
-        /// </summary>
-        Float3Array,
-
-        /// <summary>
-        /// Array of 4D vectors.
-        /// </summary>
-        Float4Array,
-
-        /// <summary>
-        /// Array of 3x3 matrices.
-        /// </summary>
-        Matrix3x3Array,
-
-        /// <summary>
-        /// Array of 4x4 matrices.
-        /// </summary>
-        Matrix4x4Array
+        Matrix4x4
     }
 
     /// <summary>
@@ -4506,6 +5068,7 @@ namespace SharpBgfx {
     /// Delegate type for callback functions.
     /// </summary>
     /// <param name="userData">User-provided data to the original allocation call.</param>
+    [SuppressUnmanagedCodeSecurity]
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public delegate void ReleaseCallback (IntPtr userData);
 
@@ -4550,7 +5113,10 @@ namespace SharpBgfx {
         public static extern InstanceDataBuffer.NativeStruct* bgfx_alloc_instance_data_buffer (int num, ushort stride);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_dispatch (byte id, ushort program, ushort numX, ushort numY, ushort numZ);
+        public static extern int bgfx_dispatch (byte id, ushort program, ushort numX, ushort numY, ushort numZ, byte flags);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int bgfx_dispatch_indirect (byte id, ushort program, ushort indirectHandle, ushort start, ushort num, byte flags);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_texture (byte stage, ushort sampler, ushort texture, uint flags);
@@ -4563,6 +5129,21 @@ namespace SharpBgfx {
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_image_from_frame_buffer (byte stage, ushort sampler, ushort frameBuffer, byte attachment, TextureFormat format, ComputeBufferAccess access);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_set_compute_index_buffer (byte stage, ushort handle, ComputeBufferAccess access);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_set_compute_vertex_buffer (byte stage, ushort handle, ComputeBufferAccess access);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_set_compute_dynamic_index_buffer (byte stage, ushort handle, ComputeBufferAccess access);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_set_compute_dynamic_vertex_buffer (byte stage, ushort handle, ComputeBufferAccess access);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_set_compute_indirect_buffer (byte stage, ushort handle, ComputeBufferAccess access);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern ushort bgfx_create_frame_buffer (ushort width, ushort height, TextureFormat format, TextureFlags flags);
@@ -4584,6 +5165,9 @@ namespace SharpBgfx {
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern ushort bgfx_create_program (ushort vsh, ushort fsh, [MarshalAs(UnmanagedType.U1)] bool destroyShaders);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern ushort bgfx_create_compute_program (ushort csh, [MarshalAs(UnmanagedType.U1)] bool destroyShaders);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_destroy_program (ushort handle);
@@ -4685,6 +5269,12 @@ namespace SharpBgfx {
         public static extern void bgfx_destroy_dynamic_vertex_buffer (ushort handle);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern ushort bgfx_create_indirect_buffer (int size);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_destroy_indirect_buffer (ushort handle);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_image_swizzle_bgra8 (int width, int height, int pitch, IntPtr src, IntPtr dst);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
@@ -4722,6 +5312,9 @@ namespace SharpBgfx {
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int bgfx_submit (byte id, int depth);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int bgfx_submit_indirect (byte id, ushort indirectHandle, ushort start, ushort num, int depth);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_discard ();
@@ -4781,6 +5374,9 @@ namespace SharpBgfx {
         public static extern void bgfx_dbg_text_printf (ushort x, ushort y, byte color, [MarshalAs(UnmanagedType.LPStr)] string format, [MarshalAs(UnmanagedType.LPStr)] string args);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_dbg_text_printf (ushort x, ushort y, byte color, byte* format, IntPtr args);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_dbg_text_image (ushort x, ushort y, ushort width, ushort height, IntPtr data, ushort pitch);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
@@ -4819,10 +5415,162 @@ namespace SharpBgfx {
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_instance_data_buffer (InstanceDataBuffer.NativeStruct* idb, ushort num);
 
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_set_instance_data_from_vertex_buffer (ushort handle, int startVertex, int count);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_set_instance_data_from_dynamic_vertex_buffer (ushort handle, int startVertex, int count);
+
 #if DEBUG
         const string DllName = "bgfx_debug.dll";
 #else
         const string DllName = "bgfx.dll";
 #endif
+    }
+
+    struct CallbackShim {
+        IntPtr vtbl;
+        IntPtr reportError;
+        IntPtr getCachedSize;
+        IntPtr getCacheEntry;
+        IntPtr setCacheEntry;
+        IntPtr saveScreenShot;
+        IntPtr captureStarted;
+        IntPtr captureFinished;
+        IntPtr captureFrame;
+
+        public static unsafe IntPtr CreateShim (ICallbackHandler handler) {
+            if (handler == null)
+                return IntPtr.Zero;
+
+            if (savedDelegates != null)
+                throw new InvalidOperationException("Callbacks should only be initialized once; bgfx can only deal with one set at a time.");
+
+            var memory = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(CallbackShim)));
+            var shim = (CallbackShim*)memory;
+            var saver = new DelegateSaver(handler, shim);
+
+            // the shim uses the unnecessary ctor slot to act as a vtbl pointer to itself,
+            // so that the same block of memory can act as both bgfx_callback_interface_t and bgfx_callback_vtbl_t
+            shim->vtbl = memory;
+
+            // cache the data so we can free it later
+            shimMemory = memory;
+            savedDelegates = saver;
+
+            return memory;
+        }
+
+        public static void FreeShim () {
+            if (savedDelegates == null)
+                return;
+
+            savedDelegates = null;
+            Marshal.FreeHGlobal(shimMemory);
+        }
+
+        [SuppressUnmanagedCodeSecurity]
+        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        delegate void ReportErrorHandler (IntPtr thisPtr, ErrorType errorType, string message);
+
+        [SuppressUnmanagedCodeSecurity]
+        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+        delegate int GetCachedSizeHandler (IntPtr thisPtr, long id);
+
+        [SuppressUnmanagedCodeSecurity]
+        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+        delegate bool GetCacheEntryHandler (IntPtr thisPtr, long id, IntPtr data, int size);
+
+        [SuppressUnmanagedCodeSecurity]
+        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+        delegate void SetCacheEntryHandler (IntPtr thisPtr, long id, IntPtr data, int size);
+
+        [SuppressUnmanagedCodeSecurity]
+        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        delegate void SaveScreenShotHandler (IntPtr thisPtr, string path, int width, int height, int pitch, IntPtr data, int size, [MarshalAs(UnmanagedType.U1)] bool flipVertical);
+
+        [SuppressUnmanagedCodeSecurity]
+        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+        delegate void CaptureStartedHandler (IntPtr thisPtr, int width, int height, int pitch, TextureFormat format, [MarshalAs(UnmanagedType.U1)] bool flipVertical);
+
+        [SuppressUnmanagedCodeSecurity]
+        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+        delegate void CaptureFinishedHandler (IntPtr thisPtr);
+
+        [SuppressUnmanagedCodeSecurity]
+        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+        delegate void CaptureFrameHandler (IntPtr thisPtr, IntPtr data, int size);
+
+        // We're creating delegates to a user's interface methods; we're then converting those delegates
+        // to native pointers and passing them into native code. If we don't save the references to the
+        // delegates in managed land somewhere, the GC will think they're unreference and clean them
+        // up, leaving native holding a bag of pointers into nowhere land.
+        class DelegateSaver {
+            ICallbackHandler handler;
+            ReportErrorHandler reportError;
+            GetCachedSizeHandler getCachedSize;
+            GetCacheEntryHandler getCacheEntry;
+            SetCacheEntryHandler setCacheEntry;
+            SaveScreenShotHandler saveScreenShot;
+            CaptureStartedHandler captureStarted;
+            CaptureFinishedHandler captureFinished;
+            CaptureFrameHandler captureFrame;
+
+            public unsafe DelegateSaver (ICallbackHandler handler, CallbackShim* shim) {
+                this.handler = handler;
+                reportError = ReportError;
+                getCachedSize = GetCachedSize;
+                getCacheEntry = GetCacheEntry;
+                setCacheEntry = SetCacheEntry;
+                saveScreenShot = SaveScreenShot;
+                captureStarted = CaptureStarted;
+                captureFinished = CaptureFinished;
+                captureFrame = CaptureFrame;
+
+                shim->reportError = Marshal.GetFunctionPointerForDelegate(reportError);
+                shim->getCachedSize = Marshal.GetFunctionPointerForDelegate(getCachedSize);
+                shim->getCacheEntry = Marshal.GetFunctionPointerForDelegate(getCacheEntry);
+                shim->setCacheEntry = Marshal.GetFunctionPointerForDelegate(setCacheEntry);
+                shim->saveScreenShot = Marshal.GetFunctionPointerForDelegate(saveScreenShot);
+                shim->captureStarted = Marshal.GetFunctionPointerForDelegate(captureStarted);
+                shim->captureFinished = Marshal.GetFunctionPointerForDelegate(captureFinished);
+                shim->captureFrame = Marshal.GetFunctionPointerForDelegate(captureFrame);
+            }
+
+            void ReportError (IntPtr thisPtr, ErrorType errorType, string message) {
+                handler.ReportError(errorType, message);
+            }
+
+            int GetCachedSize (IntPtr thisPtr, long id) {
+                return handler.GetCachedSize(id);
+            }
+
+            bool GetCacheEntry (IntPtr thisPtr, long id, IntPtr data, int size) {
+                return handler.GetCacheEntry(id, data, size);
+            }
+
+            void SetCacheEntry (IntPtr thisPtr, long id, IntPtr data, int size) {
+                handler.SetCacheEntry(id, data, size);
+            }
+
+            void SaveScreenShot (IntPtr thisPtr, string path, int width, int height, int pitch, IntPtr data, int size, bool flipVertical) {
+                handler.SaveScreenShot(path, width, height, pitch, data, size, flipVertical);
+            }
+
+            void CaptureStarted (IntPtr thisPtr, int width, int height, int pitch, TextureFormat format, bool flipVertical) {
+                handler.CaptureStarted(width, height, pitch, format, flipVertical);
+            }
+
+            void CaptureFinished (IntPtr thisPtr) {
+                handler.CaptureFinished();
+            }
+
+            void CaptureFrame (IntPtr thisPtr, IntPtr data, int size) {
+                handler.CaptureFrame(data, size);
+            }
+        }
+
+        static IntPtr shimMemory;
+        static DelegateSaver savedDelegates;
     }
 }
