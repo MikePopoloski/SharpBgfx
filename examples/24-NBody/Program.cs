@@ -89,7 +89,7 @@ static class Program {
         };
 
         // have the compute shader run initialization
-        var u_params = new Uniform("u_params", UniformType.Float4Array, 3);
+        var u_params = new Uniform("u_params", UniformType.Vector4, 3);
         Bgfx.SetUniform(u_params, &paramData, 3);
         Bgfx.SetComputeBuffer(0, prevPositionBuffer0, ComputeBufferAccess.Write);
         Bgfx.SetComputeBuffer(1, currPositionBuffer0, ComputeBufferAccess.Write);

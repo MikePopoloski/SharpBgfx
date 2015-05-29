@@ -11,7 +11,6 @@ unsafe class Uniforms : IDisposable, IUniformGroup {
     Uniform diffuseHandle;
     Uniform specularHandle;
     Uniform colorHandle;
-    Uniform timeHandle;
     Uniform lightPosRadiusHandle;
     Uniform lightRgbInnerRHandle;
 
@@ -39,14 +38,13 @@ unsafe class Uniforms : IDisposable, IUniformGroup {
     public Vector4[] LightColor { get; set; }
 
     public Uniforms () {
-        parametersHandle = new Uniform("u_params", UniformType.Float4Array);
-        ambientHandle = new Uniform("u_ambient", UniformType.Float4Array);
-        diffuseHandle = new Uniform("u_diffuse", UniformType.Float4Array);
-        specularHandle = new Uniform("u_specular_shininess", UniformType.Float4Array);
-        colorHandle = new Uniform("u_color", UniformType.Float4Array);
-        timeHandle = new Uniform("u_time", UniformType.Float);
-        lightPosRadiusHandle = new Uniform("u_lightPosRadius", UniformType.Float4Array, MaxLights);
-        lightRgbInnerRHandle = new Uniform("u_lightRgbInnerR", UniformType.Float4Array, MaxLights);
+        parametersHandle = new Uniform("u_params", UniformType.Vector4);
+        ambientHandle = new Uniform("u_ambient", UniformType.Vector4);
+        diffuseHandle = new Uniform("u_diffuse", UniformType.Vector4);
+        specularHandle = new Uniform("u_specular_shininess", UniformType.Vector4);
+        colorHandle = new Uniform("u_color", UniformType.Vector4);
+        lightPosRadiusHandle = new Uniform("u_lightPosRadius", UniformType.Vector4, MaxLights);
+        lightRgbInnerRHandle = new Uniform("u_lightRgbInnerR", UniformType.Vector4, MaxLights);
 
         LightPosRadius = new Vector4[MaxLights];
         LightColor = new Vector4[MaxLights];
@@ -67,11 +65,7 @@ unsafe class Uniforms : IDisposable, IUniformGroup {
         Bgfx.SetUniform(diffuseHandle, &diffuse);
         Bgfx.SetUniform(specularHandle, &shininess);
     }
-
-    public void SubmitPerFrameUniforms (float time) {
-        Bgfx.SetUniform(timeHandle, time);
-    }
-
+    
     public void SubmitPerDrawUniforms () {
         var color = Color;
         var param = new Vector4(
@@ -96,7 +90,6 @@ unsafe class Uniforms : IDisposable, IUniformGroup {
         diffuseHandle.Dispose();
         specularHandle.Dispose();
         colorHandle.Dispose();
-        timeHandle.Dispose();
         lightPosRadiusHandle.Dispose();
         lightRgbInnerRHandle.Dispose();
     }

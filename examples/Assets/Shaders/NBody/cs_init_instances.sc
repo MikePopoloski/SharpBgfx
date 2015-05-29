@@ -3,7 +3,7 @@
  * License: http://www.opensource.org/licenses/BSD-2-Clause
  */
 
-#include "../bgfx_compute.sh"
+#include "bgfx_compute.sh"
 #include "uniforms.sh"
 
 BUFFER_WR(prevPositionBuffer, vec4, 0);

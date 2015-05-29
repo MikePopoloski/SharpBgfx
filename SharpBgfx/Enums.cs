@@ -414,47 +414,22 @@ namespace SharpBgfx {
         /// <summary>
         /// Single integer.
         /// </summary>
-        Int,
+        Int1,
 
         /// <summary>
-        /// Single float.
+        /// 4D vector.
         /// </summary>
-        Float,
+        Vector4 = 2,
 
         /// <summary>
-        /// Array of integers.
+        /// 3x3 matrix.
         /// </summary>
-        Int1Array = 3,
+        Matrix3x3,
 
         /// <summary>
-        /// Array of floats.
+        ///4x4 matrix.
         /// </summary>
-        Float1Array,
-
-        /// <summary>
-        /// Array of 2D vectors.
-        /// </summary>
-        Float2Array,
-
-        /// <summary>
-        /// Array of 3D vectors.
-        /// </summary>
-        Float3Array,
-
-        /// <summary>
-        /// Array of 4D vectors.
-        /// </summary>
-        Float4Array,
-
-        /// <summary>
-        /// Array of 3x3 matrices.
-        /// </summary>
-        Matrix3x3Array,
-
-        /// <summary>
-        /// Array of 4x4 matrices.
-        /// </summary>
-        Matrix4x4Array
+        Matrix4x4
     }
 
     /// <summary>
@@ -765,7 +740,12 @@ namespace SharpBgfx {
         /// <summary>
         /// The format is supported for compute image operations.
         /// </summary>
-        Image = 0x10
+        Image = 0x10,
+
+        /// <summary>
+        /// The format is supported for framebuffers.
+        /// </summary>
+        Framebuffer = 0x20
     }
 
     /// <summary>

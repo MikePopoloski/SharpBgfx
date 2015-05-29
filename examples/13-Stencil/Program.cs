@@ -38,7 +38,7 @@ static class Program {
         var fieldstoneTex = ResourceLoader.LoadTexture("fieldstone-rgba.dds");
 
         // create uniforms
-        var colorTextureHandle = new Uniform("u_texColor", UniformType.Int1Array);
+        var colorTextureHandle = new Uniform("u_texColor", UniformType.Int1);
         var uniforms = new Uniforms();
         uniforms.SubmitConstUniforms();
 
@@ -63,7 +63,6 @@ static class Program {
             // tick the clock
             var elapsed = clock.Frame();
             var time = clock.TotalTime();
-            uniforms.SubmitPerFrameUniforms(time);
 
             // write some debug text
             Bgfx.DebugTextClear();
