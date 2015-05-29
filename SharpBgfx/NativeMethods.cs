@@ -305,6 +305,9 @@ namespace SharpBgfx {
         public static extern void bgfx_dbg_text_printf (ushort x, ushort y, byte color, [MarshalAs(UnmanagedType.LPStr)] string format, [MarshalAs(UnmanagedType.LPStr)] string args);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_dbg_text_printf (ushort x, ushort y, byte color, byte* format, IntPtr args);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_dbg_text_image (ushort x, ushort y, ushort width, ushort height, IntPtr data, ushort pitch);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]

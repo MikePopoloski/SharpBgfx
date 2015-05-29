@@ -275,6 +275,22 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// Writes debug text to the screen.
+        /// </summary>
+        /// <param name="x">The X position, in cells.</param>
+        /// <param name="y">The Y position, in cells.</param>
+        /// <param name="color">The color of the text.</param>
+        /// <param name="message">The message to write.</param>
+        public static void DebugTextWrite (int x, int y, DebugColor foreColor, DebugColor backColor, IntPtr message) {
+            var attr = (byte)(((byte)backColor << 4) | (byte)foreColor);
+            var format = stackalloc byte[3];
+            format[0] = (byte)'%';
+            format[1] = (byte)'s';
+            format[2] = 0;
+            NativeMethods.bgfx_dbg_text_printf((ushort)x, (ushort)y, attr, format, message);
+        }
+
+        /// <summary>
         /// Draws data directly into the debug text buffer.
         /// </summary>
         /// <param name="x">The X position, in cells.</param>
