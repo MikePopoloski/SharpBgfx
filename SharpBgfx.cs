@@ -4355,6 +4355,11 @@ namespace SharpBgfx {
         Direct3D12,
 
         /// <summary>
+        /// Apple Metal.
+        /// </summary>
+        Metal,
+
+        /// <summary>
         /// OpenGL ES
         /// </summary>
         OpenGLES,

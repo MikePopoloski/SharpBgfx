@@ -34,3 +34,5 @@ _ReSharper*/
 *.vsp
 *.vspx
 packages/*
+
+!/examples/Assets/Shaders/bin
