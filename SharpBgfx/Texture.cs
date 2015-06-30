@@ -10,42 +10,42 @@ namespace SharpBgfx {
         /// <summary>
         /// The width of the texture.
         /// </summary>
-        public int Width { get; }
+        public int Width { get; private set; }
 
         /// <summary>
         /// The height of the texture.
         /// </summary>
-        public int Height { get; }
+        public int Height { get; private set; }
 
         /// <summary>
         /// The depth of the texture, if 3D.
         /// </summary>
-        public int Depth { get; }
+        public int Depth { get; private set; }
 
         /// <summary>
         /// Indicates whether the texture is a cubemap.
         /// </summary>
-        public bool IsCubeMap { get; }
+        public bool IsCubeMap { get; private set; }
 
         /// <summary>
         /// The number of mip levels in the texture.
         /// </summary>
-        public int MipLevels { get; }
+        public int MipLevels { get; private set; }
 
         /// <summary>
         /// The number of bits per pixel.
         /// </summary>
-        public int BitsPerPixel { get; }
+        public int BitsPerPixel { get; private set; }
 
         /// <summary>
         /// The size of the entire texture, in bytes.
         /// </summary>
-        public int SizeInBytes { get; }
+        public int SizeInBytes { get; private set; }
 
         /// <summary>
         /// The format of the image data.
         /// </summary>
-        public TextureFormat Format { get; }
+        public TextureFormat Format { get; private set; }
 
         Texture (ushort handle, ref TextureInfo info) {
             this.handle = handle;
