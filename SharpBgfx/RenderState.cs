@@ -398,7 +398,6 @@ namespace SharpBgfx {
         /// Performs an implicit conversion from ulong.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        [CLSCompliant(false)]
         public static implicit operator RenderState (ulong value) {
             return new RenderState((long)value);
         }
@@ -407,7 +406,6 @@ namespace SharpBgfx {
         /// Performs an explicit conversion to ulong.
         /// </summary>
         /// <param name="state">The value to convert.</param>
-        [CLSCompliant(false)]
         public static explicit operator ulong (RenderState state) {
             return state.value;
         }

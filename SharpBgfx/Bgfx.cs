@@ -40,7 +40,6 @@ namespace SharpBgfx {
         /// <param name="layout">The layout of the vertex stream.</param>
         /// <param name="data">The pointer to the vertex data stream.</param>
         /// <param name="index">The index of the vertex within the stream.</param>
-        [CLSCompliant(false)]
         public static void VertexPack (float* input, bool inputNormalized, VertexAttributeUsage attribute, VertexLayout layout, IntPtr data, int index = 0) {
             NativeMethods.bgfx_vertex_pack(input, inputNormalized, attribute, ref layout.data, data, index);
         }
@@ -53,7 +52,6 @@ namespace SharpBgfx {
         /// <param name="layout">The layout of the vertex stream.</param>
         /// <param name="data">A pointer to the vertex data stream.</param>
         /// <param name="index">The index of the vertex within the stream.</param>
-        [CLSCompliant(false)]
         public static void VertexUnpack (float* output, VertexAttributeUsage attribute, VertexLayout layout, IntPtr data, int index = 0) {
             NativeMethods.bgfx_vertex_unpack(output, attribute, ref layout.data, data, index);
         }
@@ -403,7 +401,6 @@ namespace SharpBgfx {
         /// The clear color palette is used with SetViewClear for clearing multiple render targets
         /// to different color values.
         /// </remarks>
-        [CLSCompliant(false)]
         public static void SetClearColorPalette (byte index, float* color) {
             NativeMethods.bgfx_set_clear_color(index, color);
         }
@@ -423,7 +420,6 @@ namespace SharpBgfx {
         /// <param name="id">The index of the view.</param>
         /// <param name="view">The 4x4 view transform matrix.</param>
         /// <param name="projection">The 4x4 projection transform matrix.</param>
-        [CLSCompliant(false)]
         public static void SetViewTransform (byte id, float* view, float* projection) {
             NativeMethods.bgfx_set_view_transform(id, view, projection);
         }
@@ -443,7 +439,6 @@ namespace SharpBgfx {
         /// <param name="matrix">A pointer to one or more matrices to set.</param>
         /// <param name="count">The number of matrices in the array.</param>
         /// <returns>An index into the matrix cache to allow reusing the matrix in other calls.</returns>
-        [CLSCompliant(false)]
         public static int SetTransform (float* matrix, int count = 1) {
             return NativeMethods.bgfx_set_transform(matrix, (ushort)count);
         }
@@ -591,7 +586,6 @@ namespace SharpBgfx {
         /// <param name="uniform">The uniform to set.</param>
         /// <param name="value">A pointer to the uniform's data.</param>
         /// <param name="arraySize">The size of the data array, if the uniform is an array.</param>
-        [CLSCompliant(false)]
         public static void SetUniform (Uniform uniform, void* value, int arraySize = 1) {
             NativeMethods.bgfx_set_uniform(uniform.handle, value, (ushort)arraySize);
         }

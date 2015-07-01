@@ -266,7 +266,6 @@ namespace SharpBgfx {
         /// Performs an implicit conversion from uint.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        [CLSCompliant(false)]
         public static implicit operator StencilFlags (uint value) {
             return new StencilFlags((int)value);
         }
@@ -275,7 +274,6 @@ namespace SharpBgfx {
         /// Performs an explicit conversion to uint.
         /// </summary>
         /// <param name="state">The value to convert.</param>
-        [CLSCompliant(false)]
         public static explicit operator uint (StencilFlags state) {
             return state.value;
         }
