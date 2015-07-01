@@ -22,7 +22,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Security;
 
@@ -134,29 +133,26 @@ namespace SharpBgfx {
         /// <summary>
         /// Packs a vector into vertex stream format.
         /// </summary>
-        /// <param name="input">The vector to pack.</param>
+        /// <param name="input">The four element vector to pack.</param>
         /// <param name="inputNormalized"><c>true</c> if the input vector is normalized.</param>
         /// <param name="attribute">The attribute usage of the vector data.</param>
         /// <param name="layout">The layout of the vertex stream.</param>
         /// <param name="data">The pointer to the vertex data stream.</param>
         /// <param name="index">The index of the vertex within the stream.</param>
-        public static void VertexPack (Vector4 input, bool inputNormalized, VertexAttributeUsage attribute, VertexLayout layout, IntPtr data, int index = 0) {
-            NativeMethods.bgfx_vertex_pack((float*)&input, inputNormalized, attribute, ref layout.data, data, index);
+        public static void VertexPack (float* input, bool inputNormalized, VertexAttributeUsage attribute, VertexLayout layout, IntPtr data, int index = 0) {
+            NativeMethods.bgfx_vertex_pack(input, inputNormalized, attribute, ref layout.data, data, index);
         }
 
         /// <summary>
         /// Unpack a vector from a vertex stream.
         /// </summary>
+        /// <param name="output">A pointer to four floats that will receive the unpacked vector.</param>
         /// <param name="attribute">The usage of the vertex attribute.</param>
         /// <param name="layout">The layout of the vertex stream.</param>
         /// <param name="data">A pointer to the vertex data stream.</param>
         /// <param name="index">The index of the vertex within the stream.</param>
-        /// <returns>The unpacked vector.</returns>
-        public static Vector4 VertexUnpack (VertexAttributeUsage attribute, VertexLayout layout, IntPtr data, int index = 0) {
-            Vector4 output;
-            NativeMethods.bgfx_vertex_unpack((float*)&output, attribute, ref layout.data, data, index);
-
-            return output;
+        public static void VertexUnpack (float* output, VertexAttributeUsage attribute, VertexLayout layout, IntPtr data, int index = 0) {
+            NativeMethods.bgfx_vertex_unpack(output, attribute, ref layout.data, data, index);
         }
 
         /// <summary>
@@ -504,8 +500,8 @@ namespace SharpBgfx {
         /// The clear color palette is used with SetViewClear for clearing multiple render targets
         /// to different color values.
         /// </remarks>
-        public static void SetClearColorPalette (byte index, Vector4 color) {
-            NativeMethods.bgfx_set_clear_color(index, (float*)&color);
+        public static void SetClearColorPalette (byte index, float* color) {
+            NativeMethods.bgfx_set_clear_color(index, color);
         }
 
         /// <summary>
@@ -523,17 +519,6 @@ namespace SharpBgfx {
         /// <param name="id">The index of the view.</param>
         /// <param name="view">The 4x4 view transform matrix.</param>
         /// <param name="projection">The 4x4 projection transform matrix.</param>
-        public static void SetViewTransform (byte id, Matrix4x4 view, Matrix4x4 projection) {
-            NativeMethods.bgfx_set_view_transform(id, (float*)&view, (float*)&projection);
-        }
-
-        /// <summary>
-        /// Sets the view and projection transforms for the given rendering view.
-        /// </summary>
-        /// <param name="id">The index of the view.</param>
-        /// <param name="view">The 4x4 view transform matrix.</param>
-        /// <param name="projection">The 4x4 projection transform matrix.</param>
-        [CLSCompliant(false)]
         public static void SetViewTransform (byte id, float* view, float* projection) {
             NativeMethods.bgfx_set_view_transform(id, view, projection);
         }
@@ -550,19 +535,9 @@ namespace SharpBgfx {
         /// <summary>
         /// Sets the model transform to use for drawing primitives.
         /// </summary>
-        /// <param name="matrix">The matrix to set.</param>
-        /// <returns>An index into the matrix cache to allow reusing the matrix in other calls.</returns>
-        public static int SetTransform (Matrix4x4 matrix) {
-            return NativeMethods.bgfx_set_transform((float*)&matrix, 1);
-        }
-
-        /// <summary>
-        /// Sets the model transform to use for drawing primitives.
-        /// </summary>
         /// <param name="matrix">A pointer to one or more matrices to set.</param>
         /// <param name="count">The number of matrices in the array.</param>
         /// <returns>An index into the matrix cache to allow reusing the matrix in other calls.</returns>
-        [CLSCompliant(false)]
         public static int SetTransform (float* matrix, int count = 1) {
             return NativeMethods.bgfx_set_transform(matrix, (ushort)count);
         }
@@ -640,10 +615,9 @@ namespace SharpBgfx {
         /// Sets the vertex buffer to use for drawing primitives.
         /// </summary>
         /// <param name="vertexBuffer">The vertex buffer to set.</param>
-        /// <param name="firstVertex">The index of the first vertex to use.</param>
         /// <param name="count">The number of vertices to pull from the buffer.</param>
-        public static void SetVertexBuffer (DynamicVertexBuffer vertexBuffer, int firstVertex = 0, int count = -1) {
-            NativeMethods.bgfx_set_dynamic_vertex_buffer(vertexBuffer.handle, firstVertex, count);
+        public static void SetVertexBuffer (DynamicVertexBuffer vertexBuffer, int count = -1) {
+            NativeMethods.bgfx_set_dynamic_vertex_buffer(vertexBuffer.handle, count);
         }
 
         /// <summary>
@@ -711,7 +685,6 @@ namespace SharpBgfx {
         /// <param name="uniform">The uniform to set.</param>
         /// <param name="value">A pointer to the uniform's data.</param>
         /// <param name="arraySize">The size of the data array, if the uniform is an array.</param>
-        [CLSCompliant(false)]
         public static void SetUniform (Uniform uniform, void* value, int arraySize = 1) {
             NativeMethods.bgfx_set_uniform(uniform.handle, value, (ushort)arraySize);
         }
@@ -1061,42 +1034,42 @@ namespace SharpBgfx {
         /// <summary>
         /// The width of the texture.
         /// </summary>
-        public int Width { get; }
+        public int Width { get; private set; }
 
         /// <summary>
         /// The height of the texture.
         /// </summary>
-        public int Height { get; }
+        public int Height { get; private set; }
 
         /// <summary>
         /// The depth of the texture, if 3D.
         /// </summary>
-        public int Depth { get; }
+        public int Depth { get; private set; }
 
         /// <summary>
         /// Indicates whether the texture is a cubemap.
         /// </summary>
-        public bool IsCubeMap { get; }
+        public bool IsCubeMap { get; private set; }
 
         /// <summary>
         /// The number of mip levels in the texture.
         /// </summary>
-        public int MipLevels { get; }
+        public int MipLevels { get; private set; }
 
         /// <summary>
         /// The number of bits per pixel.
         /// </summary>
-        public int BitsPerPixel { get; }
+        public int BitsPerPixel { get; private set; }
 
         /// <summary>
         /// The size of the entire texture, in bytes.
         /// </summary>
-        public int SizeInBytes { get; }
+        public int SizeInBytes { get; private set; }
 
         /// <summary>
         /// The format of the image data.
         /// </summary>
-        public TextureFormat Format { get; }
+        public TextureFormat Format { get; private set; }
 
         Texture (ushort handle, ref TextureInfo info) {
             this.handle = handle;
@@ -1505,9 +1478,10 @@ namespace SharpBgfx {
         /// <summary>
         /// Updates the data in the buffer.
         /// </summary>
+        /// <param name="startIndex">Index of the first index to update.</param>
         /// <param name="memory">The new index data with which to fill the buffer.</param>
-        public void Update (MemoryBlock memory) {
-            NativeMethods.bgfx_update_dynamic_index_buffer(handle, memory.ptr);
+        public void Update (int startIndex, MemoryBlock memory) {
+            NativeMethods.bgfx_update_dynamic_index_buffer(handle, startIndex, memory.ptr);
         }
 
         /// <summary>
@@ -1620,9 +1594,10 @@ namespace SharpBgfx {
         /// <summary>
         /// Updates the data in the buffer.
         /// </summary>
+        /// <param name="startVertex">Index of the first vertex to update.</param>
         /// <param name="memory">The new vertex data with which to fill the buffer.</param>
-        public void Update (MemoryBlock memory) {
-            NativeMethods.bgfx_update_dynamic_vertex_buffer(handle, memory.ptr);
+        public void Update (int startVertex, MemoryBlock memory) {
+            NativeMethods.bgfx_update_dynamic_vertex_buffer(handle, startVertex, memory.ptr);
         }
 
         /// <summary>
@@ -2856,7 +2831,6 @@ namespace SharpBgfx {
         /// Performs an implicit conversion from ulong.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        [CLSCompliant(false)]
         public static implicit operator RenderState (ulong value) {
             return new RenderState((long)value);
         }
@@ -2865,7 +2839,6 @@ namespace SharpBgfx {
         /// Performs an explicit conversion to ulong.
         /// </summary>
         /// <param name="state">The value to convert.</param>
-        [CLSCompliant(false)]
         public static explicit operator ulong (RenderState state) {
             return state.value;
         }
@@ -3307,7 +3280,6 @@ namespace SharpBgfx {
         /// Performs an implicit conversion from uint.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        [CLSCompliant(false)]
         public static implicit operator StencilFlags (uint value) {
             return new StencilFlags((int)value);
         }
@@ -3316,7 +3288,6 @@ namespace SharpBgfx {
         /// Performs an explicit conversion to uint.
         /// </summary>
         /// <param name="state">The value to convert.</param>
-        [CLSCompliant(false)]
         public static explicit operator uint (StencilFlags state) {
             return state.value;
         }
@@ -5256,7 +5227,7 @@ namespace SharpBgfx {
         public static extern ushort bgfx_create_dynamic_index_buffer_mem (MemoryBlock.DataPtr* memory, BufferFlags flags);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_update_dynamic_index_buffer (ushort handle, MemoryBlock.DataPtr* memory);
+        public static extern void bgfx_update_dynamic_index_buffer (ushort handle, int startIndex, MemoryBlock.DataPtr* memory);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_destroy_dynamic_index_buffer (ushort handle);
@@ -5268,7 +5239,7 @@ namespace SharpBgfx {
         public static extern ushort bgfx_create_dynamic_vertex_buffer_mem (MemoryBlock.DataPtr* memory, ref VertexLayout.Data decl, BufferFlags flags);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_update_dynamic_vertex_buffer (ushort handle, MemoryBlock.DataPtr* memory);
+        public static extern void bgfx_update_dynamic_vertex_buffer (ushort handle, int startVertex, MemoryBlock.DataPtr* memory);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_destroy_dynamic_vertex_buffer (ushort handle);
@@ -5397,7 +5368,7 @@ namespace SharpBgfx {
         public static extern void bgfx_set_vertex_buffer (ushort handle, int startVertex, int count);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_set_dynamic_vertex_buffer (ushort handle, int startVertex, int count);
+        public static extern void bgfx_set_dynamic_vertex_buffer (ushort handle, int count);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_uniform (ushort handle, void* value, ushort arraySize);
