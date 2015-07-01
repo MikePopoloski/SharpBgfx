@@ -5,6 +5,7 @@ using SharpBgfx;
 
 static class Program {
     const float Step = 0.6f;
+    const float Scale = 0.25f;
     const int HighThreshold = 65;
     const int LowThreshold = 57;
 
@@ -16,7 +17,7 @@ static class Program {
 
     static unsafe void RenderThread (Sample sample) {
         // initialize the renderer
-        Bgfx.Init();
+        Bgfx.Init(RendererBackend.Direct3D11);
         Bgfx.Reset(sample.WindowWidth, sample.WindowHeight, ResetFlags.None);
 
         // enable debug text
@@ -36,7 +37,7 @@ static class Program {
         var clock = new Clock();
         clock.Start();
 
-        int cubeDim = 30;
+        int cubeDim = 15;
         float lastUpdate = 0.0f;
         int frameCount = 0;
 
@@ -89,6 +90,7 @@ static class Program {
                     for (int x = 0; x < cubeDim; x++) {
                         // model matrix
                         var transform = Matrix4x4.CreateFromYawPitchRoll(time + x * 0.21f, time + y * 0.37f, time + y * 0.13f);
+                        transform = Matrix4x4.CreateScale(Scale) * transform;
                         transform.M41 = initial.X + x * Step;
                         transform.M42 = initial.Y + y * Step;
                         transform.M43 = initial.Z + z * Step;
