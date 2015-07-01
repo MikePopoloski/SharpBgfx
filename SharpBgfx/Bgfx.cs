@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Globalization;
 using System.Linq;
-using System.Numerics;
 
 namespace SharpBgfx {
     /// <summary>
@@ -35,29 +34,28 @@ namespace SharpBgfx {
         /// <summary>
         /// Packs a vector into vertex stream format.
         /// </summary>
-        /// <param name="input">The vector to pack.</param>
+        /// <param name="input">The four element vector to pack.</param>
         /// <param name="inputNormalized"><c>true</c> if the input vector is normalized.</param>
         /// <param name="attribute">The attribute usage of the vector data.</param>
         /// <param name="layout">The layout of the vertex stream.</param>
         /// <param name="data">The pointer to the vertex data stream.</param>
         /// <param name="index">The index of the vertex within the stream.</param>
-        public static void VertexPack (Vector4 input, bool inputNormalized, VertexAttributeUsage attribute, VertexLayout layout, IntPtr data, int index = 0) {
-            NativeMethods.bgfx_vertex_pack((float*)&input, inputNormalized, attribute, ref layout.data, data, index);
+        [CLSCompliant(false)]
+        public static void VertexPack (float* input, bool inputNormalized, VertexAttributeUsage attribute, VertexLayout layout, IntPtr data, int index = 0) {
+            NativeMethods.bgfx_vertex_pack(input, inputNormalized, attribute, ref layout.data, data, index);
         }
 
         /// <summary>
         /// Unpack a vector from a vertex stream.
         /// </summary>
+        /// <param name="output">A pointer to four floats that will receive the unpacked vector.</param>
         /// <param name="attribute">The usage of the vertex attribute.</param>
         /// <param name="layout">The layout of the vertex stream.</param>
         /// <param name="data">A pointer to the vertex data stream.</param>
         /// <param name="index">The index of the vertex within the stream.</param>
-        /// <returns>The unpacked vector.</returns>
-        public static Vector4 VertexUnpack (VertexAttributeUsage attribute, VertexLayout layout, IntPtr data, int index = 0) {
-            Vector4 output;
-            NativeMethods.bgfx_vertex_unpack((float*)&output, attribute, ref layout.data, data, index);
-
-            return output;
+        [CLSCompliant(false)]
+        public static void VertexUnpack (float* output, VertexAttributeUsage attribute, VertexLayout layout, IntPtr data, int index = 0) {
+            NativeMethods.bgfx_vertex_unpack(output, attribute, ref layout.data, data, index);
         }
 
         /// <summary>
@@ -405,8 +403,9 @@ namespace SharpBgfx {
         /// The clear color palette is used with SetViewClear for clearing multiple render targets
         /// to different color values.
         /// </remarks>
-        public static void SetClearColorPalette (byte index, Vector4 color) {
-            NativeMethods.bgfx_set_clear_color(index, (float*)&color);
+        [CLSCompliant(false)]
+        public static void SetClearColorPalette (byte index, float* color) {
+            NativeMethods.bgfx_set_clear_color(index, color);
         }
 
         /// <summary>
@@ -416,16 +415,6 @@ namespace SharpBgfx {
         /// <param name="enabled"><c>true</c> to enable sequential mode; otherwise, <c>false</c>.</param>
         public static void SetViewSequential (byte id, bool enabled) {
             NativeMethods.bgfx_set_view_seq(id, enabled);
-        }
-
-        /// <summary>
-        /// Sets the view and projection transforms for the given rendering view.
-        /// </summary>
-        /// <param name="id">The index of the view.</param>
-        /// <param name="view">The 4x4 view transform matrix.</param>
-        /// <param name="projection">The 4x4 projection transform matrix.</param>
-        public static void SetViewTransform (byte id, Matrix4x4 view, Matrix4x4 projection) {
-            NativeMethods.bgfx_set_view_transform(id, (float*)&view, (float*)&projection);
         }
 
         /// <summary>
@@ -446,15 +435,6 @@ namespace SharpBgfx {
         /// <param name="frameBuffer">The frame buffer to set.</param>
         public static void SetViewFrameBuffer (byte id, FrameBuffer frameBuffer) {
             NativeMethods.bgfx_set_view_frame_buffer(id, frameBuffer.handle);
-        }
-
-        /// <summary>
-        /// Sets the model transform to use for drawing primitives.
-        /// </summary>
-        /// <param name="matrix">The matrix to set.</param>
-        /// <returns>An index into the matrix cache to allow reusing the matrix in other calls.</returns>
-        public static int SetTransform (Matrix4x4 matrix) {
-            return NativeMethods.bgfx_set_transform((float*)&matrix, 1);
         }
 
         /// <summary>

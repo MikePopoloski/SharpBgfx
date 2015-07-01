@@ -136,7 +136,7 @@ static class Program {
             // view transforms for particle rendering
             var viewMatrix = Matrix4x4.CreateLookAt(new Vector3(0.0f, 0.0f, -45.0f), -Vector3.UnitZ, Vector3.UnitY);
             var projMatrix = Matrix4x4.CreatePerspectiveFieldOfView((float)Math.PI / 4, (float)sample.WindowWidth / sample.WindowHeight, 0.1f, 10000.0f);
-            Bgfx.SetViewTransform(0, viewMatrix, projMatrix);
+            Bgfx.SetViewTransform(0, &viewMatrix.M11, &projMatrix.M11);
             Bgfx.SetViewRect(0, 0, 0, sample.WindowWidth, sample.WindowHeight);
 
             // draw the particles
