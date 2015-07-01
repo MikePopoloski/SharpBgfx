@@ -521,10 +521,9 @@ namespace SharpBgfx {
         /// Sets the vertex buffer to use for drawing primitives.
         /// </summary>
         /// <param name="vertexBuffer">The vertex buffer to set.</param>
-        /// <param name="firstVertex">The index of the first vertex to use.</param>
         /// <param name="count">The number of vertices to pull from the buffer.</param>
-        public static void SetVertexBuffer (DynamicVertexBuffer vertexBuffer, int firstVertex = 0, int count = -1) {
-            NativeMethods.bgfx_set_dynamic_vertex_buffer(vertexBuffer.handle, firstVertex, count);
+        public static void SetVertexBuffer (DynamicVertexBuffer vertexBuffer, int count = -1) {
+            NativeMethods.bgfx_set_dynamic_vertex_buffer(vertexBuffer.handle, count);
         }
 
         /// <summary>

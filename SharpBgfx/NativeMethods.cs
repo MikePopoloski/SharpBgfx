@@ -182,7 +182,7 @@ namespace SharpBgfx {
         public static extern ushort bgfx_create_dynamic_index_buffer_mem (MemoryBlock.DataPtr* memory, BufferFlags flags);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_update_dynamic_index_buffer (ushort handle, MemoryBlock.DataPtr* memory);
+        public static extern void bgfx_update_dynamic_index_buffer (ushort handle, int startIndex, MemoryBlock.DataPtr* memory);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_destroy_dynamic_index_buffer (ushort handle);
@@ -194,7 +194,7 @@ namespace SharpBgfx {
         public static extern ushort bgfx_create_dynamic_vertex_buffer_mem (MemoryBlock.DataPtr* memory, ref VertexLayout.Data decl, BufferFlags flags);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_update_dynamic_vertex_buffer (ushort handle, MemoryBlock.DataPtr* memory);
+        public static extern void bgfx_update_dynamic_vertex_buffer (ushort handle, int startVertex, MemoryBlock.DataPtr* memory);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_destroy_dynamic_vertex_buffer (ushort handle);
@@ -323,7 +323,7 @@ namespace SharpBgfx {
         public static extern void bgfx_set_vertex_buffer (ushort handle, int startVertex, int count);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_set_dynamic_vertex_buffer (ushort handle, int startVertex, int count);
+        public static extern void bgfx_set_dynamic_vertex_buffer (ushort handle, int count);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_uniform (ushort handle, void* value, ushort arraySize);

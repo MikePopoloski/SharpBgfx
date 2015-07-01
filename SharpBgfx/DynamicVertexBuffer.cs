@@ -35,9 +35,10 @@ namespace SharpBgfx {
         /// <summary>
         /// Updates the data in the buffer.
         /// </summary>
+        /// <param name="startVertex">Index of the first vertex to update.</param>
         /// <param name="memory">The new vertex data with which to fill the buffer.</param>
-        public void Update (MemoryBlock memory) {
-            NativeMethods.bgfx_update_dynamic_vertex_buffer(handle, memory.ptr);
+        public void Update (int startVertex, MemoryBlock memory) {
+            NativeMethods.bgfx_update_dynamic_vertex_buffer(handle, startVertex, memory.ptr);
         }
 
         /// <summary>

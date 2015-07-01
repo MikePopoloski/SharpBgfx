@@ -33,9 +33,10 @@ namespace SharpBgfx {
         /// <summary>
         /// Updates the data in the buffer.
         /// </summary>
+        /// <param name="startIndex">Index of the first index to update.</param>
         /// <param name="memory">The new index data with which to fill the buffer.</param>
-        public void Update (MemoryBlock memory) {
-            NativeMethods.bgfx_update_dynamic_index_buffer(handle, memory.ptr);
+        public void Update (int startIndex, MemoryBlock memory) {
+            NativeMethods.bgfx_update_dynamic_index_buffer(handle, startIndex, memory.ptr);
         }
 
         /// <summary>
