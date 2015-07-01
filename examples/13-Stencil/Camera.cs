@@ -1,5 +1,5 @@
-﻿using System;
-using System.Numerics;
+﻿using Common;
+using System;
 
 class Camera {
     Matrix4x4 projection;

@@ -2,7 +2,6 @@
 using SharpBgfx;
 using System;
 using System.Collections.Generic;
-using System.Numerics;
 
 static class Program {
     static void Main () {
@@ -181,7 +180,7 @@ static class Program {
     const float ColumnDistance = 14.0f;
 
     static readonly Matrix4x4 FloorTransform = Matrix4x4.CreateScale(20.0f);
-    static readonly Matrix4x4 ReflectionTransform = Matrix4x4.CreateReflection(new Plane(Vector3.UnitY, -0.01f));
+    static readonly Matrix4x4 ReflectionTransform = Matrix4x4.CreateReflection(Vector3.UnitY, -0.01f);
     static readonly Matrix4x4[] ColumnTransforms = new[] {
         Matrix4x4.CreateTranslation(ColumnDistance, 0.0f, ColumnDistance),
         Matrix4x4.CreateTranslation(-ColumnDistance, 0.0f, ColumnDistance),

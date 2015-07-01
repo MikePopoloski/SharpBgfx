@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Numerics;
 using Common;
 using SharpBgfx;
 using System.Diagnostics;

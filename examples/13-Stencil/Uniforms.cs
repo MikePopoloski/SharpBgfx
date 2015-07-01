@@ -1,7 +1,6 @@
 ﻿using Common;
 using SharpBgfx;
 using System;
-using System.Numerics;
 
 unsafe class Uniforms : IDisposable, IUniformGroup {
     const int MaxLights = 5;
