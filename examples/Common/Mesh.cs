@@ -53,12 +53,11 @@ namespace Common {
                     Bgfx.SetTexture(0, textureSampler, texture);
 
                 Bgfx.SetTransform((float*)transform);
-                Bgfx.SetProgram(program);
                 Bgfx.SetIndexBuffer(group.IndexBuffer);
                 Bgfx.SetVertexBuffer(group.VertexBuffer);
                 Bgfx.SetRenderState(renderStateGroup.State, (int)renderStateGroup.BlendFactorRgba);
                 Bgfx.SetStencil(renderStateGroup.FrontFace, renderStateGroup.BackFace);
-                Bgfx.Submit(viewId);
+                Bgfx.Submit(viewId, program);
             }
         }
 

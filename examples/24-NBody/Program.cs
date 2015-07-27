@@ -139,15 +139,14 @@ static class Program {
             Bgfx.SetViewRect(0, 0, 0, sample.WindowWidth, sample.WindowHeight);
 
             // draw the particles
-            Bgfx.SetProgram(particleProgram);
             Bgfx.SetVertexBuffer(vb);
             Bgfx.SetIndexBuffer(ib);
             Bgfx.SetInstanceDataBuffer(currPositionBuffer0, 0, paramData.DispatchSize * ThreadGroupUpdateSize);
             Bgfx.SetRenderState(RenderState.ColorWrite | RenderState.BlendAdd | RenderState.DepthTestAlways);
             if (useIndirect)
-                Bgfx.Submit(0, indirectBuffer);
+                Bgfx.Submit(0, particleProgram, indirectBuffer);
             else
-                Bgfx.Submit(0);
+                Bgfx.Submit(0, particleProgram);
 
             // done with frame
             Bgfx.Frame();
@@ -181,7 +180,7 @@ static class Program {
             Bgfx.DebugTextWrite(0, 2, DebugColor.White, DebugColor.Cyan, "Description: N-body simulation with compute shaders using buffers.");
             Bgfx.DebugTextWrite(0, 5, DebugColor.White, DebugColor.Red, "Compute is not supported by your GPU.");
 
-            Bgfx.Submit(0);
+            Bgfx.Touch(0);
             Bgfx.Frame();
         }
     }

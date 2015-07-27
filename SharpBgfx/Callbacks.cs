@@ -21,6 +21,16 @@ namespace SharpBgfx {
         void ReportError (ErrorType errorType, string message);
 
         /// <summary>
+        /// Called to print debug messages.
+        /// </summary>
+        /// <param name="fileName">The name of the source file in which the message originated.</param>
+        /// <param name="line">The line number in which the message originated.</param>
+        /// <param name="format">The message format string.</param>
+        /// <param name="args">A pointer to format arguments.</param>
+        /// <remarks>This method can be called from any thread.</remarks>
+        void ReportDebug (string fileName, int line, string format, IntPtr args);
+
+        /// <summary>
         /// Queries the size of a cache item.
         /// </summary>
         /// <param name="id">The cache entry ID.</param>
@@ -82,6 +92,7 @@ namespace SharpBgfx {
     struct CallbackShim {
         IntPtr vtbl;
         IntPtr reportError;
+        IntPtr reportDebug;
         IntPtr getCachedSize;
         IntPtr getCacheEntry;
         IntPtr setCacheEntry;
@@ -103,7 +114,7 @@ namespace SharpBgfx {
 
             // the shim uses the unnecessary ctor slot to act as a vtbl pointer to itself,
             // so that the same block of memory can act as both bgfx_callback_interface_t and bgfx_callback_vtbl_t
-            shim->vtbl = memory;
+            shim->vtbl = memory + IntPtr.Size;
 
             // cache the data so we can free it later
             shimMemory = memory;
@@ -123,6 +134,10 @@ namespace SharpBgfx {
         [SuppressUnmanagedCodeSecurity]
         [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         delegate void ReportErrorHandler (IntPtr thisPtr, ErrorType errorType, string message);
+
+        [SuppressUnmanagedCodeSecurity]
+        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        delegate void ReportDebugHandler (IntPtr thisPtr, string fileName, ushort line, string format, IntPtr args);
 
         [SuppressUnmanagedCodeSecurity]
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
@@ -154,11 +169,12 @@ namespace SharpBgfx {
 
         // We're creating delegates to a user's interface methods; we're then converting those delegates
         // to native pointers and passing them into native code. If we don't save the references to the
-        // delegates in managed land somewhere, the GC will think they're unreference and clean them
+        // delegates in managed land somewhere, the GC will think they're unreferenced and clean them
         // up, leaving native holding a bag of pointers into nowhere land.
         class DelegateSaver {
             ICallbackHandler handler;
             ReportErrorHandler reportError;
+            ReportDebugHandler reportDebug;
             GetCachedSizeHandler getCachedSize;
             GetCacheEntryHandler getCacheEntry;
             SetCacheEntryHandler setCacheEntry;
@@ -170,6 +186,7 @@ namespace SharpBgfx {
             public unsafe DelegateSaver (ICallbackHandler handler, CallbackShim* shim) {
                 this.handler = handler;
                 reportError = ReportError;
+                reportDebug = ReportDebug;
                 getCachedSize = GetCachedSize;
                 getCacheEntry = GetCacheEntry;
                 setCacheEntry = SetCacheEntry;
@@ -179,6 +196,7 @@ namespace SharpBgfx {
                 captureFrame = CaptureFrame;
 
                 shim->reportError = Marshal.GetFunctionPointerForDelegate(reportError);
+                shim->reportDebug = Marshal.GetFunctionPointerForDelegate(reportDebug);
                 shim->getCachedSize = Marshal.GetFunctionPointerForDelegate(getCachedSize);
                 shim->getCacheEntry = Marshal.GetFunctionPointerForDelegate(getCacheEntry);
                 shim->setCacheEntry = Marshal.GetFunctionPointerForDelegate(setCacheEntry);
@@ -190,6 +208,10 @@ namespace SharpBgfx {
 
             void ReportError (IntPtr thisPtr, ErrorType errorType, string message) {
                 handler.ReportError(errorType, message);
+            }
+
+            void ReportDebug (IntPtr thisPtr, string fileName, ushort line, string format, IntPtr args) {
+                handler.ReportDebug(fileName, line, format, args);
             }
 
             int GetCachedSize (IntPtr thisPtr, long id) {

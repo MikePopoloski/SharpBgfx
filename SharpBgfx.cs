@@ -44,6 +44,16 @@ namespace SharpBgfx {
         void ReportError (ErrorType errorType, string message);
 
         /// <summary>
+        /// Called to print debug messages.
+        /// </summary>
+        /// <param name="fileName">The name of the source file in which the message originated.</param>
+        /// <param name="line">The line number in which the message originated.</param>
+        /// <param name="format">The message format string.</param>
+        /// <param name="args">A pointer to format arguments.</param>
+        /// <remarks>This method can be called from any thread.</remarks>
+        void ReportDebug (string fileName, int line, string format, IntPtr args);
+
+        /// <summary>
         /// Queries the size of a cache item.
         /// </summary>
         /// <param name="id">The cache entry ID.</param>
@@ -574,14 +584,6 @@ namespace SharpBgfx {
         }
 
         /// <summary>
-        /// Sets the shader program to use for drawing primitives.
-        /// </summary>
-        /// <param name="program">The shader program to set.</param>
-        public static void SetProgram (Program program) {
-            NativeMethods.bgfx_set_program(program.handle);
-        }
-
-        /// <summary>
         /// Sets the index buffer to use for drawing primitives.
         /// </summary>
         /// <param name="indexBuffer">The index buffer to set.</param>
@@ -820,26 +822,37 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// Marks a view as "touched", ensuring that its background is cleared even if nothing is rendered.
+        /// </summary>
+        /// <param name="id">The index of the view to touch.</param>
+        /// <returns>The number of draw calls.</returns>
+        public static int Touch (byte id) {
+            return NativeMethods.bgfx_touch(id);
+        }
+
+        /// <summary>
         /// Submits the current batch of primitives for rendering.
         /// </summary>
         /// <param name="id">The index of the view to submit.</param>
+        /// <param name="program">The program with which to render.</param>
         /// <param name="depth">A depth value to use for sorting the batch.</param>
         /// <returns>The number of draw calls.</returns>
-        public static int Submit (byte id, int depth = 0) {
-            return NativeMethods.bgfx_submit(id, depth);
+        public static int Submit (byte id, Program program, int depth = 0) {
+            return NativeMethods.bgfx_submit(id, program.handle, depth);
         }
 
         /// <summary>
         /// Submits an indirect batch of drawing commands to be used for rendering.
         /// </summary>
         /// <param name="id">The index of the view to submit.</param>
+        /// <param name="program">The program with which to render.</param>
         /// <param name="indirectBuffer">The buffer containing drawing commands.</param>
         /// <param name="startIndex">The index of the first command to process.</param>
         /// <param name="count">The number of commands to process from the buffer.</param>
         /// <param name="depth">A depth value to use for sorting the batch.</param>
         /// <returns>The number of draw calls.</returns>
-        public static int Submit (byte id, IndirectBuffer indirectBuffer, int startIndex = 0, int count = 1, int depth = 0) {
-            return NativeMethods.bgfx_submit(id, depth);
+        public static int Submit (byte id, Program program, IndirectBuffer indirectBuffer, int startIndex = 0, int count = 1, int depth = 0) {
+            return NativeMethods.bgfx_submit_indirect(id, program.handle, indirectBuffer.handle, (ushort)startIndex, (ushort)count, depth);
         }
 
         /// <summary>
@@ -5287,10 +5300,13 @@ namespace SharpBgfx {
         public static extern void bgfx_set_stencil (uint frontFace, uint backFace);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int bgfx_submit (byte id, int depth);
+        public static extern int bgfx_touch (byte id);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int bgfx_submit_indirect (byte id, ushort indirectHandle, ushort start, ushort num, int depth);
+        public static extern int bgfx_submit (byte id, ushort programHandle, int depth);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int bgfx_submit_indirect (byte id, ushort programHandle, ushort indirectHandle, ushort start, ushort num, int depth);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_discard ();
@@ -5356,9 +5372,6 @@ namespace SharpBgfx {
         public static extern void bgfx_dbg_text_image (ushort x, ushort y, ushort width, ushort height, IntPtr data, ushort pitch);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_set_program (ushort handle);
-
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_index_buffer (ushort handle, int firstIndex, int count);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
@@ -5407,6 +5420,7 @@ namespace SharpBgfx {
     struct CallbackShim {
         IntPtr vtbl;
         IntPtr reportError;
+        IntPtr reportDebug;
         IntPtr getCachedSize;
         IntPtr getCacheEntry;
         IntPtr setCacheEntry;
@@ -5428,7 +5442,7 @@ namespace SharpBgfx {
 
             // the shim uses the unnecessary ctor slot to act as a vtbl pointer to itself,
             // so that the same block of memory can act as both bgfx_callback_interface_t and bgfx_callback_vtbl_t
-            shim->vtbl = memory;
+            shim->vtbl = memory + IntPtr.Size;
 
             // cache the data so we can free it later
             shimMemory = memory;
@@ -5448,6 +5462,10 @@ namespace SharpBgfx {
         [SuppressUnmanagedCodeSecurity]
         [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         delegate void ReportErrorHandler (IntPtr thisPtr, ErrorType errorType, string message);
+
+        [SuppressUnmanagedCodeSecurity]
+        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        delegate void ReportDebugHandler (IntPtr thisPtr, string fileName, ushort line, string format, IntPtr args);
 
         [SuppressUnmanagedCodeSecurity]
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
@@ -5479,11 +5497,12 @@ namespace SharpBgfx {
 
         // We're creating delegates to a user's interface methods; we're then converting those delegates
         // to native pointers and passing them into native code. If we don't save the references to the
-        // delegates in managed land somewhere, the GC will think they're unreference and clean them
+        // delegates in managed land somewhere, the GC will think they're unreferenced and clean them
         // up, leaving native holding a bag of pointers into nowhere land.
         class DelegateSaver {
             ICallbackHandler handler;
             ReportErrorHandler reportError;
+            ReportDebugHandler reportDebug;
             GetCachedSizeHandler getCachedSize;
             GetCacheEntryHandler getCacheEntry;
             SetCacheEntryHandler setCacheEntry;
@@ -5495,6 +5514,7 @@ namespace SharpBgfx {
             public unsafe DelegateSaver (ICallbackHandler handler, CallbackShim* shim) {
                 this.handler = handler;
                 reportError = ReportError;
+                reportDebug = ReportDebug;
                 getCachedSize = GetCachedSize;
                 getCacheEntry = GetCacheEntry;
                 setCacheEntry = SetCacheEntry;
@@ -5504,6 +5524,7 @@ namespace SharpBgfx {
                 captureFrame = CaptureFrame;
 
                 shim->reportError = Marshal.GetFunctionPointerForDelegate(reportError);
+                shim->reportDebug = Marshal.GetFunctionPointerForDelegate(reportDebug);
                 shim->getCachedSize = Marshal.GetFunctionPointerForDelegate(getCachedSize);
                 shim->getCacheEntry = Marshal.GetFunctionPointerForDelegate(getCacheEntry);
                 shim->setCacheEntry = Marshal.GetFunctionPointerForDelegate(setCacheEntry);
@@ -5515,6 +5536,10 @@ namespace SharpBgfx {
 
             void ReportError (IntPtr thisPtr, ErrorType errorType, string message) {
                 handler.ReportError(errorType, message);
+            }
+
+            void ReportDebug (IntPtr thisPtr, string fileName, ushort line, string format, IntPtr args) {
+                handler.ReportDebug(fileName, line, format, args);
             }
 
             int GetCachedSize (IntPtr thisPtr, long id) {

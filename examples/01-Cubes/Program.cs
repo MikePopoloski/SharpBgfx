@@ -41,8 +41,8 @@ static class Program {
             var projMatrix = Matrix4x4.CreatePerspectiveFieldOfView((float)Math.PI / 3, (float)sample.WindowWidth / sample.WindowHeight, 0.1f, 100.0f);
             Bgfx.SetViewTransform(0, &viewMatrix.M11, &projMatrix.M11);
 
-            // dummy draw call to make sure view 0 is cleared if no other draw calls are submitted
-            Bgfx.Submit(0);
+            // make sure view 0 is cleared if no other draw calls are submitted
+            Bgfx.Touch(0);
 
             // tick the clock
             var elapsed = clock.Frame();
@@ -65,13 +65,12 @@ static class Program {
                     Bgfx.SetTransform(&transform.M11);
 
                     // set pipeline states
-                    Bgfx.SetProgram(program);
                     Bgfx.SetVertexBuffer(vbh);
                     Bgfx.SetIndexBuffer(ibh);
                     Bgfx.SetRenderState(RenderState.Default);
 
                     // submit primitives
-                    Bgfx.Submit(0);
+                    Bgfx.Submit(0, program);
                 }
             }
 

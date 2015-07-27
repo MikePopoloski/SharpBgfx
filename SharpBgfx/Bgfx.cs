@@ -475,14 +475,6 @@ namespace SharpBgfx {
         }
 
         /// <summary>
-        /// Sets the shader program to use for drawing primitives.
-        /// </summary>
-        /// <param name="program">The shader program to set.</param>
-        public static void SetProgram (Program program) {
-            NativeMethods.bgfx_set_program(program.handle);
-        }
-
-        /// <summary>
         /// Sets the index buffer to use for drawing primitives.
         /// </summary>
         /// <param name="indexBuffer">The index buffer to set.</param>
@@ -721,26 +713,37 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// Marks a view as "touched", ensuring that its background is cleared even if nothing is rendered.
+        /// </summary>
+        /// <param name="id">The index of the view to touch.</param>
+        /// <returns>The number of draw calls.</returns>
+        public static int Touch (byte id) {
+            return NativeMethods.bgfx_touch(id);
+        }
+
+        /// <summary>
         /// Submits the current batch of primitives for rendering.
         /// </summary>
         /// <param name="id">The index of the view to submit.</param>
+        /// <param name="program">The program with which to render.</param>
         /// <param name="depth">A depth value to use for sorting the batch.</param>
         /// <returns>The number of draw calls.</returns>
-        public static int Submit (byte id, int depth = 0) {
-            return NativeMethods.bgfx_submit(id, depth);
+        public static int Submit (byte id, Program program, int depth = 0) {
+            return NativeMethods.bgfx_submit(id, program.handle, depth);
         }
 
         /// <summary>
         /// Submits an indirect batch of drawing commands to be used for rendering.
         /// </summary>
         /// <param name="id">The index of the view to submit.</param>
+        /// <param name="program">The program with which to render.</param>
         /// <param name="indirectBuffer">The buffer containing drawing commands.</param>
         /// <param name="startIndex">The index of the first command to process.</param>
         /// <param name="count">The number of commands to process from the buffer.</param>
         /// <param name="depth">A depth value to use for sorting the batch.</param>
         /// <returns>The number of draw calls.</returns>
-        public static int Submit (byte id, IndirectBuffer indirectBuffer, int startIndex = 0, int count = 1, int depth = 0) {
-            return NativeMethods.bgfx_submit(id, depth);
+        public static int Submit (byte id, Program program, IndirectBuffer indirectBuffer, int startIndex = 0, int count = 1, int depth = 0) {
+            return NativeMethods.bgfx_submit_indirect(id, program.handle, indirectBuffer.handle, (ushort)startIndex, (ushort)count, depth);
         }
 
         /// <summary>

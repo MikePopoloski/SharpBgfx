@@ -17,6 +17,10 @@ class CallbackHandler : ICallbackHandler {
             Environment.Exit(1);
     }
 
+    public void ReportDebug (string fileName, int line, string format, IntPtr args) {
+        //Debug.Write(string.Format("({0}:{1}) {2}", fileName, line, format));
+    }
+
     public int GetCachedSize (long id) {
         var file = GetCacheFile(id);
         if (!file.Exists)
@@ -158,13 +162,12 @@ static class Program {
                     Bgfx.SetTransform(&transform.M11);
 
                     // set pipeline states
-                    Bgfx.SetProgram(program);
                     Bgfx.SetVertexBuffer(vbh);
                     Bgfx.SetIndexBuffer(ibh);
                     Bgfx.SetRenderState(RenderState.Default);
 
                     // submit primitives
-                    Bgfx.Submit(0);
+                    Bgfx.Submit(0, program);
                 }
             }
 

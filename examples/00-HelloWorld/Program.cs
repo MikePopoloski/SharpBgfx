@@ -25,8 +25,8 @@ static class Program {
             // set view 0 viewport
             Bgfx.SetViewRect(0, 0, 0, sample.WindowWidth, sample.WindowHeight);
 
-            // dummy draw call to make sure view 0 is cleared if no other draw calls are submitted
-            Bgfx.Submit(0);
+            //  make sure view 0 is cleared if no other draw calls are submitted
+            Bgfx.Touch(0);
 
             // write some debug text
             Bgfx.DebugTextClear();

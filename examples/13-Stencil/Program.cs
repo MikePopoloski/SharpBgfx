@@ -72,7 +72,7 @@ static class Program {
             // clear the background
             Bgfx.SetViewClear(BaseId, ClearTargets.Color | ClearTargets.Depth | ClearTargets.Stencil, 0x30303000);
             Bgfx.SetViewRect(BaseId, 0, 0, sample.WindowWidth, sample.WindowHeight);
-            Bgfx.Submit(BaseId);
+            Bgfx.Touch(BaseId);
 
             // set view params for each pass
             var viewMtx = camera.GetViewMatrix();
