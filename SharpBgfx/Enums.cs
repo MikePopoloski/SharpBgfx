@@ -147,6 +147,11 @@ namespace SharpBgfx {
         UInt8,
 
         /// <summary>
+        /// 10-bit unsigned integer.
+        /// </summary>
+        UInt10,
+
+        /// <summary>
         /// Two-byte signed integer.
         /// </summary>
         Int16,
@@ -509,13 +514,19 @@ namespace SharpBgfx {
 
         /// <summary>
         /// Flip the backbuffer immediately after rendering for reduced latency.
+        /// Only useful when multithreading is disabled.
         /// </summary>
         FlipAfterRender = 0x4000,
 
         /// <summary>
         /// Write data to the backbuffer in non-linear sRGB format.
         /// </summary>
-        SrgbBackbuffer = 0x8000
+        SrgbBackbuffer = 0x8000,
+
+        /// <summary>
+        /// Enable High-DPI rendering.
+        /// </summary>
+        HighDPI = 0x10000
     }
 
     /// <summary>
@@ -662,54 +673,64 @@ namespace SharpBgfx {
         VertexAttributeHalf = 0x8,
 
         /// <summary>
+        /// UInt10 vertex attributes are supported.
+        /// </summary>
+        VertexAttributeUInt10 = 0x10,
+
+        /// <summary>
         /// Device supports instancing.
         /// </summary>
-        Instancing = 0x10,
+        Instancing = 0x20,
 
         /// <summary>
         /// Device supports multithreaded rendering.
         /// </summary>
-        RendererMultithreaded = 0x20,
+        RendererMultithreaded = 0x40,
 
         /// <summary>
         /// Fragment shaders can access depth values.
         /// </summary>
-        FragmentDepth = 0x40,
+        FragmentDepth = 0x80,
 
         /// <summary>
         /// Device supports independent blending of simultaneous render targets.
         /// </summary>
-        BlendIndependent = 0x80,
+        BlendIndependent = 0x100,
 
         /// <summary>
         /// Device supports compute shaders.
         /// </summary>
-        Compute = 0x100,
+        Compute = 0x200,
 
         /// <summary>
         /// Device supports ordering of fragment output.
         /// </summary>
-        FragmentOrdering = 0x200,
+        FragmentOrdering = 0x400,
 
         /// <summary>
         /// Indicates whether the device can render to multiple swap chains.
         /// </summary>
-        SwapChain = 0x400,
+        SwapChain = 0x800,
 
         /// <summary>
         /// Head mounted displays are supported.
         /// </summary>
-        HeadMountedDisplay = 0x800,
+        HeadMountedDisplay = 0x1000,
 
         /// <summary>
         /// Device supports 32-bit indices.
         /// </summary>
-        Index32 = 0x1000,
+        Index32 = 0x2000,
 
         /// <summary>
         /// Device supports indirect drawing via GPU buffers.
         /// </summary>
-        DrawIndirect = 0x2000
+        DrawIndirect = 0x4000,
+
+        /// <summary>
+        /// Device supports high-DPI rendering.
+        /// </summary>
+        HighDPI = 0x8000
     }
 
     /// <summary>

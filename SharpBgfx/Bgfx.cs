@@ -158,7 +158,15 @@ namespace SharpBgfx {
         /// </summary>
         /// <returns>Information about the capabilities of the device.</returns>
         public static Capabilities GetCaps () {
-            return new Capabilities();
+            return new Capabilities(NativeMethods.bgfx_get_caps());
+        }
+
+        /// <summary>
+        /// Gets frame performance statistics.
+        /// </summary>
+        /// <returns>Information about frame performance.</returns>
+        public static PerfStats GetStats () {
+            return new PerfStats(NativeMethods.bgfx_get_stats());
         }
 
         /// <summary>

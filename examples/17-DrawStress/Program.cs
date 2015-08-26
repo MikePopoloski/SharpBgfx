@@ -16,7 +16,7 @@ static class Program {
 
     static unsafe void RenderThread (Sample sample) {
         // initialize the renderer
-        Bgfx.Init(RendererBackend.Direct3D11);
+        Bgfx.Init();
         Bgfx.Reset(sample.WindowWidth, sample.WindowHeight, ResetFlags.None);
 
         // enable debug text

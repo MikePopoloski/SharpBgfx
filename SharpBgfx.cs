@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -267,7 +268,15 @@ namespace SharpBgfx {
         /// </summary>
         /// <returns>Information about the capabilities of the device.</returns>
         public static Capabilities GetCaps () {
-            return new Capabilities();
+            return new Capabilities(NativeMethods.bgfx_get_caps());
+        }
+
+        /// <summary>
+        /// Gets frame performance statistics.
+        /// </summary>
+        /// <returns>Information about frame performance.</returns>
+        public static PerfStats GetStats () {
+            return new PerfStats(NativeMethods.bgfx_get_stats());
         }
 
         /// <summary>
@@ -934,111 +943,6 @@ namespace SharpBgfx {
     }
 
     /// <summary>
-    /// Contains information about the capabilities of the rendering device.
-    /// </summary>
-    public unsafe sealed class Capabilities {
-        Caps* data;
-        Adapter[] adapters;
-
-        /// <summary>
-        /// The currently active rendering backend API.
-        /// </summary>
-        public RendererBackend Backend {
-            get { return data->Backend; }
-        }
-
-        /// <summary>
-        /// A set of extended features supported by the device.
-        /// </summary>
-        public DeviceFeatures SupportedFeatures {
-            get { return data->Supported; }
-        }
-
-        /// <summary>
-        /// The maximum size of a texture, in pixels.
-        /// </summary>
-        public int MaxTextureSize {
-            get { return data->MaxTextureSize; }
-        }
-
-        /// <summary>
-        /// The maximum number of render views supported.
-        /// </summary>
-        public int MaxViews {
-            get { return data->MaxViews; }
-        }
-
-        /// <summary>
-        /// The maximum number of draw calls in a single frame.
-        /// </summary>
-        public int MaxDrawCalls {
-            get { return data->MaxDrawCalls; }
-        }
-
-        /// <summary>
-        /// The maximum number of attachments to a single framebuffer.
-        /// </summary>
-        public int MaxFramebufferAttachments {
-            get { return data->MaxFramebufferAttachements; }
-        }
-
-        /// <summary>
-        /// Details about the currently active graphics adapter.
-        /// </summary>
-        public Adapter CurrentAdapter {
-            get { return new Adapter((Vendor)data->VendorId, data->DeviceId); }
-        }
-
-        /// <summary>
-        /// A list of all graphics adapters installed on the system.
-        /// </summary>
-        public Adapter[] Adapters {
-            get {
-                if (adapters == null) {
-                    var count = data->GPUCount;
-                    adapters = new Adapter[count];
-                    for (int i = 0, j = 0; i < count; i++, j += 2)
-                        adapters[i] = new Adapter((Vendor)data->GPUs[j], data->GPUs[j + 1]);
-                }
-
-                return adapters;
-            }
-        }
-
-        internal Capabilities () {
-            data = NativeMethods.bgfx_get_caps();
-        }
-
-        /// <summary>
-        /// Checks device support for a specific texture format.
-        /// </summary>
-        /// <param name="format">The format to check.</param>
-        /// <returns>The level of support for the given format.</returns>
-        public TextureFormatSupport CheckTextureSupport (TextureFormat format) {
-            return (TextureFormatSupport)data->Formats[(int)format];
-        }
-
-#pragma warning disable 649
-        internal unsafe struct Caps {
-            const int TextureFormatCount = 48;
-
-            public RendererBackend Backend;
-            public DeviceFeatures Supported;
-            public ushort MaxTextureSize;
-            public ushort MaxViews;
-            public ushort MaxDrawCalls;
-            public byte MaxFramebufferAttachements;
-            public byte GPUCount;
-            public ushort VendorId;
-            public ushort DeviceId;
-
-            public fixed ushort GPUs[8];
-            public fixed byte Formats[TextureFormatCount];
-        }
-#pragma warning restore 649
-    }
-
-    /// <summary>
     /// Represents a loaded texture.
     /// </summary>
     public unsafe sealed class Texture : IDisposable, IEquatable<Texture> {
@@ -1415,7 +1319,7 @@ namespace SharpBgfx {
             public uint Hash;
             public ushort Stride;
             public fixed ushort Offset[MaxAttribCount];
-            public fixed byte Attributes[MaxAttribCount];
+            public fixed ushort Attributes[MaxAttribCount];
         }
     }
 
@@ -1457,6 +1361,196 @@ namespace SharpBgfx {
         public override string ToString () {
             return string.Format("Vendor: {0}, Device: {0}", Vendor, DeviceId);
         }
+    }
+
+    /// <summary>
+    /// Contains information about the capabilities of the rendering device.
+    /// </summary>
+    public unsafe struct Capabilities {
+        Caps* data;
+
+        /// <summary>
+        /// The currently active rendering backend API.
+        /// </summary>
+        public RendererBackend Backend {
+            get { return data->Backend; }
+        }
+
+        /// <summary>
+        /// A set of extended features supported by the device.
+        /// </summary>
+        public DeviceFeatures SupportedFeatures {
+            get { return data->Supported; }
+        }
+
+        /// <summary>
+        /// The maximum size of a texture, in pixels.
+        /// </summary>
+        public int MaxTextureSize {
+            get { return data->MaxTextureSize; }
+        }
+
+        /// <summary>
+        /// The maximum number of render views supported.
+        /// </summary>
+        public int MaxViews {
+            get { return data->MaxViews; }
+        }
+
+        /// <summary>
+        /// The maximum number of draw calls in a single frame.
+        /// </summary>
+        public int MaxDrawCalls {
+            get { return data->MaxDrawCalls; }
+        }
+
+        /// <summary>
+        /// The maximum number of attachments to a single framebuffer.
+        /// </summary>
+        public int MaxFramebufferAttachments {
+            get { return data->MaxFramebufferAttachements; }
+        }
+
+        /// <summary>
+        /// Details about the currently active graphics adapter.
+        /// </summary>
+        public Adapter CurrentAdapter {
+            get { return new Adapter((Vendor)data->VendorId, data->DeviceId); }
+        }
+
+        /// <summary>
+        /// A list of all graphics adapters installed on the system.
+        /// </summary>
+        public AdapterCollection Adapters {
+            get { return new AdapterCollection(data->GPUs, data->GPUCount); }
+        }
+
+        internal Capabilities (Caps* data) {
+            this.data = data;
+        }
+
+        /// <summary>
+        /// Checks device support for a specific texture format.
+        /// </summary>
+        /// <param name="format">The format to check.</param>
+        /// <returns>The level of support for the given format.</returns>
+        public TextureFormatSupport CheckTextureSupport (TextureFormat format) {
+            return (TextureFormatSupport)data->Formats[(int)format];
+        }
+
+        /// <summary>
+        /// Provides access to a collection of adapters.
+        /// </summary>
+        public unsafe struct AdapterCollection : IReadOnlyList<Adapter> {
+            ushort* data;
+            int count;
+
+            /// <summary>
+            /// Accesses the element at the specified index.
+            /// </summary>
+            /// <param name="index">The index of the element to retrieve.</param>
+            /// <returns>The element at the given index.</returns>
+            public Adapter this[int index] {
+                get { return new Adapter((Vendor)data[index * 2], data[index * 2 + 1]); }
+            }
+
+            /// <summary>
+            /// The number of elements in the collection.
+            /// </summary>
+            public int Count {
+                get { return count; }
+            }
+
+            internal AdapterCollection (ushort* data, int count) {
+                this.data = data;
+                this.count = count;
+            }
+
+            /// <summary>
+            /// Gets an enumerator for the collection.
+            /// </summary>
+            /// <returns>A collection enumerator.</returns>
+            public Enumerator GetEnumerator () {
+                return new Enumerator(this);
+            }
+
+            IEnumerator<Adapter> IEnumerable<Adapter>.GetEnumerator () {
+                return GetEnumerator();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator () {
+                return GetEnumerator();
+            }
+
+            /// <summary>
+            /// Implements an enumerator for an AdapterCollection.
+            /// </summary>
+            public struct Enumerator : IEnumerator<Adapter> {
+                AdapterCollection collection;
+                int index;
+
+                /// <summary>
+                /// The current enumerated item.
+                /// </summary>
+                public Adapter Current {
+                    get { return collection[index]; }
+                }
+
+                object IEnumerator.Current {
+                    get { return Current; }
+                }
+
+                internal Enumerator (AdapterCollection collection) {
+                    this.collection = collection;
+                    index = -1;
+                }
+
+                /// <summary>
+                /// Advances to the next item in the sequence.
+                /// </summary>
+                /// <returns><c>true</c> if there are more items in the collection; otherwise, <c>false</c>.</returns>
+                public bool MoveNext () {
+                    var newIndex = index + 1;
+                    if (newIndex >= collection.Count)
+                        return false;
+
+                    index = newIndex;
+                    return true;
+                }
+
+                /// <summary>
+                /// Empty; does nothing.
+                /// </summary>
+                public void Dispose () {
+                }
+
+                /// <summary>
+                /// Not implemented.
+                /// </summary>
+                public void Reset () {
+                    throw new NotImplementedException();
+                }
+            }
+        }
+
+#pragma warning disable 649
+        internal unsafe struct Caps {
+            const int TextureFormatCount = 48;
+
+            public RendererBackend Backend;
+            public DeviceFeatures Supported;
+            public ushort MaxTextureSize;
+            public ushort MaxViews;
+            public ushort MaxDrawCalls;
+            public byte MaxFramebufferAttachements;
+            public byte GPUCount;
+            public ushort VendorId;
+            public ushort DeviceId;
+
+            public fixed ushort GPUs[8];
+            public fixed byte Formats[TextureFormatCount];
+        }
+#pragma warning restore 649
     }
 
     /// <summary>
@@ -2309,6 +2403,54 @@ namespace SharpBgfx {
             var handle = GCHandle.FromIntPtr(userData);
             handle.Free();
         }
+    }
+
+    /// <summary>
+    /// Contains various performance metrics tracked by the library.
+    /// </summary>
+    public unsafe struct PerfStats {
+        Stats* data;
+
+        /// <summary>
+        /// CPU frame time.
+        /// </summary>
+        public long CpuTime {
+            get { return data->CpuTime; }
+        }
+
+        /// <summary>
+        /// CPU timer frequency.
+        /// </summary>
+        public long CpuTimerFrequency {
+            get { return data->CpuTimerFrequency; }
+        }
+
+        /// <summary>
+        /// GPU frame time.
+        /// </summary>
+        public long GpuTime {
+            get { return data->GpuTime; }
+        }
+
+        /// <summary>
+        /// GPU timer frequency.
+        /// </summary>
+        public long GpuTimerFrequence {
+            get { return data->GpuTimerFrequence; }
+        }
+
+        internal PerfStats (Stats* data) {
+            this.data = data;
+        }
+
+#pragma warning disable 649
+        internal struct Stats {
+            public long CpuTime;
+            public long CpuTimerFrequency;
+            public long GpuTime;
+            public long GpuTimerFrequence;
+        }
+#pragma warning restore 649
     }
 
     /// <summary>
@@ -4229,54 +4371,64 @@ namespace SharpBgfx {
         VertexAttributeHalf = 0x8,
 
         /// <summary>
+        /// UInt10 vertex attributes are supported.
+        /// </summary>
+        VertexAttributeUInt10 = 0x10,
+
+        /// <summary>
         /// Device supports instancing.
         /// </summary>
-        Instancing = 0x10,
+        Instancing = 0x20,
 
         /// <summary>
         /// Device supports multithreaded rendering.
         /// </summary>
-        RendererMultithreaded = 0x20,
+        RendererMultithreaded = 0x40,
 
         /// <summary>
         /// Fragment shaders can access depth values.
         /// </summary>
-        FragmentDepth = 0x40,
+        FragmentDepth = 0x80,
 
         /// <summary>
         /// Device supports independent blending of simultaneous render targets.
         /// </summary>
-        BlendIndependent = 0x80,
+        BlendIndependent = 0x100,
 
         /// <summary>
         /// Device supports compute shaders.
         /// </summary>
-        Compute = 0x100,
+        Compute = 0x200,
 
         /// <summary>
         /// Device supports ordering of fragment output.
         /// </summary>
-        FragmentOrdering = 0x200,
+        FragmentOrdering = 0x400,
 
         /// <summary>
         /// Indicates whether the device can render to multiple swap chains.
         /// </summary>
-        SwapChain = 0x400,
+        SwapChain = 0x800,
 
         /// <summary>
         /// Head mounted displays are supported.
         /// </summary>
-        HeadMountedDisplay = 0x800,
+        HeadMountedDisplay = 0x1000,
 
         /// <summary>
         /// Device supports 32-bit indices.
         /// </summary>
-        Index32 = 0x1000,
+        Index32 = 0x2000,
 
         /// <summary>
         /// Device supports indirect drawing via GPU buffers.
         /// </summary>
-        DrawIndirect = 0x2000
+        DrawIndirect = 0x4000,
+
+        /// <summary>
+        /// Device supports high-DPI rendering.
+        /// </summary>
+        HighDPI = 0x8000
     }
 
     /// <summary>
@@ -4437,13 +4589,19 @@ namespace SharpBgfx {
 
         /// <summary>
         /// Flip the backbuffer immediately after rendering for reduced latency.
+        /// Only useful when multithreading is disabled.
         /// </summary>
         FlipAfterRender = 0x4000,
 
         /// <summary>
         /// Write data to the backbuffer in non-linear sRGB format.
         /// </summary>
-        SrgbBackbuffer = 0x8000
+        SrgbBackbuffer = 0x8000,
+
+        /// <summary>
+        /// Enable High-DPI rendering.
+        /// </summary>
+        HighDPI = 0x10000
     }
 
     /// <summary>
@@ -4953,6 +5111,11 @@ namespace SharpBgfx {
         UInt8,
 
         /// <summary>
+        /// 10-bit unsigned integer.
+        /// </summary>
+        UInt10,
+
+        /// <summary>
         /// Two-byte signed integer.
         /// </summary>
         Int16,
@@ -5271,6 +5434,9 @@ namespace SharpBgfx {
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_platform_data (ref PlatformData data);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern PerfStats.Stats* bgfx_get_stats ();
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern RendererBackend bgfx_get_renderer_type ();

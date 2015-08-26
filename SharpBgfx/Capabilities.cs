@@ -1,10 +1,13 @@
-﻿namespace SharpBgfx {
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+
+namespace SharpBgfx {
     /// <summary>
     /// Contains information about the capabilities of the rendering device.
     /// </summary>
-    public unsafe sealed class Capabilities {
+    public unsafe struct Capabilities {
         Caps* data;
-        Adapter[] adapters;
 
         /// <summary>
         /// The currently active rendering backend API.
@@ -58,21 +61,12 @@
         /// <summary>
         /// A list of all graphics adapters installed on the system.
         /// </summary>
-        public Adapter[] Adapters {
-            get {
-                if (adapters == null) {
-                    var count = data->GPUCount;
-                    adapters = new Adapter[count];
-                    for (int i = 0, j = 0; i < count; i++, j += 2)
-                        adapters[i] = new Adapter((Vendor)data->GPUs[j], data->GPUs[j + 1]);
-                }
-
-                return adapters;
-            }
+        public AdapterCollection Adapters {
+            get { return new AdapterCollection(data->GPUs, data->GPUCount); }
         }
 
-        internal Capabilities () {
-            data = NativeMethods.bgfx_get_caps();
+        internal Capabilities (Caps* data) {
+            this.data = data;
         }
 
         /// <summary>
@@ -82,6 +76,101 @@
         /// <returns>The level of support for the given format.</returns>
         public TextureFormatSupport CheckTextureSupport (TextureFormat format) {
             return (TextureFormatSupport)data->Formats[(int)format];
+        }
+
+        /// <summary>
+        /// Provides access to a collection of adapters.
+        /// </summary>
+        public unsafe struct AdapterCollection : IReadOnlyList<Adapter> {
+            ushort* data;
+            int count;
+
+            /// <summary>
+            /// Accesses the element at the specified index.
+            /// </summary>
+            /// <param name="index">The index of the element to retrieve.</param>
+            /// <returns>The element at the given index.</returns>
+            public Adapter this[int index] {
+                get { return new Adapter((Vendor)data[index * 2], data[index * 2 + 1]); }
+            }
+
+            /// <summary>
+            /// The number of elements in the collection.
+            /// </summary>
+            public int Count {
+                get { return count; }
+            }
+
+            internal AdapterCollection (ushort* data, int count) {
+                this.data = data;
+                this.count = count;
+            }
+
+            /// <summary>
+            /// Gets an enumerator for the collection.
+            /// </summary>
+            /// <returns>A collection enumerator.</returns>
+            public Enumerator GetEnumerator () {
+                return new Enumerator(this);
+            }
+
+            IEnumerator<Adapter> IEnumerable<Adapter>.GetEnumerator () {
+                return GetEnumerator();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator () {
+                return GetEnumerator();
+            }
+
+            /// <summary>
+            /// Implements an enumerator for an AdapterCollection.
+            /// </summary>
+            public struct Enumerator : IEnumerator<Adapter> {
+                AdapterCollection collection;
+                int index;
+
+                /// <summary>
+                /// The current enumerated item.
+                /// </summary>
+                public Adapter Current {
+                    get { return collection[index]; }
+                }
+
+                object IEnumerator.Current {
+                    get { return Current; }
+                }
+
+                internal Enumerator (AdapterCollection collection) {
+                    this.collection = collection;
+                    index = -1;
+                }
+
+                /// <summary>
+                /// Advances to the next item in the sequence.
+                /// </summary>
+                /// <returns><c>true</c> if there are more items in the collection; otherwise, <c>false</c>.</returns>
+                public bool MoveNext () {
+                    var newIndex = index + 1;
+                    if (newIndex >= collection.Count)
+                        return false;
+
+                    index = newIndex;
+                    return true;
+                }
+
+                /// <summary>
+                /// Empty; does nothing.
+                /// </summary>
+                public void Dispose () {
+                }
+
+                /// <summary>
+                /// Not implemented.
+                /// </summary>
+                public void Reset () {
+                    throw new NotImplementedException();
+                }
+            }
         }
 
 #pragma warning disable 649
@@ -142,5 +231,53 @@
         public override string ToString () {
             return string.Format("Vendor: {0}, Device: {0}", Vendor, DeviceId);
         }
+    }
+
+    /// <summary>
+    /// Contains various performance metrics tracked by the library.
+    /// </summary>
+    public unsafe struct PerfStats {
+        Stats* data;
+
+        /// <summary>
+        /// CPU frame time.
+        /// </summary>
+        public long CpuTime {
+            get { return data->CpuTime; }
+        }
+
+        /// <summary>
+        /// CPU timer frequency.
+        /// </summary>
+        public long CpuTimerFrequency {
+            get { return data->CpuTimerFrequency; }
+        }
+
+        /// <summary>
+        /// GPU frame time.
+        /// </summary>
+        public long GpuTime {
+            get { return data->GpuTime; }
+        }
+
+        /// <summary>
+        /// GPU timer frequency.
+        /// </summary>
+        public long GpuTimerFrequence {
+            get { return data->GpuTimerFrequence; }
+        }
+
+        internal PerfStats (Stats* data) {
+            this.data = data;
+        }
+
+#pragma warning disable 649
+        internal struct Stats {
+            public long CpuTime;
+            public long CpuTimerFrequency;
+            public long GpuTime;
+            public long GpuTimerFrequence;
+        }
+#pragma warning restore 649
     }
 }

@@ -215,6 +215,9 @@ namespace SharpBgfx {
         public static extern void bgfx_set_platform_data (ref PlatformData data);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern PerfStats.Stats* bgfx_get_stats ();
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern RendererBackend bgfx_get_renderer_type ();
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]

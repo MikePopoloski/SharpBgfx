@@ -83,7 +83,7 @@
             public uint Hash;
             public ushort Stride;
             public fixed ushort Offset[MaxAttribCount];
-            public fixed byte Attributes[MaxAttribCount];
+            public fixed ushort Attributes[MaxAttribCount];
         }
     }
 }
