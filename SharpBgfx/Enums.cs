@@ -149,6 +149,9 @@ namespace SharpBgfx {
         /// <summary>
         /// 10-bit unsigned integer.
         /// </summary>
+        /// <remarks>
+        /// Availability depends on Caps flags.
+        /// </remarks>
         UInt10,
 
         /// <summary>
@@ -159,6 +162,9 @@ namespace SharpBgfx {
         /// <summary>
         /// Two-byte float.
         /// </summary>
+        /// <remarks>
+        /// Availability depends on Caps flags.
+        /// </remarks>
         Half,
 
         /// <summary>
@@ -170,6 +176,9 @@ namespace SharpBgfx {
     /// <summary>
     /// Specifies the format of a texture's data.
     /// </summary>
+    /// <remarks>
+    /// Check Caps flags for hardware format support.
+    /// </remarks>
     public enum TextureFormat {
         /// <summary>
         /// Block compression with three color channels, 1 bit alpha.
@@ -267,9 +276,29 @@ namespace SharpBgfx {
         R1,
 
         /// <summary>
+        /// 8-bit single channel (alpha).
+        /// </summary>
+        A8,
+
+        /// <summary>
         /// 8-bit single channel.
         /// </summary>
         R8,
+
+        /// <summary>
+        /// 8-bit single channel (integer).
+        /// </summary>
+        R8I,
+
+        /// <summary>
+        /// 8-bit single channel (unsigned).
+        /// </summary>
+        R8U,
+
+        /// <summary>
+        /// 8-bit single channel (signed).
+        /// </summary>
+        R8S,
 
         /// <summary>
         /// 16-bit single channel.
@@ -277,14 +306,34 @@ namespace SharpBgfx {
         R16,
 
         /// <summary>
+        /// 16-bit single channel (integer).
+        /// </summary>
+        R16I,
+
+        /// <summary>
+        /// 16-bit single channel (unsigned).
+        /// </summary>
+        R16U,
+
+        /// <summary>
         /// 16-bit single channel (float).
         /// </summary>
         R16F,
 
         /// <summary>
-        /// 32-bit single channel.
+        /// 16-bit single channel (signed).
         /// </summary>
-        R32,
+        R16S,
+
+        /// <summary>
+        /// 32-bit single channel (integer).
+        /// </summary>
+        R32I,
+
+        /// <summary>
+        /// 32-bit single channel (unsigned).
+        /// </summary>
+        R32U,
 
         /// <summary>
         /// 32-bit single channel (float).
@@ -297,9 +346,34 @@ namespace SharpBgfx {
         RG8,
 
         /// <summary>
+        /// 8-bit two channel (integer).
+        /// </summary>
+        RG8I,
+
+        /// <summary>
+        /// 8-bit two channel (unsigned).
+        /// </summary>
+        RG8U,
+
+        /// <summary>
+        /// 8-bit two channel (signed).
+        /// </summary>
+        RG8S,
+
+        /// <summary>
         /// 16-bit two channel.
         /// </summary>
         RG16,
+
+        /// <summary>
+        /// 16-bit two channel (integer).
+        /// </summary>
+        RG16I,
+
+        /// <summary>
+        /// 16-bit two channel (unsigned).
+        /// </summary>
+        RG16U,
 
         /// <summary>
         /// 16-bit two channel (float).
@@ -307,9 +381,19 @@ namespace SharpBgfx {
         RG16F,
 
         /// <summary>
-        /// 32-bit two channel.
+        /// 16-bit two channel (signed).
         /// </summary>
-        RG32,
+        RG16S,
+
+        /// <summary>
+        /// 32-bit two channel (integer).
+        /// </summary>
+        RG32I,
+
+        /// <summary>
+        /// 32-bit two channel (unsigned).
+        /// </summary>
+        RG32U,
 
         /// <summary>
         /// 32-bit two channel (float).
@@ -327,9 +411,34 @@ namespace SharpBgfx {
         RGBA8,
 
         /// <summary>
+        /// 8-bit RGBA color (integer).
+        /// </summary>
+        RGBA8I,
+
+        /// <summary>
+        /// 8-bit RGBA color (unsigned).
+        /// </summary>
+        RGBA8U,
+
+        /// <summary>
+        /// 8-bit RGBA color (signed).
+        /// </summary>
+        RGBA8S,
+
+        /// <summary>
         /// 16-bit RGBA color.
         /// </summary>
         RGBA16,
+
+        /// <summary>
+        /// 16-bit RGBA color (integer).
+        /// </summary>
+        RGBA16I,
+
+        /// <summary>
+        /// 16-bit RGBA color (unsigned).
+        /// </summary>
+        RGBA16U,
 
         /// <summary>
         /// 16-bit RGBA color (float).
@@ -337,9 +446,19 @@ namespace SharpBgfx {
         RGBA16F,
 
         /// <summary>
-        /// 32-bit RGBA color.
+        /// 16-bit RGBA color (signed).
         /// </summary>
-        RGBA32,
+        RGBA16S,
+
+        /// <summary>
+        /// 32-bit RGBA color (integer).
+        /// </summary>
+        RGBA32I,
+
+        /// <summary>
+        /// 32-bit RGBA color (unsigned).
+        /// </summary>
+        RGBA32U,
 
         /// <summary>
         /// 32-bit RGBA color (float).
@@ -771,7 +890,17 @@ namespace SharpBgfx {
         /// <summary>
         /// The format is supported for framebuffers.
         /// </summary>
-        Framebuffer = 0x20
+        Framebuffer = 0x20,
+
+        /// <summary>
+        /// The format is supported for MSAA framebuffers.
+        /// </summary>
+        FramebufferMSAA = 0x40,
+
+        /// <summary>
+        /// The format is supported for MSAA sampling.
+        /// </summary>
+        MSAA = 0x80
     }
 
     /// <summary>
