@@ -401,7 +401,7 @@ namespace SharpBgfx {
         }
 
         /// <summary>
-        /// Sets an entry in the clear color palette.
+        /// Sets an entry in the color palette.
         /// </summary>
         /// <param name="index">The index of the palette entry to set.</param>
         /// <param name="color">The color to set.</param>
@@ -409,8 +409,8 @@ namespace SharpBgfx {
         /// The clear color palette is used with SetViewClear for clearing multiple render targets
         /// to different color values.
         /// </remarks>
-        public static void SetClearColorPalette (byte index, float* color) {
-            NativeMethods.bgfx_set_clear_color(index, color);
+        public static void SetPaletteColor (byte index, float* color) {
+            NativeMethods.bgfx_set_palette_color(index, color);
         }
 
         /// <summary>

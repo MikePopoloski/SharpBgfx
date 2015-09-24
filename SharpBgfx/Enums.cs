@@ -924,6 +924,11 @@ namespace SharpBgfx {
         ClampU = 0x00000002,
 
         /// <summary>
+        /// Use a border color for addresses outside the range in the U coordinate.
+        /// </summary>
+        BorderU = 0x00000003,
+
+        /// <summary>
         /// Mirror the texture in the V coordinate.
         /// </summary>
         MirrorV = 0x00000004,
@@ -934,6 +939,11 @@ namespace SharpBgfx {
         ClampV = 0x00000008,
 
         /// <summary>
+        /// Use a border color for addresses outside the range in the V coordinate.
+        /// </summary>
+        BorderV = 0x0000000c,
+
+        /// <summary>
         /// Mirror the texture in the W coordinate.
         /// </summary>
         MirrorW = 0x00000010,
@@ -942,6 +952,11 @@ namespace SharpBgfx {
         /// Clamp the texture in the W coordinate.
         /// </summary>
         ClampW = 0x00000020,
+
+        /// <summary>
+        /// Use a border color for addresses outside the range in the W coordinate.
+        /// </summary>
+        BorderW = 0x00000030,
 
         /// <summary>
         /// Use point filtering for texture minification.

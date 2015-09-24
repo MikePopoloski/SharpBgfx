@@ -511,7 +511,7 @@ namespace SharpBgfx {
         }
 
         /// <summary>
-        /// Sets an entry in the clear color palette.
+        /// Sets an entry in the color palette.
         /// </summary>
         /// <param name="index">The index of the palette entry to set.</param>
         /// <param name="color">The color to set.</param>
@@ -519,8 +519,8 @@ namespace SharpBgfx {
         /// The clear color palette is used with SetViewClear for clearing multiple render targets
         /// to different color values.
         /// </remarks>
-        public static void SetClearColorPalette (byte index, float* color) {
-            NativeMethods.bgfx_set_clear_color(index, color);
+        public static void SetPaletteColor (byte index, float* color) {
+            NativeMethods.bgfx_set_palette_color(index, color);
         }
 
         /// <summary>
@@ -4625,6 +4625,11 @@ namespace SharpBgfx {
         ClampU = 0x00000002,
 
         /// <summary>
+        /// Use a border color for addresses outside the range in the U coordinate.
+        /// </summary>
+        BorderU = 0x00000003,
+
+        /// <summary>
         /// Mirror the texture in the V coordinate.
         /// </summary>
         MirrorV = 0x00000004,
@@ -4635,6 +4640,11 @@ namespace SharpBgfx {
         ClampV = 0x00000008,
 
         /// <summary>
+        /// Use a border color for addresses outside the range in the V coordinate.
+        /// </summary>
+        BorderV = 0x0000000c,
+
+        /// <summary>
         /// Mirror the texture in the W coordinate.
         /// </summary>
         MirrorW = 0x00000010,
@@ -4643,6 +4653,11 @@ namespace SharpBgfx {
         /// Clamp the texture in the W coordinate.
         /// </summary>
         ClampW = 0x00000020,
+
+        /// <summary>
+        /// Use a border color for addresses outside the range in the W coordinate.
+        /// </summary>
+        BorderW = 0x00000030,
 
         /// <summary>
         /// Use point filtering for texture minification.
@@ -5622,7 +5637,7 @@ namespace SharpBgfx {
         public static extern void bgfx_set_view_clear_mrt (byte id, ClearTargets flags, float depth, byte stencil, byte rt0, byte rt1, byte rt2, byte rt3, byte rt4, byte rt5, byte rt6, byte rt7);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_set_clear_color (byte index, float* color);
+        public static extern void bgfx_set_palette_color (byte index, float* color);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_view_seq (byte id, [MarshalAs(UnmanagedType.U1)] bool enabled);

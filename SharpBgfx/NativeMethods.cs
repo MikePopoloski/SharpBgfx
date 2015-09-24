@@ -272,7 +272,7 @@ namespace SharpBgfx {
         public static extern void bgfx_set_view_clear_mrt (byte id, ClearTargets flags, float depth, byte stencil, byte rt0, byte rt1, byte rt2, byte rt3, byte rt4, byte rt5, byte rt6, byte rt7);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_set_clear_color (byte index, float* color);
+        public static extern void bgfx_set_palette_color (byte index, float* color);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_view_seq (byte id, [MarshalAs(UnmanagedType.U1)] bool enabled);
