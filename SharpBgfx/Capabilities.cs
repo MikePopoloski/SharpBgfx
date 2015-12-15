@@ -240,10 +240,17 @@ namespace SharpBgfx {
         Stats* data;
 
         /// <summary>
-        /// CPU frame time.
+        /// CPU frame start time.
         /// </summary>
-        public long CpuTime {
-            get { return data->CpuTime; }
+        public long CpuTimeStart {
+            get { return data->CpuTimeBegin; }
+        }
+
+        /// <summary>
+        /// CPU frame end time.
+        /// </summary>
+        public long CpuTimeEnd {
+            get { return data->CpuTimeEnd; }
         }
 
         /// <summary>
@@ -254,17 +261,38 @@ namespace SharpBgfx {
         }
 
         /// <summary>
-        /// GPU frame time.
+        /// Elapsed CPU time.
         /// </summary>
-        public long GpuTime {
-            get { return data->GpuTime; }
+        public TimeSpan CpuElapsed {
+            get { return TimeSpan.FromSeconds((double)(CpuTimeEnd - CpuTimeStart) / CpuTimerFrequency); }
+        }
+
+        /// <summary>
+        /// GPU frame start time.
+        /// </summary>
+        public long GpuTimeStart {
+            get { return data->GpuTimeBegin; }
+        }
+
+        /// <summary>
+        /// GPU frame end time.
+        /// </summary>
+        public long GpuTimeEnd {
+            get { return data->GpuTimeEnd; }
         }
 
         /// <summary>
         /// GPU timer frequency.
         /// </summary>
-        public long GpuTimerFrequence {
-            get { return data->GpuTimerFrequence; }
+        public long GpuTimerFrequency {
+            get { return data->GpuTimerFrequency; }
+        }
+
+        /// <summary>
+        /// Elapsed GPU time.
+        /// </summary>
+        public TimeSpan GpuElapsed {
+            get { return TimeSpan.FromSeconds((double)(GpuTimeEnd - GpuTimeStart) / GpuTimerFrequency); }
         }
 
         internal PerfStats (Stats* data) {
@@ -273,10 +301,12 @@ namespace SharpBgfx {
 
 #pragma warning disable 649
         internal struct Stats {
-            public long CpuTime;
+            public long CpuTimeBegin;
+            public long CpuTimeEnd;
             public long CpuTimerFrequency;
-            public long GpuTime;
-            public long GpuTimerFrequence;
+            public long GpuTimeBegin;
+            public long GpuTimeEnd;
+            public long GpuTimerFrequency;
         }
 #pragma warning restore 649
     }

@@ -60,6 +60,7 @@
     <Compile Include="InstanceDataBuffer.cs" />
     <Compile Include="MemoryBlock.cs" />
     <Compile Include="NativeMethods.cs" />
+    <Compile Include="OcclusionQuery.cs" />
     <Compile Include="PlatformData.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

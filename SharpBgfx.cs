@@ -439,6 +439,17 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// Sets the viewport for the given rendering view.
+        /// </summary>
+        /// <param name="id">The index of the view.</param>
+        /// <param name="x">The X coordinate of the viewport.</param>
+        /// <param name="y">The Y coordinate of the viewport.</param>
+        /// <param name="ratio">The ratio with which to automatically size the viewport.</param>
+        public static void SetViewRect (byte id, int x, int y, BackbufferRatio ratio) {
+            NativeMethods.bgfx_set_view_rect_auto(id, (ushort)x, (ushort)y, ratio);
+        }
+
+        /// <summary>
         /// Sets the scissor rectangle for a specific view.
         /// </summary>
         /// <param name="id">The index of the view.</param>
@@ -840,6 +851,14 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// Resets all view settings to default.
+        /// </summary>
+        /// <param name="id">The index of the view to reset.</param>
+        public static void ResetView (byte id) {
+            NativeMethods.bgfx_reset_view(id);
+        }
+
+        /// <summary>
         /// Submits the current batch of primitives for rendering.
         /// </summary>
         /// <param name="id">The index of the view to submit.</param>
@@ -848,6 +867,18 @@ namespace SharpBgfx {
         /// <returns>The number of draw calls.</returns>
         public static int Submit (byte id, Program program, int depth = 0) {
             return NativeMethods.bgfx_submit(id, program.handle, depth);
+        }
+
+        /// <summary>
+        /// Submits the current batch of primitives for rendering.
+        /// </summary>
+        /// <param name="id">The index of the view to submit.</param>
+        /// <param name="program">The program with which to render.</param>
+        /// <param name="query">An occlusion query to use as a predicate during rendering.</param>
+        /// <param name="depth">A depth value to use for sorting the batch.</param>
+        /// <returns>The number of draw calls.</returns>
+        public static int Submit (byte id, Program program, OcclusionQuery query, int depth = 0) {
+            return NativeMethods.bgfx_submit_occlusion_query(id, program.handle, query.handle, depth);
         }
 
         /// <summary>
@@ -1151,6 +1182,56 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// Blits the contents of the texture to another texture.
+        /// </summary>
+        /// <param name="viewId">The view in which the blit will be ordered.</param>
+        /// <param name="dest">The destination texture.</param>
+        /// <param name="destX">The destination X position.</param>
+        /// <param name="destY">The destination Y position.</param>
+        /// <param name="sourceX">The source X position.</param>
+        /// <param name="sourceY">The source Y position.</param>
+        /// <param name="width">The width of the region to blit.</param>
+        /// <param name="height">The height of the region to blit.</param>
+        /// <remarks>The destination texture must be created with the <see cref="TextureFlags.BlitDestination"/> flag.</remarks>
+        public void BlitTo (byte viewId, Texture dest, int destX, int destY, int sourceX = 0, int sourceY = 0,
+                            int width = ushort.MaxValue, int height = ushort.MaxValue) {
+            BlitTo(viewId, dest, 0, destX, destY, 0, 0, sourceX, sourceY, 0, width, height, 0);
+        }
+
+        /// <summary>
+        /// Blits the contents of the texture to another texture.
+        /// </summary>
+        /// <param name="viewId">The view in which the blit will be ordered.</param>
+        /// <param name="dest">The destination texture.</param>
+        /// <param name="destMip">The destination mip level.</param>
+        /// <param name="destX">The destination X position.</param>
+        /// <param name="destY">The destination Y position.</param>
+        /// <param name="destZ">The destination Z position.</param>
+        /// <param name="sourceMip">The source mip level.</param>
+        /// <param name="sourceX">The source X position.</param>
+        /// <param name="sourceY">The source Y position.</param>
+        /// <param name="sourceZ">The source Z position.</param>
+        /// <param name="width">The width of the region to blit.</param>
+        /// <param name="height">The height of the region to blit.</param>
+        /// <param name="depth">The depth of the region to blit.</param>
+        /// <remarks>The destination texture must be created with the <see cref="TextureFlags.BlitDestination"/> flag.</remarks>
+        public void BlitTo (byte viewId, Texture dest, int destMip, int destX, int destY, int destZ,
+                            int sourceMip = 0, int sourceX = 0, int sourceY = 0, int sourceZ = 0,
+                            int width = ushort.MaxValue, int height = ushort.MaxValue, int depth = ushort.MaxValue) {
+            NativeMethods.bgfx_blit(viewId, dest.handle, (byte)destMip, (ushort)destX, (ushort)destY, (ushort)destZ,
+                handle, (byte)sourceMip, (ushort)sourceX, (ushort)sourceY, (ushort)sourceZ, (ushort)width, (ushort)height, (ushort)depth);
+        }
+
+        /// <summary>
+        /// Reads the contents of the texture and stores them in memory pointed to by <paramref name="data"/>.
+        /// </summary>
+        /// <param name="data">The destination for the read image data.</param>
+        /// <remarks>The texture must have been created with the <see cref="TextureFlags.ReadBack"/> flag.</remarks>
+        public void Read (IntPtr data) {
+            NativeMethods.bgfx_read_texture(handle, data);
+        }
+
+        /// <summary>
         /// Determines whether the specified object is equal to this instance.
         /// </summary>
         /// <param name="other">The object to compare with this instance.</param>
@@ -1204,7 +1285,7 @@ namespace SharpBgfx {
         /// <returns>
         /// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
         /// </returns>
-        public static bool operator ==(Texture left, Texture right) {
+        public static bool operator == (Texture left, Texture right) {
             if (ReferenceEquals(left, null))
                 return ReferenceEquals(right, null);
 
@@ -1219,7 +1300,7 @@ namespace SharpBgfx {
         /// <returns>
         /// <c>true</c> if the two objects are not equal; otherwise, <c>false</c>.
         /// </returns>
-        public static bool operator !=(Texture left, Texture right) {
+        public static bool operator != (Texture left, Texture right) {
             return !(left == right);
         }
 
@@ -1848,6 +1929,59 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// Blits the contents of the framebuffer to a texture.
+        /// </summary>
+        /// <param name="viewId">The view in which the blit will be ordered.</param>
+        /// <param name="dest">The destination texture.</param>
+        /// <param name="destX">The destination X position.</param>
+        /// <param name="destY">The destination Y position.</param>
+        /// <param name="attachment">The frame buffer attachment from which to blit.</param>
+        /// <param name="sourceX">The source X position.</param>
+        /// <param name="sourceY">The source Y position.</param>
+        /// <param name="width">The width of the region to blit.</param>
+        /// <param name="height">The height of the region to blit.</param>
+        /// <remarks>The destination texture must be created with the <see cref="TextureFlags.BlitDestination"/> flag.</remarks>
+        public void BlitTo (byte viewId, Texture dest, int destX, int destY, int attachment = 0, int sourceX = 0, int sourceY = 0,
+                            int width = ushort.MaxValue, int height = ushort.MaxValue) {
+            BlitTo(viewId, dest, 0, destX, destY, 0, attachment, 0, sourceX, sourceY, 0, width, height, 0);
+        }
+
+        /// <summary>
+        /// Blits the contents of the framebuffer to a texture.
+        /// </summary>
+        /// <param name="viewId">The view in which the blit will be ordered.</param>
+        /// <param name="dest">The destination texture.</param>
+        /// <param name="destMip">The destination mip level.</param>
+        /// <param name="destX">The destination X position.</param>
+        /// <param name="destY">The destination Y position.</param>
+        /// <param name="destZ">The destination Z position.</param>
+        /// <param name="attachment">The frame buffer attachment from which to blit.</param>
+        /// <param name="sourceMip">The source mip level.</param>
+        /// <param name="sourceX">The source X position.</param>
+        /// <param name="sourceY">The source Y position.</param>
+        /// <param name="sourceZ">The source Z position.</param>
+        /// <param name="width">The width of the region to blit.</param>
+        /// <param name="height">The height of the region to blit.</param>
+        /// <param name="depth">The depth of the region to blit.</param>
+        /// <remarks>The destination texture must be created with the <see cref="TextureFlags.BlitDestination"/> flag.</remarks>
+        public void BlitTo (byte viewId, Texture dest, int destMip, int destX, int destY, int destZ, int attachment = 0,
+                            int sourceMip = 0, int sourceX = 0, int sourceY = 0, int sourceZ = 0,
+                            int width = ushort.MaxValue, int height = ushort.MaxValue, int depth = ushort.MaxValue) {
+            NativeMethods.bgfx_blit_frame_buffer(viewId, dest.handle, (byte)destMip, (ushort)destX, (ushort)destY, (ushort)destZ,
+                handle, (byte)attachment, (byte)sourceMip, (ushort)sourceX, (ushort)sourceY, (ushort)sourceZ, (ushort)width, (ushort)height, (ushort)depth);
+        }
+
+        /// <summary>
+        /// Reads the contents of the frame buffer and stores them in memory pointed to by <paramref name="data"/>.
+        /// </summary>
+        /// <param name="attachment">The frame buffer attachment from which to read.</param>
+        /// <param name="data">The destination for the read image data.</param>
+        /// <remarks>The attachment must have been created with the <see cref="TextureFlags.ReadBack"/> flag.</remarks>
+        public void Read (int attachment, IntPtr data) {
+            NativeMethods.bgfx_read_frame_buffer(handle, (byte)attachment, data);
+        }
+
+        /// <summary>
         /// Determines whether the specified object is equal to this instance.
         /// </summary>
         /// <param name="other">The object to compare with this instance.</param>
@@ -2406,16 +2540,137 @@ namespace SharpBgfx {
     }
 
     /// <summary>
+    /// Represents an occlusion query.
+    /// </summary>
+    public unsafe struct OcclusionQuery : IDisposable, IEquatable<OcclusionQuery> {
+        internal readonly ushort handle;
+
+        /// <summary>
+        /// Represents an invalid handle.
+        /// </summary>
+        public static readonly OcclusionQuery Invalid = new OcclusionQuery();
+
+        /// <summary>
+        /// Gets the result of the query.
+        /// </summary>
+        public OcclusionQueryResult Result {
+            get { return NativeMethods.bgfx_get_result(handle); }
+        }
+
+        OcclusionQuery (ushort handle) {
+            this.handle = handle;
+        }
+
+        /// <summary>
+        /// Creates a new query.
+        /// </summary>
+        /// <returns>The new occlusion query.</returns>
+        public static OcclusionQuery Create() {
+            return new OcclusionQuery(NativeMethods.bgfx_create_occlusion_query());
+        }
+
+        /// <summary>
+        /// Releases the query.
+        /// </summary>
+        public void Dispose () {
+            NativeMethods.bgfx_destroy_occlusion_query(handle);
+        }
+
+        /// <summary>
+        /// Sets the condition for which the query should check.
+        /// </summary>
+        /// <param name="visible"><c>true</c> for visible; <c>false</c> for invisible.</param>
+        public void SetCondition (bool visible) {
+            NativeMethods.bgfx_set_condition(handle, visible);
+        }
+
+        /// <summary>
+        /// Determines whether the specified object is equal to this instance.
+        /// </summary>
+        /// <param name="other">The object to compare with this instance.</param>
+        /// <returns><c>true</c> if the specified object is equal to this instance; otherwise, <c>false</c>.</returns>
+        public bool Equals (OcclusionQuery other) {
+            return handle == other.handle;
+        }
+
+        /// <summary>
+        /// Determines whether the specified <see cref="System.Object" /> is equal to this instance.
+        /// </summary>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool Equals (object obj) {
+            var other = obj as OcclusionQuery?;
+            if (other == null)
+                return false;
+
+            return Equals(other);
+        }
+
+        /// <summary>
+        /// Returns a hash code for this instance.
+        /// </summary>
+        /// <returns>
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
+        /// </returns>
+        public override int GetHashCode () {
+            return handle.GetHashCode();
+        }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String"/> that represents this instance.
+        /// </returns>
+        public override string ToString () {
+            return string.Format("Handle: {0}", handle);
+        }
+
+        /// <summary>
+        /// Implements the equality operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// <c>true</c> if the two objects are equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator == (OcclusionQuery left, OcclusionQuery right) {
+            return left.Equals(right);
+        }
+
+        /// <summary>
+        /// Implements the inequality operator.
+        /// </summary>
+        /// <param name="left">The left side of the operator.</param>
+        /// <param name="right">The right side of the operator.</param>
+        /// <returns>
+        /// <c>true</c> if the two objects are not equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator != (OcclusionQuery left, OcclusionQuery right) {
+            return !left.Equals(right);
+        }
+    }
+
+    /// <summary>
     /// Contains various performance metrics tracked by the library.
     /// </summary>
     public unsafe struct PerfStats {
         Stats* data;
 
         /// <summary>
-        /// CPU frame time.
+        /// CPU frame start time.
         /// </summary>
-        public long CpuTime {
-            get { return data->CpuTime; }
+        public long CpuTimeStart {
+            get { return data->CpuTimeBegin; }
+        }
+
+        /// <summary>
+        /// CPU frame end time.
+        /// </summary>
+        public long CpuTimeEnd {
+            get { return data->CpuTimeEnd; }
         }
 
         /// <summary>
@@ -2426,17 +2681,38 @@ namespace SharpBgfx {
         }
 
         /// <summary>
-        /// GPU frame time.
+        /// Elapsed CPU time.
         /// </summary>
-        public long GpuTime {
-            get { return data->GpuTime; }
+        public TimeSpan CpuElapsed {
+            get { return TimeSpan.FromSeconds((double)(CpuTimeEnd - CpuTimeStart) / CpuTimerFrequency); }
+        }
+
+        /// <summary>
+        /// GPU frame start time.
+        /// </summary>
+        public long GpuTimeStart {
+            get { return data->GpuTimeBegin; }
+        }
+
+        /// <summary>
+        /// GPU frame end time.
+        /// </summary>
+        public long GpuTimeEnd {
+            get { return data->GpuTimeEnd; }
         }
 
         /// <summary>
         /// GPU timer frequency.
         /// </summary>
-        public long GpuTimerFrequence {
-            get { return data->GpuTimerFrequence; }
+        public long GpuTimerFrequency {
+            get { return data->GpuTimerFrequency; }
+        }
+
+        /// <summary>
+        /// Elapsed GPU time.
+        /// </summary>
+        public TimeSpan GpuElapsed {
+            get { return TimeSpan.FromSeconds((double)(GpuTimeEnd - GpuTimeStart) / GpuTimerFrequency); }
         }
 
         internal PerfStats (Stats* data) {
@@ -2445,10 +2721,12 @@ namespace SharpBgfx {
 
 #pragma warning disable 649
         internal struct Stats {
-            public long CpuTime;
+            public long CpuTimeBegin;
+            public long CpuTimeEnd;
             public long CpuTimerFrequency;
-            public long GpuTime;
-            public long GpuTimerFrequence;
+            public long GpuTimeBegin;
+            public long GpuTimeEnd;
+            public long GpuTimerFrequency;
         }
 #pragma warning restore 649
     }
@@ -4428,7 +4706,22 @@ namespace SharpBgfx {
         /// <summary>
         /// Device supports high-DPI rendering.
         /// </summary>
-        HighDPI = 0x8000
+        HighDPI = 0x8000,
+
+        /// <summary>
+        /// Device supports texture blits.
+        /// </summary>
+        TextureBlit = 0x10000,
+
+        /// <summary>
+        /// Device supports reading back texture data.
+        /// </summary>
+        TextureReadBack = 0x20000,
+
+        /// <summary>
+        /// Device supports occlusion queries.
+        /// </summary>
+        OcclusionQuery = 0x40000
     }
 
     /// <summary>
@@ -4464,6 +4757,26 @@ namespace SharpBgfx {
         /// The graphics device was lost and the library was unable to recover.
         /// </summary>
         DeviceLost
+    }
+
+    /// <summary>
+    /// Specifies results of an occlusion query.
+    /// </summary>
+    public enum OcclusionQueryResult {
+        /// <summary>
+        /// Objects are invisible.
+        /// </summary>
+        Invisible,
+
+        /// <summary>
+        /// Objects are visible.
+        /// </summary>
+        Visible,
+
+        /// <summary>
+        /// Result is not ready or is unknown.
+        /// </summary>
+        NoResult
     }
 
     /// <summary>
@@ -4601,7 +4914,12 @@ namespace SharpBgfx {
         /// <summary>
         /// Enable High-DPI rendering.
         /// </summary>
-        HighDPI = 0x10000
+        HighDPI = 0x10000,
+
+        /// <summary>
+        /// Enables depth clamping.
+        /// </summary>
+        DepthClamp = 0x20000
     }
 
     /// <summary>
@@ -4762,7 +5080,17 @@ namespace SharpBgfx {
         /// <summary>
         /// Texture data is in non-linear sRGB format.
         /// </summary>
-        Srgb = 0x00200000
+        Srgb = 0x00200000,
+
+        /// <summary>
+        /// Texture can be used as the destination of a blit operation.
+        /// </summary>
+        BlitDestination = 0x00400000,
+
+        /// <summary>
+        /// Texture data can be read back.
+        /// </summary>
+        ReadBack = 0x00800000
     }
 
     /// <summary>
@@ -4993,6 +5321,11 @@ namespace SharpBgfx {
         RG32F,
 
         /// <summary>
+        /// 9-bit three channel floating point with shared 5-bit exponent.
+        /// </summary>
+        RGB9E5F,
+
+        /// <summary>
         /// 8-bit BGRA color.
         /// </summary>
         BGRA8,
@@ -5139,44 +5472,74 @@ namespace SharpBgfx {
         Unsupported = 0x0,
 
         /// <summary>
-        /// The format is supported for color data and operations.
+        /// The format is supported for 2D color data and operations.
         /// </summary>
-        Color = 0x1,
+        Color2D = 0x1,
 
         /// <summary>
-        /// The format is supported for sRGB operations.
+        /// The format is supported for 2D sRGB operations.
         /// </summary>
-        ColorSrgb = 0x2,
+        Srgb2D = 0x2,
 
         /// <summary>
-        /// The format is supported through library emulation.
+        /// The format is supported for 2D textures through library emulation.
         /// </summary>
-        Emulated = 0x4,
+        Emulated2D = 0x4,
+
+        /// <summary>
+        /// The format is supported for 3D color data and operations.
+        /// </summary>
+        Color3D = 0x8,
+
+        /// <summary>
+        /// The format is supported for 3D sRGB operations.
+        /// </summary>
+        Srgb3D = 0x10,
+
+        /// <summary>
+        /// The format is supported for 3D textures through library emulation.
+        /// </summary>
+        Emulated3D = 0x20,
+
+        /// <summary>
+        /// The format is supported for cube color data and operations.
+        /// </summary>
+        ColorCube = 0x40,
+
+        /// <summary>
+        /// The format is supported for cube sRGB operations.
+        /// </summary>
+        SrgbCube = 0x80,
+
+        /// <summary>
+        /// The format is supported for cube textures through library emulation.
+        /// </summary>
+        EmulatedCube = 0x100,
 
         /// <summary>
         /// The format is supported for vertex texturing.
         /// </summary>
-        Vertex = 0x8,
+        Vertex = 0x200,
 
         /// <summary>
         /// The format is supported for compute image operations.
         /// </summary>
-        Image = 0x10,
+        Image = 0x400,
 
         /// <summary>
         /// The format is supported for framebuffers.
         /// </summary>
-        Framebuffer = 0x20,
+        Framebuffer = 0x800,
 
         /// <summary>
         /// The format is supported for MSAA framebuffers.
         /// </summary>
-        FramebufferMSAA = 0x40,
+        FramebufferMSAA = 0x1000,
 
         /// <summary>
         /// The format is supported for MSAA sampling.
         /// </summary>
-        MSAA = 0x80
+        MSAA = 0x2000
     }
 
     /// <summary>
@@ -5616,6 +5979,9 @@ namespace SharpBgfx {
         public static extern int bgfx_submit (byte id, ushort programHandle, int depth);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int bgfx_submit_occlusion_query (byte id, ushort programHandle, ushort queryHandle, int depth);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int bgfx_submit_indirect (byte id, ushort programHandle, ushort indirectHandle, ushort start, ushort num, int depth);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
@@ -5626,6 +5992,9 @@ namespace SharpBgfx {
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_view_rect (byte id, ushort x, ushort y, ushort width, ushort height);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_set_view_rect_auto (byte id, ushort x, ushort y, BackbufferRatio ratio);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_view_scissor (byte id, ushort x, ushort y, ushort width, ushort height);
@@ -5719,6 +6088,35 @@ namespace SharpBgfx {
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_instance_data_from_dynamic_vertex_buffer (ushort handle, int startVertex, int count);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_reset_view (byte id);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_blit (byte id, ushort dst, byte dstMip, ushort dstX, ushort dstY, ushort dstZ, ushort src,
+                                             byte srcMip, ushort srcX, ushort srcY, ushort srcZ, ushort width, ushort height, ushort depth);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_blit_frame_buffer (byte id, ushort dst, byte dstMip, ushort dstX, ushort dstY, ushort dstZ, ushort src, byte attachment,
+                                                          byte srcMip, ushort srcX, ushort srcY, ushort srcZ, ushort width, ushort height, ushort depth);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_read_texture (ushort handle, IntPtr data);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_read_frame_buffer (ushort handle, byte attachment, IntPtr data);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern ushort bgfx_create_occlusion_query ();
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_destroy_occlusion_query (ushort handle);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern OcclusionQueryResult bgfx_get_result (ushort handle);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_set_condition (ushort handle, [MarshalAs(UnmanagedType.U1)] bool visible);
 
 #if DEBUG
         const string DllName = "bgfx_debug.dll";

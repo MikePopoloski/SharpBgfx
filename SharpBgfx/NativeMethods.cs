@@ -251,6 +251,9 @@ namespace SharpBgfx {
         public static extern int bgfx_submit (byte id, ushort programHandle, int depth);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int bgfx_submit_occlusion_query (byte id, ushort programHandle, ushort queryHandle, int depth);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int bgfx_submit_indirect (byte id, ushort programHandle, ushort indirectHandle, ushort start, ushort num, int depth);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
@@ -261,6 +264,9 @@ namespace SharpBgfx {
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_view_rect (byte id, ushort x, ushort y, ushort width, ushort height);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_set_view_rect_auto (byte id, ushort x, ushort y, BackbufferRatio ratio);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_view_scissor (byte id, ushort x, ushort y, ushort width, ushort height);
@@ -354,6 +360,35 @@ namespace SharpBgfx {
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_instance_data_from_dynamic_vertex_buffer (ushort handle, int startVertex, int count);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_reset_view (byte id);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_blit (byte id, ushort dst, byte dstMip, ushort dstX, ushort dstY, ushort dstZ, ushort src,
+                                             byte srcMip, ushort srcX, ushort srcY, ushort srcZ, ushort width, ushort height, ushort depth);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_blit_frame_buffer (byte id, ushort dst, byte dstMip, ushort dstX, ushort dstY, ushort dstZ, ushort src, byte attachment,
+                                                          byte srcMip, ushort srcX, ushort srcY, ushort srcZ, ushort width, ushort height, ushort depth);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_read_texture (ushort handle, IntPtr data);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_read_frame_buffer (ushort handle, byte attachment, IntPtr data);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern ushort bgfx_create_occlusion_query ();
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_destroy_occlusion_query (ushort handle);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern OcclusionQueryResult bgfx_get_result (ushort handle);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_set_condition (ushort handle, [MarshalAs(UnmanagedType.U1)] bool visible);
 
 #if DEBUG
         const string DllName = "bgfx_debug.dll";

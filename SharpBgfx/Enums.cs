@@ -401,6 +401,11 @@ namespace SharpBgfx {
         RG32F,
 
         /// <summary>
+        /// 9-bit three channel floating point with shared 5-bit exponent.
+        /// </summary>
+        RGB9E5F,
+
+        /// <summary>
         /// 8-bit BGRA color.
         /// </summary>
         BGRA8,
@@ -645,7 +650,12 @@ namespace SharpBgfx {
         /// <summary>
         /// Enable High-DPI rendering.
         /// </summary>
-        HighDPI = 0x10000
+        HighDPI = 0x10000,
+
+        /// <summary>
+        /// Enables depth clamping.
+        /// </summary>
+        DepthClamp = 0x20000
     }
 
     /// <summary>
@@ -849,7 +859,22 @@ namespace SharpBgfx {
         /// <summary>
         /// Device supports high-DPI rendering.
         /// </summary>
-        HighDPI = 0x8000
+        HighDPI = 0x8000,
+
+        /// <summary>
+        /// Device supports texture blits.
+        /// </summary>
+        TextureBlit = 0x10000,
+
+        /// <summary>
+        /// Device supports reading back texture data.
+        /// </summary>
+        TextureReadBack = 0x20000,
+
+        /// <summary>
+        /// Device supports occlusion queries.
+        /// </summary>
+        OcclusionQuery = 0x40000
     }
 
     /// <summary>
@@ -863,44 +888,74 @@ namespace SharpBgfx {
         Unsupported = 0x0,
 
         /// <summary>
-        /// The format is supported for color data and operations.
+        /// The format is supported for 2D color data and operations.
         /// </summary>
-        Color = 0x1,
+        Color2D = 0x1,
 
         /// <summary>
-        /// The format is supported for sRGB operations.
+        /// The format is supported for 2D sRGB operations.
         /// </summary>
-        ColorSrgb = 0x2,
+        Srgb2D = 0x2,
 
         /// <summary>
-        /// The format is supported through library emulation.
+        /// The format is supported for 2D textures through library emulation.
         /// </summary>
-        Emulated = 0x4,
+        Emulated2D = 0x4,
+
+        /// <summary>
+        /// The format is supported for 3D color data and operations.
+        /// </summary>
+        Color3D = 0x8,
+
+        /// <summary>
+        /// The format is supported for 3D sRGB operations.
+        /// </summary>
+        Srgb3D = 0x10,
+
+        /// <summary>
+        /// The format is supported for 3D textures through library emulation.
+        /// </summary>
+        Emulated3D = 0x20,
+
+        /// <summary>
+        /// The format is supported for cube color data and operations.
+        /// </summary>
+        ColorCube = 0x40,
+
+        /// <summary>
+        /// The format is supported for cube sRGB operations.
+        /// </summary>
+        SrgbCube = 0x80,
+
+        /// <summary>
+        /// The format is supported for cube textures through library emulation.
+        /// </summary>
+        EmulatedCube = 0x100,
 
         /// <summary>
         /// The format is supported for vertex texturing.
         /// </summary>
-        Vertex = 0x8,
+        Vertex = 0x200,
 
         /// <summary>
         /// The format is supported for compute image operations.
         /// </summary>
-        Image = 0x10,
+        Image = 0x400,
 
         /// <summary>
         /// The format is supported for framebuffers.
         /// </summary>
-        Framebuffer = 0x20,
+        Framebuffer = 0x800,
 
         /// <summary>
         /// The format is supported for MSAA framebuffers.
         /// </summary>
-        FramebufferMSAA = 0x40,
+        FramebufferMSAA = 0x1000,
 
         /// <summary>
         /// The format is supported for MSAA sampling.
         /// </summary>
-        MSAA = 0x80
+        MSAA = 0x2000
     }
 
     /// <summary>
@@ -1061,7 +1116,17 @@ namespace SharpBgfx {
         /// <summary>
         /// Texture data is in non-linear sRGB format.
         /// </summary>
-        Srgb = 0x00200000
+        Srgb = 0x00200000,
+
+        /// <summary>
+        /// Texture can be used as the destination of a blit operation.
+        /// </summary>
+        BlitDestination = 0x00400000,
+
+        /// <summary>
+        /// Texture data can be read back.
+        /// </summary>
+        ReadBack = 0x00800000
     }
 
     /// <summary>
@@ -1409,5 +1474,25 @@ namespace SharpBgfx {
         /// White.
         /// </summary>
         White
+    }
+
+    /// <summary>
+    /// Specifies results of an occlusion query.
+    /// </summary>
+    public enum OcclusionQueryResult {
+        /// <summary>
+        /// Objects are invisible.
+        /// </summary>
+        Invisible,
+
+        /// <summary>
+        /// Objects are visible.
+        /// </summary>
+        Visible,
+
+        /// <summary>
+        /// Result is not ready or is unknown.
+        /// </summary>
+        NoResult
     }
 }

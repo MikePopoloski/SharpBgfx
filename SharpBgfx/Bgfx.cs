@@ -329,6 +329,17 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// Sets the viewport for the given rendering view.
+        /// </summary>
+        /// <param name="id">The index of the view.</param>
+        /// <param name="x">The X coordinate of the viewport.</param>
+        /// <param name="y">The Y coordinate of the viewport.</param>
+        /// <param name="ratio">The ratio with which to automatically size the viewport.</param>
+        public static void SetViewRect (byte id, int x, int y, BackbufferRatio ratio) {
+            NativeMethods.bgfx_set_view_rect_auto(id, (ushort)x, (ushort)y, ratio);
+        }
+
+        /// <summary>
         /// Sets the scissor rectangle for a specific view.
         /// </summary>
         /// <param name="id">The index of the view.</param>
@@ -730,6 +741,14 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// Resets all view settings to default.
+        /// </summary>
+        /// <param name="id">The index of the view to reset.</param>
+        public static void ResetView (byte id) {
+            NativeMethods.bgfx_reset_view(id);
+        }
+
+        /// <summary>
         /// Submits the current batch of primitives for rendering.
         /// </summary>
         /// <param name="id">The index of the view to submit.</param>
@@ -738,6 +757,18 @@ namespace SharpBgfx {
         /// <returns>The number of draw calls.</returns>
         public static int Submit (byte id, Program program, int depth = 0) {
             return NativeMethods.bgfx_submit(id, program.handle, depth);
+        }
+
+        /// <summary>
+        /// Submits the current batch of primitives for rendering.
+        /// </summary>
+        /// <param name="id">The index of the view to submit.</param>
+        /// <param name="program">The program with which to render.</param>
+        /// <param name="query">An occlusion query to use as a predicate during rendering.</param>
+        /// <param name="depth">A depth value to use for sorting the batch.</param>
+        /// <returns>The number of draw calls.</returns>
+        public static int Submit (byte id, Program program, OcclusionQuery query, int depth = 0) {
+            return NativeMethods.bgfx_submit_occlusion_query(id, program.handle, query.handle, depth);
         }
 
         /// <summary>
