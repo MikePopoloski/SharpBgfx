@@ -30,4 +30,19 @@ namespace SharpBgfx {
         /// </summary>
         public IntPtr BackbufferDepthStencil;
     }
+
+    /// <summary>
+    /// Exposes internal API data for interop scenarios.
+    /// </summary>
+    public struct InternalData {
+        /// <summary>
+        /// Pointer to internal Bgfx capabilities structure. Use <see cref="Bgfx.GetCaps"/> instead.
+        /// </summary>
+        public IntPtr Caps;
+
+        /// <summary>
+        /// The underlying API's device context (OpenGL, Direct3D, etc).
+        /// </summary>
+        public IntPtr Context;
+    }
 }

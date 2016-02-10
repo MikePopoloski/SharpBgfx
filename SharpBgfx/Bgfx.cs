@@ -138,6 +138,27 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// Gets access to underlying API internals for interop scenarios.
+        /// </summary>
+        /// <returns>A structure containing API context information.</returns>
+        public static InternalData GetInternalData () {
+            unsafe { return *NativeMethods.bgfx_get_internal_data(); }
+        }
+
+        /// <summary>
+        /// Manually renders a frame. Use this to control the Bgfx render loop.
+        /// </summary>
+        /// <returns>The result of the render call.</returns>
+        /// <remarks>
+        /// Use this function if you don't want Bgfx to create and maintain a
+        /// separate render thread. Call this once before <see cref="Bgfx.Init(RendererBackend, Adapter, ICallbackHandler)"/>
+        /// to avoid having the thread created internally.
+        /// </remarks>
+        public static RenderFrameResult ManuallyRenderFrame () {
+            return NativeMethods.bgfx_render_frame();
+        }
+
+        /// <summary>
         /// Gets the currently active rendering backend API.
         /// </summary>
         /// <returns>The currently active rendering backend.</returns>

@@ -215,6 +215,18 @@ namespace SharpBgfx {
         public static extern void bgfx_set_platform_data (ref PlatformData data);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern InternalData* bgfx_get_internal_data ();
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern RenderFrameResult bgfx_render_frame ();
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr bgfx_override_internal_texture_ptr (ushort handle, IntPtr ptr);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr bgfx_override_internal_texture (ushort handle, ushort width, ushort height, byte numMips, TextureFormat format, TextureFlags flags);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern PerfStats.Stats* bgfx_get_stats ();
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]

@@ -1064,9 +1064,9 @@ namespace SharpBgfx {
         RenderTargetMultisample16x = 0x00005000,
 
         /// <summary>
-        /// The texture is only usable as a render target, not as a shader resource.
+        /// The texture is only writeable (render target).
         /// </summary>
-        RenderTargetBufferOnly = 0x00008000,
+        RenderTargetWriteOnly = 0x00008000,
 
         /// <summary>
         /// Use a "less than" operator when comparing textures.
@@ -1494,5 +1494,25 @@ namespace SharpBgfx {
         /// Result is not ready or is unknown.
         /// </summary>
         NoResult
+    }
+
+    /// <summary>
+    /// Specifies results of manually rendering a single frame.
+    /// </summary>
+    public enum RenderFrameResult {
+        /// <summary>
+        /// No device context has been created yet.
+        /// </summary>
+        NoContext,
+
+        /// <summary>
+        /// The frame was rendered.
+        /// </summary>
+        Render,
+
+        /// <summary>
+        /// Rendering is done; the program should exit.
+        /// </summary>
+        Exiting
     }
 }

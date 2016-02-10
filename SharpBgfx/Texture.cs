@@ -260,6 +260,38 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// Override internal texture with externally created texture.
+        /// </summary>
+        /// <param name="ptr">The native API texture pointer.</param>
+        /// <returns>
+        /// Native API pointer to the texture. If result is <see cref="IntPtr.Zero"/>, the texture is not yet
+        /// created from the main thread.
+        /// </returns>
+        public IntPtr OverrideInternal (IntPtr ptr) {
+            return NativeMethods.bgfx_override_internal_texture_ptr(handle, ptr);
+        }
+
+        /// <summary>
+        /// Override internal texture by creating a new 2D texture.
+        /// </summary>
+        /// <param name="width">The width of the texture.</param>
+        /// <param name="height">The height of the texture.</param>
+        /// <param name="mipCount">The number of mip levels.</param>
+        /// <param name="format">The format of the texture data.</param>
+        /// <param name="flags">Flags that control texture behavior.</param>
+        /// <returns>
+        /// Native API pointer to the texture. If result is <see cref="IntPtr.Zero"/>, the texture is not yet
+        /// created from the main thread.
+        /// </returns>
+        public IntPtr OverrideInternal (int width, int height, int mipCount, TextureFormat format, TextureFlags flags = TextureFlags.None) {
+            Width = width;
+            Height = height;
+            MipLevels = mipCount;
+            Format = format;
+            return NativeMethods.bgfx_override_internal_texture(handle, (ushort)width, (ushort)height, (byte)mipCount, format, flags);
+        }
+
+        /// <summary>
         /// Determines whether the specified object is equal to this instance.
         /// </summary>
         /// <param name="other">The object to compare with this instance.</param>

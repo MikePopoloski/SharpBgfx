@@ -1,4 +1,4 @@
-// Copyright (c) 2015 Michael Popoloski
+// Copyright (c) 2015-2016 Michael Popoloski
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -245,6 +245,27 @@ namespace SharpBgfx {
         public static void SetWindowHandle (IntPtr windowHandle) {
             var data = new PlatformData { WindowHandle = windowHandle };
             NativeMethods.bgfx_set_platform_data(ref data);
+        }
+
+        /// <summary>
+        /// Gets access to underlying API internals for interop scenarios.
+        /// </summary>
+        /// <returns>A structure containing API context information.</returns>
+        public static InternalData GetInternalData () {
+            unsafe { return *NativeMethods.bgfx_get_internal_data(); }
+        }
+
+        /// <summary>
+        /// Manually renders a frame. Use this to control the Bgfx render loop.
+        /// </summary>
+        /// <returns>The result of the render call.</returns>
+        /// <remarks>
+        /// Use this function if you don't want Bgfx to create and maintain a
+        /// separate render thread. Call this once before <see cref="Bgfx.Init(RendererBackend, Adapter, ICallbackHandler)"/>
+        /// to avoid having the thread created internally.
+        /// </remarks>
+        public static RenderFrameResult ManuallyRenderFrame () {
+            return NativeMethods.bgfx_render_frame();
         }
 
         /// <summary>
@@ -1229,6 +1250,38 @@ namespace SharpBgfx {
         /// <remarks>The texture must have been created with the <see cref="TextureFlags.ReadBack"/> flag.</remarks>
         public void Read (IntPtr data) {
             NativeMethods.bgfx_read_texture(handle, data);
+        }
+
+        /// <summary>
+        /// Override internal texture with externally created texture.
+        /// </summary>
+        /// <param name="ptr">The native API texture pointer.</param>
+        /// <returns>
+        /// Native API pointer to the texture. If result is <see cref="IntPtr.Zero"/>, the texture is not yet
+        /// created from the main thread.
+        /// </returns>
+        public IntPtr OverrideInternal (IntPtr ptr) {
+            return NativeMethods.bgfx_override_internal_texture_ptr(handle, ptr);
+        }
+
+        /// <summary>
+        /// Override internal texture by creating a new 2D texture.
+        /// </summary>
+        /// <param name="width">The width of the texture.</param>
+        /// <param name="height">The height of the texture.</param>
+        /// <param name="mipCount">The number of mip levels.</param>
+        /// <param name="format">The format of the texture data.</param>
+        /// <param name="flags">Flags that control texture behavior.</param>
+        /// <returns>
+        /// Native API pointer to the texture. If result is <see cref="IntPtr.Zero"/>, the texture is not yet
+        /// created from the main thread.
+        /// </returns>
+        public IntPtr OverrideInternal (int width, int height, int mipCount, TextureFormat format, TextureFlags flags = TextureFlags.None) {
+            Width = width;
+            Height = height;
+            MipLevels = mipCount;
+            Format = format;
+            return NativeMethods.bgfx_override_internal_texture(handle, (ushort)width, (ushort)height, (byte)mipCount, format, flags);
         }
 
         /// <summary>
@@ -2359,6 +2412,21 @@ namespace SharpBgfx {
             public ushort handle;
         }
 #pragma warning restore 649
+    }
+
+    /// <summary>
+    /// Exposes internal API data for interop scenarios.
+    /// </summary>
+    public struct InternalData {
+        /// <summary>
+        /// Pointer to internal Bgfx capabilities structure. Use <see cref="Bgfx.GetCaps"/> instead.
+        /// </summary>
+        public IntPtr Caps;
+
+        /// <summary>
+        /// The underlying API's device context (OpenGL, Direct3D, etc).
+        /// </summary>
+        public IntPtr Context;
     }
 
     /// <summary>
@@ -4831,6 +4899,26 @@ namespace SharpBgfx {
     }
 
     /// <summary>
+    /// Specifies results of manually rendering a single frame.
+    /// </summary>
+    public enum RenderFrameResult {
+        /// <summary>
+        /// No device context has been created yet.
+        /// </summary>
+        NoContext,
+
+        /// <summary>
+        /// The frame was rendered.
+        /// </summary>
+        Render,
+
+        /// <summary>
+        /// Rendering is done; the program should exit.
+        /// </summary>
+        Exiting
+    }
+
+    /// <summary>
     /// Specifies various settings to change during a reset call.
     /// </summary>
     [Flags]
@@ -5028,9 +5116,9 @@ namespace SharpBgfx {
         RenderTargetMultisample16x = 0x00005000,
 
         /// <summary>
-        /// The texture is only usable as a render target, not as a shader resource.
+        /// The texture is only writeable (render target).
         /// </summary>
-        RenderTargetBufferOnly = 0x00008000,
+        RenderTargetWriteOnly = 0x00008000,
 
         /// <summary>
         /// Use a "less than" operator when comparing textures.
@@ -5941,6 +6029,18 @@ namespace SharpBgfx {
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_platform_data (ref PlatformData data);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern InternalData* bgfx_get_internal_data ();
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern RenderFrameResult bgfx_render_frame ();
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr bgfx_override_internal_texture_ptr (ushort handle, IntPtr ptr);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr bgfx_override_internal_texture (ushort handle, ushort width, ushort height, byte numMips, TextureFormat format, TextureFlags flags);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern PerfStats.Stats* bgfx_get_stats ();
