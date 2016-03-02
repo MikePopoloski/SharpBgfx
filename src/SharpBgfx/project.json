@@ -1,0 +1,35 @@
+{
+  "version": "1.0.0-*",
+  "title": "SharpBgfx",
+  "description": "",
+  "authors": [ "" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+
+  "compilationOptions": {
+    "allowUnsafe": true
+  },
+
+  "dependencies": {
+  },
+
+  "commands": {
+  },
+
+  "frameworks": {
+    "net45": {
+    },
+    "dotnet": {
+      "compilationOptions": {
+        "define": [ "PORTABLE" ]
+      },
+      "dependencies": {
+        "System.Runtime": "4.0.20",
+        "System.Runtime.Extensions": "4.0.10",
+        "System.Runtime.InteropServices": "4.0.20",
+        "System.Linq": "4.0.0"
+      }
+    }
+  }
+}

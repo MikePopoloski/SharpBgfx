@@ -34,5 +34,6 @@ _ReSharper*/
 *.vsp
 *.vspx
 packages/*
+project.lock.json
 
 !/examples/Assets/Shaders/bin
