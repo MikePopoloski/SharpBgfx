@@ -246,7 +246,7 @@ namespace SharpBgfx {
         /// <param name="backend">The backend for which to retrieve a name.</param>
         /// <returns>The friendly name of the specified backend.</returns>
         public static string GetBackendName (RendererBackend backend) {
-            return new string(NativeMethods.bgfx_get_renderer_name(backend));
+            return new string((char*)NativeMethods.bgfx_get_renderer_name(backend));
         }
 
         /// <summary>
