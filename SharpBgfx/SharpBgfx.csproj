@@ -75,7 +75,7 @@
     <Compile Include="VertexLayout.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\External\bgfx\bgfx.dll">
+    <Content Include="..\external\bgfx\bgfx.dll">
       <Link>bgfx.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -83,6 +83,11 @@
       <Link>bgfx_debug.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="SharpBgfx.dll.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
