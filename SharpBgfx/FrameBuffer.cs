@@ -2,6 +2,26 @@
 
 namespace SharpBgfx {
     /// <summary>
+    /// Represents a framebuffer attachment.
+    /// </summary>
+    public struct Attachment {
+        /// <summary>
+        /// The attachment texture handle.
+        /// </summary>
+        public Texture Texture;
+
+        /// <summary>
+        /// The texture mip level.
+        /// </summary>
+        public int Mip;
+
+        /// <summary>
+        /// Cube map face or depth layer/slice.
+        /// </summary>
+        public int Layer;
+    }
+
+    /// <summary>
     /// An aggregated frame buffer, with one or more attached texture surfaces.
     /// </summary>
     public unsafe struct FrameBuffer : IDisposable, IEquatable<FrameBuffer> {
@@ -38,13 +58,19 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="attachments">A set of attachments from which to build the frame buffer.</param>
         /// <param name="destroyTextures">if set to <c>true</c>, attached textures will be destroyed when the frame buffer is destroyed.</param>
-        public FrameBuffer (Texture[] attachments, bool destroyTextures = false) {
+        public FrameBuffer (Attachment[] attachments, bool destroyTextures = false) {
             var count = (byte)attachments.Length;
-            var handles = stackalloc ushort[count];
-            for (int i = 0; i < count; i++)
-                handles[i] = attachments[i].handle;
+            var native = stackalloc NativeAttachment[count];
+            for (int i = 0; i < count; i++) {
+                var attachment = attachments[i];
+                native[i] = new NativeAttachment {
+                    handle = attachment.Texture.handle,
+                    mip = (ushort)attachment.Mip,
+                    layer = (ushort)attachment.Layer
+                };
+            }
 
-            handle = NativeMethods.bgfx_create_frame_buffer_from_handles(count, handles, destroyTextures);
+            handle = NativeMethods.bgfx_create_frame_buffer_from_attachment(count, native, destroyTextures);
         }
 
         /// <summary>
@@ -184,6 +210,12 @@ namespace SharpBgfx {
         /// </returns>
         public static bool operator !=(FrameBuffer left, FrameBuffer right) {
             return !left.Equals(right);
+        }
+
+        internal struct NativeAttachment {
+            public ushort handle;
+            public ushort mip;
+            public ushort layer;
         }
     }
 }

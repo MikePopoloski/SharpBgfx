@@ -52,6 +52,20 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// Indicates whether depth coordinates in NDC range from -1 to 1 (true) or 0 to 1 (false).
+        /// </summary>
+        public bool HomogeneousDepth {
+            get { return data->HomogeneousDepth != 0; }
+        }
+
+        /// <summary>
+        /// Indicates whether the coordinate system origin is at the bottom left or top left.
+        /// </summary>
+        public bool OriginBottomLeft {
+            get { return data->OriginBottomLeft != 0; }
+        }
+
+        /// <summary>
         /// Details about the currently active graphics adapter.
         /// </summary>
         public Adapter CurrentAdapter {
@@ -186,6 +200,8 @@ namespace SharpBgfx {
             public byte GPUCount;
             public ushort VendorId;
             public ushort DeviceId;
+            public byte HomogeneousDepth;
+            public byte OriginBottomLeft;
 
             public fixed ushort GPUs[8];
             public fixed byte Formats[TextureFormatCount];

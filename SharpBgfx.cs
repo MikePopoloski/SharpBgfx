@@ -628,9 +628,17 @@ namespace SharpBgfx {
         /// Sets the index buffer to use for drawing primitives.
         /// </summary>
         /// <param name="indexBuffer">The index buffer to set.</param>
+        public static void SetIndexBuffer (IndexBuffer indexBuffer) {
+            NativeMethods.bgfx_set_index_buffer(indexBuffer.handle, 0, -1);
+        }
+
+        /// <summary>
+        /// Sets the index buffer to use for drawing primitives.
+        /// </summary>
+        /// <param name="indexBuffer">The index buffer to set.</param>
         /// <param name="firstIndex">The first index in the buffer to use.</param>
         /// <param name="count">The number of indices to pull from the buffer.</param>
-        public static void SetIndexBuffer (IndexBuffer indexBuffer, int firstIndex = 0, int count = -1) {
+        public static void SetIndexBuffer (IndexBuffer indexBuffer, int firstIndex, int count) {
             NativeMethods.bgfx_set_index_buffer(indexBuffer.handle, firstIndex, count);
         }
 
@@ -638,9 +646,17 @@ namespace SharpBgfx {
         /// Sets the vertex buffer to use for drawing primitives.
         /// </summary>
         /// <param name="vertexBuffer">The vertex buffer to set.</param>
+        public static void SetVertexBuffer (VertexBuffer vertexBuffer) {
+            NativeMethods.bgfx_set_vertex_buffer(vertexBuffer.handle, 0, -1);
+        }
+
+        /// <summary>
+        /// Sets the vertex buffer to use for drawing primitives.
+        /// </summary>
+        /// <param name="vertexBuffer">The vertex buffer to set.</param>
         /// <param name="firstVertex">The index of the first vertex to use.</param>
         /// <param name="count">The number of vertices to pull from the buffer.</param>
-        public static void SetVertexBuffer (VertexBuffer vertexBuffer, int firstVertex = 0, int count = -1) {
+        public static void SetVertexBuffer (VertexBuffer vertexBuffer, int firstVertex, int count) {
             NativeMethods.bgfx_set_vertex_buffer(vertexBuffer.handle, firstVertex, count);
         }
 
@@ -648,19 +664,8 @@ namespace SharpBgfx {
         /// Sets the index buffer to use for drawing primitives.
         /// </summary>
         /// <param name="indexBuffer">The index buffer to set.</param>
-        /// <param name="firstIndex">The first index in the buffer to use.</param>
-        /// <param name="count">The number of indices to pull from the buffer.</param>
-        public static void SetIndexBuffer (DynamicIndexBuffer indexBuffer, int firstIndex = 0, int count = -1) {
-            NativeMethods.bgfx_set_dynamic_index_buffer(indexBuffer.handle, firstIndex, count);
-        }
-
-        /// <summary>
-        /// Sets the vertex buffer to use for drawing primitives.
-        /// </summary>
-        /// <param name="vertexBuffer">The vertex buffer to set.</param>
-        /// <param name="count">The number of vertices to pull from the buffer.</param>
-        public static void SetVertexBuffer (DynamicVertexBuffer vertexBuffer, int count = -1) {
-            NativeMethods.bgfx_set_dynamic_vertex_buffer(vertexBuffer.handle, count);
+        public static void SetIndexBuffer (DynamicIndexBuffer indexBuffer) {
+            NativeMethods.bgfx_set_dynamic_index_buffer(indexBuffer.handle, 0, -1);
         }
 
         /// <summary>
@@ -669,8 +674,52 @@ namespace SharpBgfx {
         /// <param name="indexBuffer">The index buffer to set.</param>
         /// <param name="firstIndex">The first index in the buffer to use.</param>
         /// <param name="count">The number of indices to pull from the buffer.</param>
-        public static void SetIndexBuffer (TransientIndexBuffer indexBuffer, int firstIndex = 0, int count = -1) {
+        public static void SetIndexBuffer (DynamicIndexBuffer indexBuffer, int firstIndex, int count) {
+            NativeMethods.bgfx_set_dynamic_index_buffer(indexBuffer.handle, firstIndex, count);
+        }
+
+        /// <summary>
+        /// Sets the vertex buffer to use for drawing primitives.
+        /// </summary>
+        /// <param name="vertexBuffer">The vertex buffer to set.</param>
+        public static void SetVertexBuffer (DynamicVertexBuffer vertexBuffer) {
+            NativeMethods.bgfx_set_dynamic_vertex_buffer(vertexBuffer.handle, 0, -1);
+        }
+
+        /// <summary>
+        /// Sets the vertex buffer to use for drawing primitives.
+        /// </summary>
+        /// <param name="vertexBuffer">The vertex buffer to set.</param>
+        /// <param name="startVertex">The index of the first vertex to use.</param>
+        /// <param name="count">The number of vertices to pull from the buffer.</param>
+        public static void SetVertexBuffer (DynamicVertexBuffer vertexBuffer, int startVertex, int count) {
+            NativeMethods.bgfx_set_dynamic_vertex_buffer(vertexBuffer.handle, startVertex, count);
+        }
+
+        /// <summary>
+        /// Sets the index buffer to use for drawing primitives.
+        /// </summary>
+        /// <param name="indexBuffer">The index buffer to set.</param>
+        public static void SetIndexBuffer (TransientIndexBuffer indexBuffer) {
+            NativeMethods.bgfx_set_transient_index_buffer(ref indexBuffer, 0, -1);
+        }
+
+        /// <summary>
+        /// Sets the index buffer to use for drawing primitives.
+        /// </summary>
+        /// <param name="indexBuffer">The index buffer to set.</param>
+        /// <param name="firstIndex">The first index in the buffer to use.</param>
+        /// <param name="count">The number of indices to pull from the buffer.</param>
+        public static void SetIndexBuffer (TransientIndexBuffer indexBuffer, int firstIndex, int count) {
             NativeMethods.bgfx_set_transient_index_buffer(ref indexBuffer, firstIndex, count);
+        }
+
+        /// <summary>
+        /// Sets the vertex buffer to use for drawing primitives.
+        /// </summary>
+        /// <param name="vertexBuffer">The vertex buffer to set.</param>
+        public static void SetVertexBuffer (TransientVertexBuffer vertexBuffer) {
+            NativeMethods.bgfx_set_transient_vertex_buffer(ref vertexBuffer, 0, -1);
         }
 
         /// <summary>
@@ -679,7 +728,7 @@ namespace SharpBgfx {
         /// <param name="vertexBuffer">The vertex buffer to set.</param>
         /// <param name="firstVertex">The index of the first vertex to use.</param>
         /// <param name="count">The number of vertices to pull from the buffer.</param>
-        public static void SetVertexBuffer (TransientVertexBuffer vertexBuffer, int firstVertex = 0, int count = -1) {
+        public static void SetVertexBuffer (TransientVertexBuffer vertexBuffer, int firstVertex, int count) {
             NativeMethods.bgfx_set_transient_vertex_buffer(ref vertexBuffer, firstVertex, count);
         }
 
@@ -885,9 +934,10 @@ namespace SharpBgfx {
         /// <param name="id">The index of the view to submit.</param>
         /// <param name="program">The program with which to render.</param>
         /// <param name="depth">A depth value to use for sorting the batch.</param>
+        /// <param name="preserveState"><c>true</c> to preserve internal draw state after the call.</param>
         /// <returns>The number of draw calls.</returns>
-        public static int Submit (byte id, Program program, int depth = 0) {
-            return NativeMethods.bgfx_submit(id, program.handle, depth);
+        public static int Submit (byte id, Program program, int depth = 0, bool preserveState = false) {
+            return NativeMethods.bgfx_submit(id, program.handle, depth, preserveState);
         }
 
         /// <summary>
@@ -897,9 +947,10 @@ namespace SharpBgfx {
         /// <param name="program">The program with which to render.</param>
         /// <param name="query">An occlusion query to use as a predicate during rendering.</param>
         /// <param name="depth">A depth value to use for sorting the batch.</param>
+        /// <param name="preserveState"><c>true</c> to preserve internal draw state after the call.</param>
         /// <returns>The number of draw calls.</returns>
-        public static int Submit (byte id, Program program, OcclusionQuery query, int depth = 0) {
-            return NativeMethods.bgfx_submit_occlusion_query(id, program.handle, query.handle, depth);
+        public static int Submit (byte id, Program program, OcclusionQuery query, int depth = 0, bool preserveState = false) {
+            return NativeMethods.bgfx_submit_occlusion_query(id, program.handle, query.handle, depth, preserveState);
         }
 
         /// <summary>
@@ -911,9 +962,10 @@ namespace SharpBgfx {
         /// <param name="startIndex">The index of the first command to process.</param>
         /// <param name="count">The number of commands to process from the buffer.</param>
         /// <param name="depth">A depth value to use for sorting the batch.</param>
+        /// <param name="preserveState"><c>true</c> to preserve internal draw state after the call.</param>
         /// <returns>The number of draw calls.</returns>
-        public static int Submit (byte id, Program program, IndirectBuffer indirectBuffer, int startIndex = 0, int count = 1, int depth = 0) {
-            return NativeMethods.bgfx_submit_indirect(id, program.handle, indirectBuffer.handle, (ushort)startIndex, (ushort)count, depth);
+        public static int Submit (byte id, Program program, IndirectBuffer indirectBuffer, int startIndex = 0, int count = 1, int depth = 0, bool preserveState = false) {
+            return NativeMethods.bgfx_submit_indirect(id, program.handle, indirectBuffer.handle, (ushort)startIndex, (ushort)count, depth, preserveState);
         }
 
         /// <summary>
@@ -1498,6 +1550,26 @@ namespace SharpBgfx {
     }
 
     /// <summary>
+    /// Represents a framebuffer attachment.
+    /// </summary>
+    public struct Attachment {
+        /// <summary>
+        /// The attachment texture handle.
+        /// </summary>
+        public Texture Texture;
+
+        /// <summary>
+        /// The texture mip level.
+        /// </summary>
+        public int Mip;
+
+        /// <summary>
+        /// Cube map face or depth layer/slice.
+        /// </summary>
+        public int Layer;
+    }
+
+    /// <summary>
     /// Contains information about the capabilities of the rendering device.
     /// </summary>
     public unsafe struct Capabilities {
@@ -1543,6 +1615,20 @@ namespace SharpBgfx {
         /// </summary>
         public int MaxFramebufferAttachments {
             get { return data->MaxFramebufferAttachements; }
+        }
+
+        /// <summary>
+        /// Indicates whether depth coordinates in NDC range from -1 to 1 (true) or 0 to 1 (false).
+        /// </summary>
+        public bool HomogeneousDepth {
+            get { return data->HomogeneousDepth != 0; }
+        }
+
+        /// <summary>
+        /// Indicates whether the coordinate system origin is at the bottom left or top left.
+        /// </summary>
+        public bool OriginBottomLeft {
+            get { return data->OriginBottomLeft != 0; }
         }
 
         /// <summary>
@@ -1680,6 +1766,8 @@ namespace SharpBgfx {
             public byte GPUCount;
             public ushort VendorId;
             public ushort DeviceId;
+            public byte HomogeneousDepth;
+            public byte OriginBottomLeft;
 
             public fixed ushort GPUs[8];
             public fixed byte Formats[TextureFormatCount];
@@ -1954,13 +2042,19 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="attachments">A set of attachments from which to build the frame buffer.</param>
         /// <param name="destroyTextures">if set to <c>true</c>, attached textures will be destroyed when the frame buffer is destroyed.</param>
-        public FrameBuffer (Texture[] attachments, bool destroyTextures = false) {
+        public FrameBuffer (Attachment[] attachments, bool destroyTextures = false) {
             var count = (byte)attachments.Length;
-            var handles = stackalloc ushort[count];
-            for (int i = 0; i < count; i++)
-                handles[i] = attachments[i].handle;
+            var native = stackalloc NativeAttachment[count];
+            for (int i = 0; i < count; i++) {
+                var attachment = attachments[i];
+                native[i] = new NativeAttachment {
+                    handle = attachment.Texture.handle,
+                    mip = (ushort)attachment.Mip,
+                    layer = (ushort)attachment.Layer
+                };
+            }
 
-            handle = NativeMethods.bgfx_create_frame_buffer_from_handles(count, handles, destroyTextures);
+            handle = NativeMethods.bgfx_create_frame_buffer_from_attachment(count, native, destroyTextures);
         }
 
         /// <summary>
@@ -2100,6 +2194,12 @@ namespace SharpBgfx {
         /// </returns>
         public static bool operator !=(FrameBuffer left, FrameBuffer right) {
             return !left.Equals(right);
+        }
+
+        internal struct NativeAttachment {
+            public ushort handle;
+            public ushort mip;
+            public ushort layer;
         }
     }
 
@@ -3102,6 +3202,11 @@ namespace SharpBgfx {
         public static readonly RenderState BlendIndependent = 0x0000000400000000;
 
         /// <summary>
+        /// Enable alpha to coverage blending.
+        /// </summary>
+        public static readonly RenderState BlendAlphaToCoverage = 0x0000000800000000;
+
+        /// <summary>
         /// Don't perform culling of back faces.
         /// </summary>
         public static readonly RenderState NoCulling = 0x0000000000000000;
@@ -3145,6 +3250,16 @@ namespace SharpBgfx {
         /// Enable multisampling.
         /// </summary>
         public static readonly RenderState Multisampling = 0x1000000000000000;
+
+        /// <summary>
+        /// Enable line antialiasing.
+        /// </summary>
+        public static readonly RenderState LineAA = 0x2000000000000000;
+
+        /// <summary>
+        /// Enable conservative rasterization.
+        /// </summary>
+        public static readonly RenderState ConservativeRasterization = 0x4000000000000000;
 
         /// <summary>
         /// Provides a set of sane defaults.
@@ -4789,7 +4904,17 @@ namespace SharpBgfx {
         /// <summary>
         /// Device supports occlusion queries.
         /// </summary>
-        OcclusionQuery = 0x40000
+        OcclusionQuery = 0x40000,
+
+        /// <summary>
+        /// Device supports alpha to coverage.
+        /// </summary>
+        AlphaToCoverage = 0x80000,
+
+        /// <summary>
+        /// Device supports conservative rasterization.
+        /// </summary>
+        ConservativeRasterization = 0x100000
     }
 
     /// <summary>
@@ -5007,7 +5132,12 @@ namespace SharpBgfx {
         /// <summary>
         /// Enables depth clamping.
         /// </summary>
-        DepthClamp = 0x20000
+        DepthClamp = 0x20000,
+
+        /// <summary>
+        /// Suspends rendering.
+        /// </summary>
+        Suspend = 0x40000
     }
 
     /// <summary>
@@ -5407,6 +5537,26 @@ namespace SharpBgfx {
         /// 32-bit two channel (float).
         /// </summary>
         RG32F,
+
+        /// <summary>
+        /// 8-bit three channel.
+        /// </summary>
+        RGB8,
+
+        /// <summary>
+        /// 8-bit three channel (integer).
+        /// </summary>
+        RGB8I,
+
+        /// <summary>
+        /// 8-bit three channel (unsigned).
+        /// </summary>
+        RGB8U,
+
+        /// <summary>
+        /// 8-bit three channel (signed).
+        /// </summary>
+        RGB8S,
 
         /// <summary>
         /// 9-bit three channel floating point with shared 5-bit exponent.
@@ -5899,7 +6049,7 @@ namespace SharpBgfx {
         public static extern ushort bgfx_create_frame_buffer_scaled (BackbufferRatio ratio, TextureFormat format, TextureFlags flags);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern ushort bgfx_create_frame_buffer_from_handles (byte count, ushort* handles, [MarshalAs(UnmanagedType.U1)] bool destroyTextures);
+        public static extern ushort bgfx_create_frame_buffer_from_attachment (byte count, FrameBuffer.NativeAttachment* attachment, [MarshalAs(UnmanagedType.U1)] bool destroyTextures);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern ushort bgfx_create_frame_buffer_from_nwh (IntPtr nwh, ushort width, ushort height, TextureFormat depthFormat);
@@ -6076,13 +6226,13 @@ namespace SharpBgfx {
         public static extern int bgfx_touch (byte id);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int bgfx_submit (byte id, ushort programHandle, int depth);
+        public static extern int bgfx_submit (byte id, ushort programHandle, int depth, [MarshalAs(UnmanagedType.U1)] bool preserveState);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int bgfx_submit_occlusion_query (byte id, ushort programHandle, ushort queryHandle, int depth);
+        public static extern int bgfx_submit_occlusion_query (byte id, ushort programHandle, ushort queryHandle, int depth, [MarshalAs(UnmanagedType.U1)] bool preserveState);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int bgfx_submit_indirect (byte id, ushort programHandle, ushort indirectHandle, ushort start, ushort num, int depth);
+        public static extern int bgfx_submit_indirect (byte id, ushort programHandle, ushort indirectHandle, ushort start, ushort num, int depth, [MarshalAs(UnmanagedType.U1)] bool preserveState);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_discard ();
@@ -6160,7 +6310,7 @@ namespace SharpBgfx {
         public static extern void bgfx_set_vertex_buffer (ushort handle, int startVertex, int count);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_set_dynamic_vertex_buffer (ushort handle, int count);
+        public static extern void bgfx_set_dynamic_vertex_buffer (ushort handle, int startVertex, int count);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_uniform (ushort handle, void* value, ushort arraySize);

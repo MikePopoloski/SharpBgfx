@@ -518,9 +518,17 @@ namespace SharpBgfx {
         /// Sets the index buffer to use for drawing primitives.
         /// </summary>
         /// <param name="indexBuffer">The index buffer to set.</param>
+        public static void SetIndexBuffer (IndexBuffer indexBuffer) {
+            NativeMethods.bgfx_set_index_buffer(indexBuffer.handle, 0, -1);
+        }
+
+        /// <summary>
+        /// Sets the index buffer to use for drawing primitives.
+        /// </summary>
+        /// <param name="indexBuffer">The index buffer to set.</param>
         /// <param name="firstIndex">The first index in the buffer to use.</param>
         /// <param name="count">The number of indices to pull from the buffer.</param>
-        public static void SetIndexBuffer (IndexBuffer indexBuffer, int firstIndex = 0, int count = -1) {
+        public static void SetIndexBuffer (IndexBuffer indexBuffer, int firstIndex, int count) {
             NativeMethods.bgfx_set_index_buffer(indexBuffer.handle, firstIndex, count);
         }
 
@@ -528,9 +536,17 @@ namespace SharpBgfx {
         /// Sets the vertex buffer to use for drawing primitives.
         /// </summary>
         /// <param name="vertexBuffer">The vertex buffer to set.</param>
+        public static void SetVertexBuffer (VertexBuffer vertexBuffer) {
+            NativeMethods.bgfx_set_vertex_buffer(vertexBuffer.handle, 0, -1);
+        }
+
+        /// <summary>
+        /// Sets the vertex buffer to use for drawing primitives.
+        /// </summary>
+        /// <param name="vertexBuffer">The vertex buffer to set.</param>
         /// <param name="firstVertex">The index of the first vertex to use.</param>
         /// <param name="count">The number of vertices to pull from the buffer.</param>
-        public static void SetVertexBuffer (VertexBuffer vertexBuffer, int firstVertex = 0, int count = -1) {
+        public static void SetVertexBuffer (VertexBuffer vertexBuffer, int firstVertex, int count) {
             NativeMethods.bgfx_set_vertex_buffer(vertexBuffer.handle, firstVertex, count);
         }
 
@@ -538,19 +554,8 @@ namespace SharpBgfx {
         /// Sets the index buffer to use for drawing primitives.
         /// </summary>
         /// <param name="indexBuffer">The index buffer to set.</param>
-        /// <param name="firstIndex">The first index in the buffer to use.</param>
-        /// <param name="count">The number of indices to pull from the buffer.</param>
-        public static void SetIndexBuffer (DynamicIndexBuffer indexBuffer, int firstIndex = 0, int count = -1) {
-            NativeMethods.bgfx_set_dynamic_index_buffer(indexBuffer.handle, firstIndex, count);
-        }
-
-        /// <summary>
-        /// Sets the vertex buffer to use for drawing primitives.
-        /// </summary>
-        /// <param name="vertexBuffer">The vertex buffer to set.</param>
-        /// <param name="count">The number of vertices to pull from the buffer.</param>
-        public static void SetVertexBuffer (DynamicVertexBuffer vertexBuffer, int count = -1) {
-            NativeMethods.bgfx_set_dynamic_vertex_buffer(vertexBuffer.handle, count);
+        public static void SetIndexBuffer (DynamicIndexBuffer indexBuffer) {
+            NativeMethods.bgfx_set_dynamic_index_buffer(indexBuffer.handle, 0, -1);
         }
 
         /// <summary>
@@ -559,8 +564,52 @@ namespace SharpBgfx {
         /// <param name="indexBuffer">The index buffer to set.</param>
         /// <param name="firstIndex">The first index in the buffer to use.</param>
         /// <param name="count">The number of indices to pull from the buffer.</param>
-        public static void SetIndexBuffer (TransientIndexBuffer indexBuffer, int firstIndex = 0, int count = -1) {
+        public static void SetIndexBuffer (DynamicIndexBuffer indexBuffer, int firstIndex, int count) {
+            NativeMethods.bgfx_set_dynamic_index_buffer(indexBuffer.handle, firstIndex, count);
+        }
+
+        /// <summary>
+        /// Sets the vertex buffer to use for drawing primitives.
+        /// </summary>
+        /// <param name="vertexBuffer">The vertex buffer to set.</param>
+        public static void SetVertexBuffer (DynamicVertexBuffer vertexBuffer) {
+            NativeMethods.bgfx_set_dynamic_vertex_buffer(vertexBuffer.handle, 0, -1);
+        }
+
+        /// <summary>
+        /// Sets the vertex buffer to use for drawing primitives.
+        /// </summary>
+        /// <param name="vertexBuffer">The vertex buffer to set.</param>
+        /// <param name="startVertex">The index of the first vertex to use.</param>
+        /// <param name="count">The number of vertices to pull from the buffer.</param>
+        public static void SetVertexBuffer (DynamicVertexBuffer vertexBuffer, int startVertex, int count) {
+            NativeMethods.bgfx_set_dynamic_vertex_buffer(vertexBuffer.handle, startVertex, count);
+        }
+
+        /// <summary>
+        /// Sets the index buffer to use for drawing primitives.
+        /// </summary>
+        /// <param name="indexBuffer">The index buffer to set.</param>
+        public static void SetIndexBuffer (TransientIndexBuffer indexBuffer) {
+            NativeMethods.bgfx_set_transient_index_buffer(ref indexBuffer, 0, -1);
+        }
+
+        /// <summary>
+        /// Sets the index buffer to use for drawing primitives.
+        /// </summary>
+        /// <param name="indexBuffer">The index buffer to set.</param>
+        /// <param name="firstIndex">The first index in the buffer to use.</param>
+        /// <param name="count">The number of indices to pull from the buffer.</param>
+        public static void SetIndexBuffer (TransientIndexBuffer indexBuffer, int firstIndex, int count) {
             NativeMethods.bgfx_set_transient_index_buffer(ref indexBuffer, firstIndex, count);
+        }
+
+        /// <summary>
+        /// Sets the vertex buffer to use for drawing primitives.
+        /// </summary>
+        /// <param name="vertexBuffer">The vertex buffer to set.</param>
+        public static void SetVertexBuffer (TransientVertexBuffer vertexBuffer) {
+            NativeMethods.bgfx_set_transient_vertex_buffer(ref vertexBuffer, 0, -1);
         }
 
         /// <summary>
@@ -569,7 +618,7 @@ namespace SharpBgfx {
         /// <param name="vertexBuffer">The vertex buffer to set.</param>
         /// <param name="firstVertex">The index of the first vertex to use.</param>
         /// <param name="count">The number of vertices to pull from the buffer.</param>
-        public static void SetVertexBuffer (TransientVertexBuffer vertexBuffer, int firstVertex = 0, int count = -1) {
+        public static void SetVertexBuffer (TransientVertexBuffer vertexBuffer, int firstVertex, int count) {
             NativeMethods.bgfx_set_transient_vertex_buffer(ref vertexBuffer, firstVertex, count);
         }
 
@@ -775,9 +824,10 @@ namespace SharpBgfx {
         /// <param name="id">The index of the view to submit.</param>
         /// <param name="program">The program with which to render.</param>
         /// <param name="depth">A depth value to use for sorting the batch.</param>
+        /// <param name="preserveState"><c>true</c> to preserve internal draw state after the call.</param>
         /// <returns>The number of draw calls.</returns>
-        public static int Submit (byte id, Program program, int depth = 0) {
-            return NativeMethods.bgfx_submit(id, program.handle, depth);
+        public static int Submit (byte id, Program program, int depth = 0, bool preserveState = false) {
+            return NativeMethods.bgfx_submit(id, program.handle, depth, preserveState);
         }
 
         /// <summary>
@@ -787,9 +837,10 @@ namespace SharpBgfx {
         /// <param name="program">The program with which to render.</param>
         /// <param name="query">An occlusion query to use as a predicate during rendering.</param>
         /// <param name="depth">A depth value to use for sorting the batch.</param>
+        /// <param name="preserveState"><c>true</c> to preserve internal draw state after the call.</param>
         /// <returns>The number of draw calls.</returns>
-        public static int Submit (byte id, Program program, OcclusionQuery query, int depth = 0) {
-            return NativeMethods.bgfx_submit_occlusion_query(id, program.handle, query.handle, depth);
+        public static int Submit (byte id, Program program, OcclusionQuery query, int depth = 0, bool preserveState = false) {
+            return NativeMethods.bgfx_submit_occlusion_query(id, program.handle, query.handle, depth, preserveState);
         }
 
         /// <summary>
@@ -801,9 +852,10 @@ namespace SharpBgfx {
         /// <param name="startIndex">The index of the first command to process.</param>
         /// <param name="count">The number of commands to process from the buffer.</param>
         /// <param name="depth">A depth value to use for sorting the batch.</param>
+        /// <param name="preserveState"><c>true</c> to preserve internal draw state after the call.</param>
         /// <returns>The number of draw calls.</returns>
-        public static int Submit (byte id, Program program, IndirectBuffer indirectBuffer, int startIndex = 0, int count = 1, int depth = 0) {
-            return NativeMethods.bgfx_submit_indirect(id, program.handle, indirectBuffer.handle, (ushort)startIndex, (ushort)count, depth);
+        public static int Submit (byte id, Program program, IndirectBuffer indirectBuffer, int startIndex = 0, int count = 1, int depth = 0, bool preserveState = false) {
+            return NativeMethods.bgfx_submit_indirect(id, program.handle, indirectBuffer.handle, (ushort)startIndex, (ushort)count, depth, preserveState);
         }
 
         /// <summary>

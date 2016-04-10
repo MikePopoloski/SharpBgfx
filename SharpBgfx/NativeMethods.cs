@@ -83,7 +83,7 @@ namespace SharpBgfx {
         public static extern ushort bgfx_create_frame_buffer_scaled (BackbufferRatio ratio, TextureFormat format, TextureFlags flags);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern ushort bgfx_create_frame_buffer_from_handles (byte count, ushort* handles, [MarshalAs(UnmanagedType.U1)] bool destroyTextures);
+        public static extern ushort bgfx_create_frame_buffer_from_attachment (byte count, FrameBuffer.NativeAttachment* attachment, [MarshalAs(UnmanagedType.U1)] bool destroyTextures);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern ushort bgfx_create_frame_buffer_from_nwh (IntPtr nwh, ushort width, ushort height, TextureFormat depthFormat);
@@ -260,13 +260,13 @@ namespace SharpBgfx {
         public static extern int bgfx_touch (byte id);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int bgfx_submit (byte id, ushort programHandle, int depth);
+        public static extern int bgfx_submit (byte id, ushort programHandle, int depth, [MarshalAs(UnmanagedType.U1)] bool preserveState);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int bgfx_submit_occlusion_query (byte id, ushort programHandle, ushort queryHandle, int depth);
+        public static extern int bgfx_submit_occlusion_query (byte id, ushort programHandle, ushort queryHandle, int depth, [MarshalAs(UnmanagedType.U1)] bool preserveState);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int bgfx_submit_indirect (byte id, ushort programHandle, ushort indirectHandle, ushort start, ushort num, int depth);
+        public static extern int bgfx_submit_indirect (byte id, ushort programHandle, ushort indirectHandle, ushort start, ushort num, int depth, [MarshalAs(UnmanagedType.U1)] bool preserveState);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_discard ();
@@ -344,7 +344,7 @@ namespace SharpBgfx {
         public static extern void bgfx_set_vertex_buffer (ushort handle, int startVertex, int count);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_set_dynamic_vertex_buffer (ushort handle, int count);
+        public static extern void bgfx_set_dynamic_vertex_buffer (ushort handle, int startVertex, int count);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_uniform (ushort handle, void* value, ushort arraySize);

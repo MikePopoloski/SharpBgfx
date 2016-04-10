@@ -401,6 +401,26 @@ namespace SharpBgfx {
         RG32F,
 
         /// <summary>
+        /// 8-bit three channel.
+        /// </summary>
+        RGB8,
+
+        /// <summary>
+        /// 8-bit three channel (integer).
+        /// </summary>
+        RGB8I,
+
+        /// <summary>
+        /// 8-bit three channel (unsigned).
+        /// </summary>
+        RGB8U,
+
+        /// <summary>
+        /// 8-bit three channel (signed).
+        /// </summary>
+        RGB8S,
+
+        /// <summary>
         /// 9-bit three channel floating point with shared 5-bit exponent.
         /// </summary>
         RGB9E5F,
@@ -655,7 +675,12 @@ namespace SharpBgfx {
         /// <summary>
         /// Enables depth clamping.
         /// </summary>
-        DepthClamp = 0x20000
+        DepthClamp = 0x20000,
+
+        /// <summary>
+        /// Suspends rendering.
+        /// </summary>
+        Suspend = 0x40000
     }
 
     /// <summary>
@@ -874,7 +899,17 @@ namespace SharpBgfx {
         /// <summary>
         /// Device supports occlusion queries.
         /// </summary>
-        OcclusionQuery = 0x40000
+        OcclusionQuery = 0x40000,
+
+        /// <summary>
+        /// Device supports alpha to coverage.
+        /// </summary>
+        AlphaToCoverage = 0x80000,
+
+        /// <summary>
+        /// Device supports conservative rasterization.
+        /// </summary>
+        ConservativeRasterization = 0x100000
     }
 
     /// <summary>

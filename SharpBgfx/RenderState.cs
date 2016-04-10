@@ -168,6 +168,11 @@ namespace SharpBgfx {
         public static readonly RenderState BlendIndependent = 0x0000000400000000;
 
         /// <summary>
+        /// Enable alpha to coverage blending.
+        /// </summary>
+        public static readonly RenderState BlendAlphaToCoverage = 0x0000000800000000;
+
+        /// <summary>
         /// Don't perform culling of back faces.
         /// </summary>
         public static readonly RenderState NoCulling = 0x0000000000000000;
@@ -211,6 +216,16 @@ namespace SharpBgfx {
         /// Enable multisampling.
         /// </summary>
         public static readonly RenderState Multisampling = 0x1000000000000000;
+
+        /// <summary>
+        /// Enable line antialiasing.
+        /// </summary>
+        public static readonly RenderState LineAA = 0x2000000000000000;
+
+        /// <summary>
+        /// Enable conservative rasterization.
+        /// </summary>
+        public static readonly RenderState ConservativeRasterization = 0x4000000000000000;
 
         /// <summary>
         /// Provides a set of sane defaults.
