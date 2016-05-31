@@ -2883,6 +2883,20 @@ namespace SharpBgfx {
             get { return TimeSpan.FromSeconds((double)(GpuTimeEnd - GpuTimeStart) / GpuTimerFrequency); }
         }
 
+        /// <summary>
+        /// Time spent waiting for the render thread.
+        /// </summary>
+        public long WaitingForRender {
+            get { return data->WaitRender; }
+        }
+
+        /// <summary>
+        /// Time spent waiting for the submit thread.
+        /// </summary>
+        public long WaitingForSubmit {
+            get { return data->WaitSubmit; }
+        }
+
         internal PerfStats (Stats* data) {
             this.data = data;
         }
@@ -2895,6 +2909,8 @@ namespace SharpBgfx {
             public long GpuTimeBegin;
             public long GpuTimeEnd;
             public long GpuTimerFrequency;
+            public long WaitRender;
+            public long WaitSubmit;
         }
 #pragma warning restore 649
     }
@@ -5219,6 +5235,11 @@ namespace SharpBgfx {
         /// Use point filtering for texture mipmaps.
         /// </summary>
         MipFilterPoint = 0x00000400,
+
+        /// <summary>
+        /// Perform MSAA sampling on the texture.
+        /// </summary>
+        MSAASample = 0x00000800,
 
         /// <summary>
         /// The texture will be used as a render target.

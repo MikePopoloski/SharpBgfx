@@ -1074,6 +1074,11 @@ namespace SharpBgfx {
         MipFilterPoint = 0x00000400,
 
         /// <summary>
+        /// Perform MSAA sampling on the texture.
+        /// </summary>
+        MSAASample = 0x00000800,
+
+        /// <summary>
         /// The texture will be used as a render target.
         /// </summary>
         RenderTarget = 0x00001000,
