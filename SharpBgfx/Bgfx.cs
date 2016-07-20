@@ -203,14 +203,15 @@ namespace SharpBgfx {
         /// <summary>
         /// Advances to the next frame.
         /// </summary>
+        /// <param name="capture">If <c>true</c> the frame is captured for debugging.</param>
         /// <returns>The current frame number.</returns>
         /// <remarks>
         /// When using a multithreaded renderer, this call
         /// just swaps internal buffers, kicks render thread, and returns. In a
         /// singlethreaded renderer this call does frame rendering.
         /// </remarks>
-        public static int Frame () {
-            return NativeMethods.bgfx_frame();
+        public static int Frame (bool capture = false) {
+            return NativeMethods.bgfx_frame(capture);
         }
 
         /// <summary>

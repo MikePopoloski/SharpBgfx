@@ -254,9 +254,10 @@ namespace SharpBgfx {
         /// Reads the contents of the texture and stores them in memory pointed to by <paramref name="data"/>.
         /// </summary>
         /// <param name="data">The destination for the read image data.</param>
+        /// <returns>The frame number on which the result will be available.</returns>
         /// <remarks>The texture must have been created with the <see cref="TextureFlags.ReadBack"/> flag.</remarks>
-        public void Read (IntPtr data) {
-            NativeMethods.bgfx_read_texture(handle, data);
+        public int Read (IntPtr data) {
+            return (int)NativeMethods.bgfx_read_texture(handle, data);
         }
 
         /// <summary>

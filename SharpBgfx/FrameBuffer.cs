@@ -139,9 +139,10 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="attachment">The frame buffer attachment from which to read.</param>
         /// <param name="data">The destination for the read image data.</param>
+        /// <returns>The frame number on which the result will be available.</returns>
         /// <remarks>The attachment must have been created with the <see cref="TextureFlags.ReadBack"/> flag.</remarks>
-        public void Read (int attachment, IntPtr data) {
-            NativeMethods.bgfx_read_frame_buffer(handle, (byte)attachment, data);
+        public int Read (int attachment, IntPtr data) {
+            return (int)NativeMethods.bgfx_read_frame_buffer(handle, (byte)attachment, data);
         }
 
         /// <summary>

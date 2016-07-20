@@ -239,7 +239,7 @@ namespace SharpBgfx {
         public static extern void bgfx_reset (int width, int height, ResetFlags flags);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int bgfx_frame ();
+        public static extern int bgfx_frame ([MarshalAs(UnmanagedType.U1)] bool capture);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_debug (DebugFeatures flags);
@@ -385,10 +385,10 @@ namespace SharpBgfx {
                                                           byte srcMip, ushort srcX, ushort srcY, ushort srcZ, ushort width, ushort height, ushort depth);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_read_texture (ushort handle, IntPtr data);
+        public static extern uint bgfx_read_texture (ushort handle, IntPtr data);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_read_frame_buffer (ushort handle, byte attachment, IntPtr data);
+        public static extern uint bgfx_read_frame_buffer (ushort handle, byte attachment, IntPtr data);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern ushort bgfx_create_occlusion_query ();
