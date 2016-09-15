@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using Common;
 using SharpBgfx;
 
@@ -10,6 +11,9 @@ static class Program {
     }
 
     static void RenderThread (Sample sample) {
+        GCHandle logo = GCHandle.Alloc(Logo.Bytes, GCHandleType.Pinned);
+        IntPtr logoPointer = logo.AddrOfPinnedObject();
+
         // initialize the renderer
         Bgfx.Init();
         Bgfx.Reset(sample.WindowWidth, sample.WindowHeight, ResetFlags.Vsync);
@@ -30,6 +34,13 @@ static class Program {
 
             // write some debug text
             Bgfx.DebugTextClear();
+            Bgfx.DebugTextImage(Math.Max(sample.WindowWidth / 2 / 8, 20) - 20
+                             , Math.Max(sample.WindowHeight / 2 / 16, 6) - 6
+                             , 40
+                             , 12
+                             , logoPointer
+                             , 160
+                             );
             Bgfx.DebugTextWrite(0, 1, DebugColor.White, DebugColor.Blue, "SharpBgfx/Samples/00-HelloWorld");
             Bgfx.DebugTextWrite(0, 2, DebugColor.White, DebugColor.Cyan, "Description: Initialization and debug text.");
 
@@ -40,5 +51,7 @@ static class Program {
 
         // clean up
         Bgfx.Shutdown();
+
+        logo.Free();
     }
 }
