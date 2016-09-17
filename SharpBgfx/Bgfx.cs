@@ -281,7 +281,8 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="x">The X position, in cells.</param>
         /// <param name="y">The Y position, in cells.</param>
-        /// <param name="color">The color of the text.</param>
+        /// <param name="foreColor">The foreground color of the text.</param>
+        /// <param name="backColor">The background color of the text.</param>
         /// <param name="format">The format of the message.</param>
         /// <param name="args">The arguments with which to format the message.</param>
         public static void DebugTextWrite (int x, int y, DebugColor foreColor, DebugColor backColor, string format, params object[] args) {
@@ -293,7 +294,8 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="x">The X position, in cells.</param>
         /// <param name="y">The Y position, in cells.</param>
-        /// <param name="color">The color of the text.</param>
+        /// <param name="foreColor">The foreground color of the text.</param>
+        /// <param name="backColor">The background color of the text.</param>
         /// <param name="message">The message to write.</param>
         public static void DebugTextWrite (int x, int y, DebugColor foreColor, DebugColor backColor, string message) {
             var attr = (byte)(((byte)backColor << 4) | (byte)foreColor);
@@ -305,7 +307,8 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="x">The X position, in cells.</param>
         /// <param name="y">The Y position, in cells.</param>
-        /// <param name="color">The color of the text.</param>
+        /// <param name="foreColor">The foreground color of the text.</param>
+        /// <param name="backColor">The background color of the text.</param>
         /// <param name="message">The message to write.</param>
         public static void DebugTextWrite (int x, int y, DebugColor foreColor, DebugColor backColor, IntPtr message) {
             var attr = (byte)(((byte)backColor << 4) | (byte)foreColor);
@@ -327,6 +330,20 @@ namespace SharpBgfx {
         /// <param name="pitch">The pitch of each line in the image data.</param>
         public static void DebugTextImage (int x, int y, int width, int height, IntPtr data, int pitch) {
             NativeMethods.bgfx_dbg_text_image((ushort)x, (ushort)y, (ushort)width, (ushort)height, data, (ushort)pitch);
+        }
+
+        /// <summary>
+        /// Draws data directly into the debug text buffer.
+        /// </summary>
+        /// <param name="x">The X position, in cells.</param>
+        /// <param name="y">The Y position, in cells.</param>
+        /// <param name="width">The width of the image to draw.</param>
+        /// <param name="height">The height of the image to draw.</param>
+        /// <param name="data">The image data bytes.</param>
+        /// <param name="pitch">The pitch of each line in the image data.</param>
+        public static void DebugTextImage (int x, int y, int width, int height, byte[] data, int pitch) {
+            fixed (byte* ptr = data)
+                NativeMethods.bgfx_dbg_text_image((ushort)x, (ushort)y, (ushort)width, (ushort)height, new IntPtr(ptr), (ushort)pitch);
         }
 
         /// <summary>

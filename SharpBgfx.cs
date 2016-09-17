@@ -313,14 +313,15 @@ namespace SharpBgfx {
         /// <summary>
         /// Advances to the next frame.
         /// </summary>
+        /// <param name="capture">If <c>true</c> the frame is captured for debugging.</param>
         /// <returns>The current frame number.</returns>
         /// <remarks>
         /// When using a multithreaded renderer, this call
         /// just swaps internal buffers, kicks render thread, and returns. In a
         /// singlethreaded renderer this call does frame rendering.
         /// </remarks>
-        public static int Frame () {
-            return NativeMethods.bgfx_frame();
+        public static int Frame (bool capture = false) {
+            return NativeMethods.bgfx_frame(capture);
         }
 
         /// <summary>
@@ -390,7 +391,8 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="x">The X position, in cells.</param>
         /// <param name="y">The Y position, in cells.</param>
-        /// <param name="color">The color of the text.</param>
+        /// <param name="foreColor">The foreground color of the text.</param>
+        /// <param name="backColor">The background color of the text.</param>
         /// <param name="format">The format of the message.</param>
         /// <param name="args">The arguments with which to format the message.</param>
         public static void DebugTextWrite (int x, int y, DebugColor foreColor, DebugColor backColor, string format, params object[] args) {
@@ -402,7 +404,8 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="x">The X position, in cells.</param>
         /// <param name="y">The Y position, in cells.</param>
-        /// <param name="color">The color of the text.</param>
+        /// <param name="foreColor">The foreground color of the text.</param>
+        /// <param name="backColor">The background color of the text.</param>
         /// <param name="message">The message to write.</param>
         public static void DebugTextWrite (int x, int y, DebugColor foreColor, DebugColor backColor, string message) {
             var attr = (byte)(((byte)backColor << 4) | (byte)foreColor);
@@ -414,7 +417,8 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="x">The X position, in cells.</param>
         /// <param name="y">The Y position, in cells.</param>
-        /// <param name="color">The color of the text.</param>
+        /// <param name="foreColor">The foreground color of the text.</param>
+        /// <param name="backColor">The background color of the text.</param>
         /// <param name="message">The message to write.</param>
         public static void DebugTextWrite (int x, int y, DebugColor foreColor, DebugColor backColor, IntPtr message) {
             var attr = (byte)(((byte)backColor << 4) | (byte)foreColor);
@@ -436,6 +440,20 @@ namespace SharpBgfx {
         /// <param name="pitch">The pitch of each line in the image data.</param>
         public static void DebugTextImage (int x, int y, int width, int height, IntPtr data, int pitch) {
             NativeMethods.bgfx_dbg_text_image((ushort)x, (ushort)y, (ushort)width, (ushort)height, data, (ushort)pitch);
+        }
+
+        /// <summary>
+        /// Draws data directly into the debug text buffer.
+        /// </summary>
+        /// <param name="x">The X position, in cells.</param>
+        /// <param name="y">The Y position, in cells.</param>
+        /// <param name="width">The width of the image to draw.</param>
+        /// <param name="height">The height of the image to draw.</param>
+        /// <param name="data">The image data bytes.</param>
+        /// <param name="pitch">The pitch of each line in the image data.</param>
+        public static void DebugTextImage (int x, int y, int width, int height, byte[] data, int pitch) {
+            fixed (byte* ptr = data)
+                NativeMethods.bgfx_dbg_text_image((ushort)x, (ushort)y, (ushort)width, (ushort)height, new IntPtr(ptr), (ushort)pitch);
         }
 
         /// <summary>
@@ -1073,6 +1091,11 @@ namespace SharpBgfx {
         public bool IsCubeMap { get; private set; }
 
         /// <summary>
+        /// The number of texture array layers (for 2D or cube textures).
+        /// </summary>
+        public int ArrayLayers { get; private set; }
+
+        /// <summary>
         /// The number of mip levels in the texture.
         /// </summary>
         public int MipLevels { get; private set; }
@@ -1098,6 +1121,7 @@ namespace SharpBgfx {
             Width = info.Width;
             Height = info.Height;
             Depth = info.Depth;
+            ArrayLayers = info.Layers;
             MipLevels = info.MipCount;
             BitsPerPixel = info.BitsPerPixel;
             SizeInBytes = info.StorageSize;
@@ -1130,18 +1154,19 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="width">The width of the texture.</param>
         /// <param name="height">The height of the texture.</param>
-        /// <param name="mipCount">The number of mip levels.</param>
+        /// <param name="hasMips">Indicates that texture contains full mip-map chain.</param>
+        /// <param name="arrayLayers">Number of layers in texture array. Must be 1 if Texture2DArray caps flag not set.</param>
         /// <param name="format">The format of the texture data.</param>
         /// <param name="flags">Flags that control texture behavior.</param>
         /// <param name="memory">If not <c>null</c>, contains the texture's image data.</param>
         /// <returns>
         /// The newly created texture handle.
         /// </returns>
-        public static Texture Create2D (int width, int height, int mipCount, TextureFormat format, TextureFlags flags = TextureFlags.None, MemoryBlock? memory = null) {
+        public static Texture Create2D (int width, int height, bool hasMips, int arrayLayers, TextureFormat format, TextureFlags flags = TextureFlags.None, MemoryBlock? memory = null) {
             var info = new TextureInfo();
-            NativeMethods.bgfx_calc_texture_size(ref info, (ushort)width, (ushort)height, 1, false, (byte)mipCount, format);
+            NativeMethods.bgfx_calc_texture_size(ref info, (ushort)width, (ushort)height, 1, false, hasMips, (ushort)arrayLayers, format);
 
-            var handle = NativeMethods.bgfx_create_texture_2d(info.Width, info.Height, info.MipCount, format, flags, memory == null ? null : memory.Value.ptr);
+            var handle = NativeMethods.bgfx_create_texture_2d(info.Width, info.Height, hasMips, (ushort)arrayLayers, format, flags, memory == null ? null : memory.Value.ptr);
             return new Texture(handle, ref info);
         }
 
@@ -1149,19 +1174,20 @@ namespace SharpBgfx {
         /// Creates a new 2D texture that scales with backbuffer size.
         /// </summary>
         /// <param name="ratio">The amount to scale when the backbuffer resizes.</param>
-        /// <param name="mipCount">The number of mip levels.</param>
+        /// <param name="hasMips">Indicates that texture contains full mip-map chain.</param>
+        /// <param name="arrayLayers">Number of layers in texture array. Must be 1 if Texture2DArray caps flag not set.</param>
         /// <param name="format">The format of the texture data.</param>
         /// <param name="flags">Flags that control texture behavior.</param>
         /// <returns>
         /// The newly created texture handle.
         /// </returns>
-        public static Texture Create2D (BackbufferRatio ratio, int mipCount, TextureFormat format, TextureFlags flags = TextureFlags.None) {
+        public static Texture Create2D (BackbufferRatio ratio, bool hasMips, int arrayLayers, TextureFormat format, TextureFlags flags = TextureFlags.None) {
             var info = new TextureInfo {
                 Format = format,
-                MipCount = (byte)mipCount
+                Layers = (ushort)arrayLayers
             };
 
-            var handle = NativeMethods.bgfx_create_texture_2d_scaled(ratio, info.MipCount, format, flags);
+            var handle = NativeMethods.bgfx_create_texture_2d_scaled(ratio, hasMips, (ushort)arrayLayers, format, flags);
             return new Texture(handle, ref info);
         }
 
@@ -1171,16 +1197,16 @@ namespace SharpBgfx {
         /// <param name="width">The width of the texture.</param>
         /// <param name="height">The height of the texture.</param>
         /// <param name="depth">The depth of the texture.</param>
-        /// <param name="mipCount">The number of mip levels.</param>
+        /// <param name="hasMips">Indicates that texture contains full mip-map chain.</param>
         /// <param name="format">The format of the texture data.</param>
         /// <param name="flags">Flags that control texture behavior.</param>
         /// <param name="memory">If not <c>null</c>, contains the texture's image data.</param>
         /// <returns>The newly created texture handle.</returns>
-        public static Texture Create3D (int width, int height, int depth, int mipCount, TextureFormat format, TextureFlags flags = TextureFlags.None, MemoryBlock? memory = null) {
+        public static Texture Create3D (int width, int height, int depth, bool hasMips, TextureFormat format, TextureFlags flags = TextureFlags.None, MemoryBlock? memory = null) {
             var info = new TextureInfo();
-            NativeMethods.bgfx_calc_texture_size(ref info, (ushort)width, (ushort)height, (ushort)depth, false, (byte)mipCount, format);
+            NativeMethods.bgfx_calc_texture_size(ref info, (ushort)width, (ushort)height, (ushort)depth, false, hasMips, 1, format);
 
-            var handle = NativeMethods.bgfx_create_texture_3d(info.Width, info.Height, info.Depth, info.MipCount, format, flags, memory == null ? null : memory.Value.ptr);
+            var handle = NativeMethods.bgfx_create_texture_3d(info.Width, info.Height, info.Depth, hasMips, format, flags, memory == null ? null : memory.Value.ptr);
             return new Texture(handle, ref info);
         }
 
@@ -1188,18 +1214,19 @@ namespace SharpBgfx {
         /// Creates a new cube texture.
         /// </summary>
         /// <param name="size">The size of each cube face.</param>
-        /// <param name="mipCount">The number of mip levels.</param>
+        /// <param name="hasMips">Indicates that texture contains full mip-map chain.</param>
+        /// <param name="arrayLayers">Number of layers in texture array. Must be 1 if Texture2DArray caps flag not set.</param>
         /// <param name="format">The format of the texture data.</param>
         /// <param name="flags">Flags that control texture behavior.</param>
         /// <param name="memory">If not <c>null</c>, contains the texture's image data.</param>
         /// <returns>
         /// The newly created texture handle.
         /// </returns>
-        public static Texture CreateCube (int size, int mipCount, TextureFormat format, TextureFlags flags = TextureFlags.None, MemoryBlock? memory = null) {
+        public static Texture CreateCube (int size, bool hasMips, int arrayLayers, TextureFormat format, TextureFlags flags = TextureFlags.None, MemoryBlock? memory = null) {
             var info = new TextureInfo();
-            NativeMethods.bgfx_calc_texture_size(ref info, (ushort)size, (ushort)size, 1, true, (byte)mipCount, format);
+            NativeMethods.bgfx_calc_texture_size(ref info, (ushort)size, (ushort)size, 1, true, hasMips, (ushort)arrayLayers, format);
 
-            var handle = NativeMethods.bgfx_create_texture_cube(info.Width, info.MipCount, format, flags, memory == null ? null : memory.Value.ptr);
+            var handle = NativeMethods.bgfx_create_texture_cube(info.Width, hasMips, (ushort)arrayLayers, format, flags, memory == null ? null : memory.Value.ptr);
             return new Texture(handle, ref info);
         }
 
@@ -1213,6 +1240,7 @@ namespace SharpBgfx {
         /// <summary>
         /// Updates the data in a 2D texture.
         /// </summary>
+        /// <param name="arrayLayer">The layer in a texture array to update.</param>
         /// <param name="mipLevel">The mip level.</param>
         /// <param name="x">The X coordinate of the rectangle to update.</param>
         /// <param name="y">The Y coordinate of the rectangle to update.</param>
@@ -1220,8 +1248,8 @@ namespace SharpBgfx {
         /// <param name="height">The height of the rectangle to update.</param>
         /// <param name="memory">The new image data.</param>
         /// <param name="pitch">The pitch of the image data.</param>
-        public void Update2D (int mipLevel, int x, int y, int width, int height, MemoryBlock memory, int pitch) {
-            NativeMethods.bgfx_update_texture_2d(handle, (byte)mipLevel, (ushort)x, (ushort)y, (ushort)width, (ushort)height, memory.ptr, (ushort)pitch);
+        public void Update2D (int arrayLayer, int mipLevel, int x, int y, int width, int height, MemoryBlock memory, int pitch) {
+            NativeMethods.bgfx_update_texture_2d(handle, (ushort)arrayLayer, (byte)mipLevel, (ushort)x, (ushort)y, (ushort)width, (ushort)height, memory.ptr, (ushort)pitch);
         }
 
         /// <summary>
@@ -1243,6 +1271,7 @@ namespace SharpBgfx {
         /// Updates the data in a cube texture.
         /// </summary>
         /// <param name="face">The cube map face to update.</param>
+        /// <param name="arrayLayer">The layer in a texture array to update.</param>
         /// <param name="mipLevel">The mip level.</param>
         /// <param name="x">The X coordinate of the rectangle to update.</param>
         /// <param name="y">The Y coordinate of the rectangle to update.</param>
@@ -1250,8 +1279,8 @@ namespace SharpBgfx {
         /// <param name="height">The height of the rectangle to update.</param>
         /// <param name="memory">The new image data.</param>
         /// <param name="pitch">The pitch of the image data.</param>
-        public void UpdateCube (CubeMapFace face, int mipLevel, int x, int y, int width, int height, MemoryBlock memory, int pitch) {
-            NativeMethods.bgfx_update_texture_cube(handle, face, (byte)mipLevel, (ushort)x, (ushort)y, (ushort)width, (ushort)height, memory.ptr, (ushort)pitch);
+        public void UpdateCube (CubeMapFace face, int arrayLayer, int mipLevel, int x, int y, int width, int height, MemoryBlock memory, int pitch) {
+            NativeMethods.bgfx_update_texture_cube(handle, face, (ushort)arrayLayer, (byte)mipLevel, (ushort)x, (ushort)y, (ushort)width, (ushort)height, memory.ptr, (ushort)pitch);
         }
 
         /// <summary>
@@ -1299,9 +1328,10 @@ namespace SharpBgfx {
         /// Reads the contents of the texture and stores them in memory pointed to by <paramref name="data"/>.
         /// </summary>
         /// <param name="data">The destination for the read image data.</param>
+        /// <returns>The frame number on which the result will be available.</returns>
         /// <remarks>The texture must have been created with the <see cref="TextureFlags.ReadBack"/> flag.</remarks>
-        public void Read (IntPtr data) {
-            NativeMethods.bgfx_read_texture(handle, data);
+        public int Read (IntPtr data) {
+            return (int)NativeMethods.bgfx_read_texture(handle, data);
         }
 
         /// <summary>
@@ -1415,6 +1445,7 @@ namespace SharpBgfx {
             public ushort Width;
             public ushort Height;
             public ushort Depth;
+            public ushort Layers;
             public byte MipCount;
             public byte BitsPerPixel;
             public bool IsCubeMap;
@@ -2060,6 +2091,20 @@ namespace SharpBgfx {
         /// <summary>
         /// Initializes a new instance of the <see cref="FrameBuffer"/> struct.
         /// </summary>
+        /// <param name="textures">A set of textures from which to build the frame buffer.</param>
+        /// <param name="destroyTextures">if set to <c>true</c>, attached textures will be destroyed when the frame buffer is destroyed.</param>
+        public FrameBuffer (Texture[] textures, bool destroyTextures = false) {
+            var count = (byte)textures.Length;
+            var native = stackalloc ushort[count];
+            for (int i = 0; i < count; i++)
+                native[i] = textures[i].handle;
+
+            handle = NativeMethods.bgfx_create_frame_buffer_from_handles(count, native, destroyTextures);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FrameBuffer"/> struct.
+        /// </summary>
         /// <param name="windowHandle">The OS window handle to which the frame buffer is attached.</param>
         /// <param name="width">The width of the render target.</param>
         /// <param name="height">The height of the render target.</param>
@@ -2123,9 +2168,10 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="attachment">The frame buffer attachment from which to read.</param>
         /// <param name="data">The destination for the read image data.</param>
+        /// <returns>The frame number on which the result will be available.</returns>
         /// <remarks>The attachment must have been created with the <see cref="TextureFlags.ReadBack"/> flag.</remarks>
-        public void Read (int attachment, IntPtr data) {
-            NativeMethods.bgfx_read_frame_buffer(handle, (byte)attachment, data);
+        public int Read (int attachment, IntPtr data) {
+            return (int)NativeMethods.bgfx_read_frame_buffer(handle, (byte)attachment, data);
         }
 
         /// <summary>
@@ -4930,7 +4976,22 @@ namespace SharpBgfx {
         /// <summary>
         /// Device supports conservative rasterization.
         /// </summary>
-        ConservativeRasterization = 0x100000
+        ConservativeRasterization = 0x100000,
+
+        /// <summary>
+        /// Device supports 2D texture arrays.
+        /// </summary>
+        Texture2DArray = 0x200000,
+
+        /// <summary>
+        /// Device supports cubemap texture arrays.
+        /// </summary>
+        TextureCubeArray = 0x400000,
+
+        /// <summary>
+        /// A graphics debugger is present.
+        /// </summary>
+        GraphicsDebugger = 0x800000
     }
 
     /// <summary>
@@ -5798,7 +5859,12 @@ namespace SharpBgfx {
         /// <summary>
         /// The format is supported for MSAA sampling.
         /// </summary>
-        MSAA = 0x2000
+        MSAA = 0x2000,
+
+        /// <summary>
+        /// The format supports auto-generated mipmaps.
+        /// </summary>
+        MipsAutogen = 0x4000
     }
 
     /// <summary>
@@ -5993,13 +6059,13 @@ namespace SharpBgfx {
     [SuppressUnmanagedCodeSecurity]
     unsafe static class NativeMethods {
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_update_texture_2d (ushort handle, byte mip, ushort x, ushort y, ushort width, ushort height, MemoryBlock.DataPtr* memory, ushort pitch);
+        public static extern void bgfx_update_texture_2d (ushort handle, ushort layer, byte mip, ushort x, ushort y, ushort width, ushort height, MemoryBlock.DataPtr* memory, ushort pitch);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_update_texture_3d (ushort handle, byte mip, ushort x, ushort y, ushort z, ushort width, ushort height, ushort depth, MemoryBlock.DataPtr* memory);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_update_texture_cube (ushort handle, CubeMapFace side, byte mip, ushort x, ushort y, ushort width, ushort height, MemoryBlock.DataPtr* memory, ushort pitch);
+        public static extern void bgfx_update_texture_cube (ushort handle, CubeMapFace side, ushort layer, byte mip, ushort x, ushort y, ushort width, ushort height, MemoryBlock.DataPtr* memory, ushort pitch);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAs(UnmanagedType.U1)]
@@ -6070,6 +6136,9 @@ namespace SharpBgfx {
         public static extern ushort bgfx_create_frame_buffer_scaled (BackbufferRatio ratio, TextureFormat format, TextureFlags flags);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern ushort bgfx_create_frame_buffer_from_handles (byte count, ushort* handles, [MarshalAs(UnmanagedType.U1)] bool destroyTextures);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern ushort bgfx_create_frame_buffer_from_attachment (byte count, FrameBuffer.NativeAttachment* attachment, [MarshalAs(UnmanagedType.U1)] bool destroyTextures);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
@@ -6121,22 +6190,22 @@ namespace SharpBgfx {
         public static extern ushort bgfx_create_texture (MemoryBlock.DataPtr* mem, TextureFlags flags, byte skip, out Texture.TextureInfo info);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern ushort bgfx_create_texture_2d (ushort width, ushort _height, byte numMips, TextureFormat format, TextureFlags flags, MemoryBlock.DataPtr* mem);
+        public static extern ushort bgfx_create_texture_2d (ushort width, ushort _height, [MarshalAs(UnmanagedType.U1)] bool hasMips, ushort numLayers, TextureFormat format, TextureFlags flags, MemoryBlock.DataPtr* mem);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern ushort bgfx_create_texture_2d_scaled (BackbufferRatio ratio, byte numMips, TextureFormat format, TextureFlags flags);
+        public static extern ushort bgfx_create_texture_2d_scaled (BackbufferRatio ratio, [MarshalAs(UnmanagedType.U1)] bool hasMips, ushort numLayers, TextureFormat format, TextureFlags flags);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern ushort bgfx_create_texture_3d (ushort width, ushort _height, ushort _depth, byte numMips, TextureFormat format, TextureFlags flags, MemoryBlock.DataPtr* mem);
+        public static extern ushort bgfx_create_texture_3d (ushort width, ushort _height, ushort _depth, [MarshalAs(UnmanagedType.U1)] bool hasMips, TextureFormat format, TextureFlags flags, MemoryBlock.DataPtr* mem);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern ushort bgfx_create_texture_cube (ushort size, byte numMips, TextureFormat format, TextureFlags flags, MemoryBlock.DataPtr* mem);
+        public static extern ushort bgfx_create_texture_cube (ushort size, [MarshalAs(UnmanagedType.U1)] bool hasMips, ushort numLayers, TextureFormat format, TextureFlags flags, MemoryBlock.DataPtr* mem);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_destroy_texture (ushort handle);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_calc_texture_size (ref Texture.TextureInfo info, ushort width, ushort height, ushort depth, [MarshalAs(UnmanagedType.U1)] bool cubeMap, byte mipCount, TextureFormat format);
+        public static extern void bgfx_calc_texture_size (ref Texture.TextureInfo info, ushort width, ushort height, ushort depth, [MarshalAs(UnmanagedType.U1)] bool cubeMap, [MarshalAs(UnmanagedType.U1)] bool hasMips, ushort numLayers, TextureFormat format);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern ushort bgfx_create_shader (MemoryBlock.DataPtr* memory);
@@ -6226,7 +6295,7 @@ namespace SharpBgfx {
         public static extern void bgfx_reset (int width, int height, ResetFlags flags);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int bgfx_frame ();
+        public static extern int bgfx_frame ([MarshalAs(UnmanagedType.U1)] bool capture);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_debug (DebugFeatures flags);
@@ -6372,10 +6441,10 @@ namespace SharpBgfx {
                                                           byte srcMip, ushort srcX, ushort srcY, ushort srcZ, ushort width, ushort height, ushort depth);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_read_texture (ushort handle, IntPtr data);
+        public static extern uint bgfx_read_texture (ushort handle, IntPtr data);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_read_frame_buffer (ushort handle, byte attachment, IntPtr data);
+        public static extern uint bgfx_read_frame_buffer (ushort handle, byte attachment, IntPtr data);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern ushort bgfx_create_occlusion_query ();

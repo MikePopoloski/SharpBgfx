@@ -76,6 +76,20 @@ namespace SharpBgfx {
         /// <summary>
         /// Initializes a new instance of the <see cref="FrameBuffer"/> struct.
         /// </summary>
+        /// <param name="textures">A set of textures from which to build the frame buffer.</param>
+        /// <param name="destroyTextures">if set to <c>true</c>, attached textures will be destroyed when the frame buffer is destroyed.</param>
+        public FrameBuffer (Texture[] textures, bool destroyTextures = false) {
+            var count = (byte)textures.Length;
+            var native = stackalloc ushort[count];
+            for (int i = 0; i < count; i++)
+                native[i] = textures[i].handle;
+
+            handle = NativeMethods.bgfx_create_frame_buffer_from_handles(count, native, destroyTextures);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FrameBuffer"/> struct.
+        /// </summary>
         /// <param name="windowHandle">The OS window handle to which the frame buffer is attached.</param>
         /// <param name="width">The width of the render target.</param>
         /// <param name="height">The height of the render target.</param>
