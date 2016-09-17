@@ -33,6 +33,11 @@ namespace SharpBgfx {
         public int MipLevels { get; private set; }
 
         /// <summary>
+        /// The number of layers in the texture array.
+        /// </summary>
+        public int Layers { get; private set; }
+
+        /// <summary>
         /// The number of bits per pixel.
         /// </summary>
         public int BitsPerPixel { get; private set; }
@@ -54,6 +59,7 @@ namespace SharpBgfx {
             Height = info.Height;
             Depth = info.Depth;
             MipLevels = info.MipCount;
+            Layers = info.Layers;
             BitsPerPixel = info.BitsPerPixel;
             SizeInBytes = info.StorageSize;
             Format = info.Format;
@@ -85,6 +91,8 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="width">The width of the texture.</param>
         /// <param name="height">The height of the texture.</param>
+        /// <param name="hasMips">Indicates that texture contains full mip-map chain.</param>
+        /// <param name="numLayers">Number of layers in texture array. Must be 1 if Texture2DArray caps flag not set.</param>
         /// <param name="mipCount">The number of mip levels.</param>
         /// <param name="format">The format of the texture data.</param>
         /// <param name="flags">Flags that control texture behavior.</param>
@@ -92,11 +100,11 @@ namespace SharpBgfx {
         /// <returns>
         /// The newly created texture handle.
         /// </returns>
-        public static Texture Create2D (int width, int height, int mipCount, TextureFormat format, TextureFlags flags = TextureFlags.None, MemoryBlock? memory = null) {
+        public static Texture Create2D (int width, int height, bool hasMips, int numLayers, TextureFormat format, TextureFlags flags = TextureFlags.None, MemoryBlock? memory = null) {
             var info = new TextureInfo();
-            NativeMethods.bgfx_calc_texture_size(ref info, (ushort)width, (ushort)height, 1, false, (byte)mipCount, format);
+            NativeMethods.bgfx_calc_texture_size(ref info, (ushort)width, (ushort)height, 1, false, hasMips, (ushort)numLayers, format);
 
-            var handle = NativeMethods.bgfx_create_texture_2d(info.Width, info.Height, info.MipCount, format, flags, memory == null ? null : memory.Value.ptr);
+            var handle = NativeMethods.bgfx_create_texture_2d(info.Width, info.Height, hasMips, (ushort)numLayers, format, flags, memory == null ? null : memory.Value.ptr);
             return new Texture(handle, ref info);
         }
 
@@ -105,18 +113,20 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="ratio">The amount to scale when the backbuffer resizes.</param>
         /// <param name="mipCount">The number of mip levels.</param>
+        /// <param name="hasMips">Indicates that texture contains full mip-map chain.</param>
+        /// <param name="numLayers">Number of layers in texture array. Must be 1 if Texture2DArray caps flag not set.</param>
         /// <param name="format">The format of the texture data.</param>
         /// <param name="flags">Flags that control texture behavior.</param>
         /// <returns>
         /// The newly created texture handle.
         /// </returns>
-        public static Texture Create2D (BackbufferRatio ratio, int mipCount, TextureFormat format, TextureFlags flags = TextureFlags.None) {
+        public static Texture Create2D (BackbufferRatio ratio, bool hasMips, int numLayers, TextureFormat format, TextureFlags flags = TextureFlags.None) {
             var info = new TextureInfo {
                 Format = format,
-                MipCount = (byte)mipCount
+                Layers = (ushort)numLayers
             };
 
-            var handle = NativeMethods.bgfx_create_texture_2d_scaled(ratio, info.MipCount, format, flags);
+            var handle = NativeMethods.bgfx_create_texture_2d_scaled(ratio, hasMips, (ushort)numLayers, format, flags);
             return new Texture(handle, ref info);
         }
 
@@ -127,15 +137,17 @@ namespace SharpBgfx {
         /// <param name="height">The height of the texture.</param>
         /// <param name="depth">The depth of the texture.</param>
         /// <param name="mipCount">The number of mip levels.</param>
+        /// <param name="hasMips">Indicates that texture contains full mip-map chain.</param>
+        /// <param name="numLayers">Number of layers in texture array. Must be 1 if Texture2DArray caps flag not set.</param>
         /// <param name="format">The format of the texture data.</param>
         /// <param name="flags">Flags that control texture behavior.</param>
         /// <param name="memory">If not <c>null</c>, contains the texture's image data.</param>
         /// <returns>The newly created texture handle.</returns>
-        public static Texture Create3D (int width, int height, int depth, int mipCount, TextureFormat format, TextureFlags flags = TextureFlags.None, MemoryBlock? memory = null) {
+        public static Texture Create3D (int width, int height, int depth, bool hasMips, int numLayers, TextureFormat format, TextureFlags flags = TextureFlags.None, MemoryBlock? memory = null) {
             var info = new TextureInfo();
-            NativeMethods.bgfx_calc_texture_size(ref info, (ushort)width, (ushort)height, (ushort)depth, false, (byte)mipCount, format);
+            NativeMethods.bgfx_calc_texture_size(ref info, (ushort)width, (ushort)height, (ushort)depth, false, hasMips, (ushort)numLayers, format);
 
-            var handle = NativeMethods.bgfx_create_texture_3d(info.Width, info.Height, info.Depth, info.MipCount, format, flags, memory == null ? null : memory.Value.ptr);
+            var handle = NativeMethods.bgfx_create_texture_3d(info.Width, info.Height, info.Depth, hasMips, (ushort)numLayers, format, flags, memory == null ? null : memory.Value.ptr);
             return new Texture(handle, ref info);
         }
 
@@ -143,18 +155,19 @@ namespace SharpBgfx {
         /// Creates a new cube texture.
         /// </summary>
         /// <param name="size">The size of each cube face.</param>
-        /// <param name="mipCount">The number of mip levels.</param>
+        /// <param name="hasMips">Indicates that texture contains full mip-map chain.</param>
+        /// <param name="numLayers">Number of layers in texture array. Must be 1 if Texture2DArray caps flag not set.</param>
         /// <param name="format">The format of the texture data.</param>
         /// <param name="flags">Flags that control texture behavior.</param>
         /// <param name="memory">If not <c>null</c>, contains the texture's image data.</param>
         /// <returns>
         /// The newly created texture handle.
         /// </returns>
-        public static Texture CreateCube (int size, int mipCount, TextureFormat format, TextureFlags flags = TextureFlags.None, MemoryBlock? memory = null) {
+        public static Texture CreateCube (int size, bool hasMips, int numLayers, TextureFormat format, TextureFlags flags = TextureFlags.None, MemoryBlock? memory = null) {
             var info = new TextureInfo();
-            NativeMethods.bgfx_calc_texture_size(ref info, (ushort)size, (ushort)size, 1, true, (byte)mipCount, format);
+            NativeMethods.bgfx_calc_texture_size(ref info, (ushort)size, (ushort)size, 1, true, hasMips, (ushort)numLayers, format);
 
-            var handle = NativeMethods.bgfx_create_texture_cube(info.Width, info.MipCount, format, flags, memory == null ? null : memory.Value.ptr);
+            var handle = NativeMethods.bgfx_create_texture_cube(info.Width, hasMips, (ushort)numLayers, format, flags, memory == null ? null : memory.Value.ptr);
             return new Texture(handle, ref info);
         }
 
@@ -168,6 +181,7 @@ namespace SharpBgfx {
         /// <summary>
         /// Updates the data in a 2D texture.
         /// </summary>
+        /// <param name="layer">Layers in texture array.</param>
         /// <param name="mipLevel">The mip level.</param>
         /// <param name="x">The X coordinate of the rectangle to update.</param>
         /// <param name="y">The Y coordinate of the rectangle to update.</param>
@@ -175,8 +189,8 @@ namespace SharpBgfx {
         /// <param name="height">The height of the rectangle to update.</param>
         /// <param name="memory">The new image data.</param>
         /// <param name="pitch">The pitch of the image data.</param>
-        public void Update2D (int mipLevel, int x, int y, int width, int height, MemoryBlock memory, int pitch) {
-            NativeMethods.bgfx_update_texture_2d(handle, (byte)mipLevel, (ushort)x, (ushort)y, (ushort)width, (ushort)height, memory.ptr, (ushort)pitch);
+        public void Update2D (int layer, int mipLevel, int x, int y, int width, int height, MemoryBlock memory, int pitch) {
+            NativeMethods.bgfx_update_texture_2d(handle, (ushort)layer, (byte)mipLevel, (ushort)x, (ushort)y, (ushort)width, (ushort)height, memory.ptr, (ushort)pitch);
         }
 
         /// <summary>
@@ -198,6 +212,7 @@ namespace SharpBgfx {
         /// Updates the data in a cube texture.
         /// </summary>
         /// <param name="face">The cube map face to update.</param>
+        /// <param name="layer">Layers in texture array.</param>
         /// <param name="mipLevel">The mip level.</param>
         /// <param name="x">The X coordinate of the rectangle to update.</param>
         /// <param name="y">The Y coordinate of the rectangle to update.</param>
@@ -205,8 +220,8 @@ namespace SharpBgfx {
         /// <param name="height">The height of the rectangle to update.</param>
         /// <param name="memory">The new image data.</param>
         /// <param name="pitch">The pitch of the image data.</param>
-        public void UpdateCube (CubeMapFace face, int mipLevel, int x, int y, int width, int height, MemoryBlock memory, int pitch) {
-            NativeMethods.bgfx_update_texture_cube(handle, face, (byte)mipLevel, (ushort)x, (ushort)y, (ushort)width, (ushort)height, memory.ptr, (ushort)pitch);
+        public void UpdateCube (CubeMapFace face, int layer, int mipLevel, int x, int y, int width, int height, MemoryBlock memory, int pitch) {
+            NativeMethods.bgfx_update_texture_cube(handle, (ushort)layer, face, (byte)mipLevel, (ushort)x, (ushort)y, (ushort)width, (ushort)height, memory.ptr, (ushort)pitch);
         }
 
         /// <summary>
@@ -371,6 +386,7 @@ namespace SharpBgfx {
             public ushort Width;
             public ushort Height;
             public ushort Depth;
+            public ushort Layers;
             public byte MipCount;
             public byte BitsPerPixel;
             public bool IsCubeMap;

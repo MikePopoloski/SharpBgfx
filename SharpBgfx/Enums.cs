@@ -909,7 +909,17 @@ namespace SharpBgfx {
         /// <summary>
         /// Device supports conservative rasterization.
         /// </summary>
-        ConservativeRasterization = 0x100000
+        ConservativeRasterization = 0x100000,
+
+        /// <summary>
+        /// Device supports 2D texture arrays.
+        /// </summary>
+        Texture2DArray = 0x200000,
+
+        /// <summary>
+        /// Device supports cubemap texture arrays.
+        /// </summary>
+        TextureCubeArray = 0x400000
     }
 
     /// <summary>
@@ -990,7 +1000,12 @@ namespace SharpBgfx {
         /// <summary>
         /// The format is supported for MSAA sampling.
         /// </summary>
-        MSAA = 0x2000
+        MSAA = 0x2000,
+
+        /// <summary>
+        /// The format supports auto-generated mipmaps.
+        /// </summary>
+        MipsAutogen = 0x4000
     }
 
     /// <summary>
