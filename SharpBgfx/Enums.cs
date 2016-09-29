@@ -8,7 +8,7 @@ namespace SharpBgfx {
         /// <summary>
         /// No backend given.
         /// </summary>
-        Null,
+        Noop,
 
         /// <summary>
         /// Direct3D 9
@@ -24,6 +24,11 @@ namespace SharpBgfx {
         /// Direct3D 12
         /// </summary>
         Direct3D12,
+
+        /// <summary>
+        /// PlayStation 4's GNM
+        /// </summary>
+        GNM,
 
         /// <summary>
         /// Apple Metal.

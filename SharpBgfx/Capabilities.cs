@@ -24,31 +24,129 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// The maximum number of draw calls in a single frame.
+        /// </summary>
+        public int MaxDrawCalls {
+            get { return (int)data->MaxDrawCalls; }
+        }
+
+        /// <summary>
+        /// The maximum number of texture blits in a single frame.
+        /// </summary>
+        public int MaxBlits {
+            get { return (int)data->MaxBlits; }
+        }
+
+        /// <summary>
         /// The maximum size of a texture, in pixels.
         /// </summary>
         public int MaxTextureSize {
-            get { return data->MaxTextureSize; }
+            get { return (int)data->MaxTextureSize; }
         }
 
         /// <summary>
         /// The maximum number of render views supported.
         /// </summary>
         public int MaxViews {
-            get { return data->MaxViews; }
+            get { return (int)data->MaxViews; }
         }
 
         /// <summary>
-        /// The maximum number of draw calls in a single frame.
+        /// The maximum number of frame buffers that can be allocated.
         /// </summary>
-        public int MaxDrawCalls {
-            get { return data->MaxDrawCalls; }
+        public int MaxFramebuffers {
+            get { return (int)data->MaxFramebuffers; }
         }
 
         /// <summary>
         /// The maximum number of attachments to a single framebuffer.
         /// </summary>
         public int MaxFramebufferAttachments {
-            get { return data->MaxFramebufferAttachements; }
+            get { return (int)data->MaxFramebufferAttachements; }
+        }
+
+        /// <summary>
+        /// The maximum number of programs that can be allocated.
+        /// </summary>
+        public int MaxPrograms {
+            get { return (int)data->MaxPrograms; }
+        }
+
+        /// <summary>
+        /// The maximum number of shaders that can be allocated.
+        /// </summary>
+        public int MaxShaders {
+            get { return (int)data->MaxShaders; }
+        }
+
+        /// <summary>
+        /// The maximum number of textures that can be allocated.
+        /// </summary>
+        public int MaxTextures {
+            get { return (int)data->MaxTextures; }
+        }
+
+        /// <summary>
+        /// The maximum number of texture samplers that can be allocated.
+        /// </summary>
+        public int MaxTextureSamplers {
+            get { return (int)data->MaxTextureSamplers; }
+        }
+
+        /// <summary>
+        /// The maximum number of vertex declarations that can be allocated.
+        /// </summary>
+        public int MaxVertexDecls {
+            get { return (int)data->MaxVertexDecls; }
+        }
+
+        /// <summary>
+        /// The maximum number of vertex streams that can be used.
+        /// </summary>
+        public int MaxVertexStreams {
+            get { return (int)data->MaxVertexStreams; }
+        }
+
+        /// <summary>
+        /// The maximum number of index buffers that can be allocated.
+        /// </summary>
+        public int MaxIndexBuffers {
+            get { return (int)data->MaxIndexBuffers; }
+        }
+
+        /// <summary>
+        /// The maximum number of vertex buffers that can be allocated.
+        /// </summary>
+        public int MaxVertexBuffers {
+            get { return (int)data->MaxVertexBuffers; }
+        }
+
+        /// <summary>
+        /// The maximum number of dynamic index buffers that can be allocated.
+        /// </summary>
+        public int MaxDynamicIndexBuffers {
+            get { return (int)data->MaxDynamicIndexBuffers; }
+        }
+
+        /// <summary>
+        /// The maximum number of dynamic vertex buffers that can be allocated.
+        /// </summary>
+        public int MaxDynamicVertexBuffers {
+            get { return (int)data->MaxDynamicVertexBuffers; }
+        }
+
+        /// <summary>
+        /// The maximum number of uniforms that can be used.
+        /// </summary>
+        public int MaxUniforms {
+            get { return (int)data->MaxUniforms; }
+        }
+
+        /// <summary>
+        /// The maximum number of occlusion queries that can be used.
+        /// </summary>
+        public int MaxOcclusionQueries {
+            get { return (int)data->MaxOcclusionQueries; }
         }
 
         /// <summary>
@@ -193,17 +291,33 @@ namespace SharpBgfx {
 
             public RendererBackend Backend;
             public DeviceFeatures Supported;
-            public ushort MaxTextureSize;
-            public ushort MaxViews;
-            public ushort MaxDrawCalls;
-            public byte MaxFramebufferAttachements;
-            public byte GPUCount;
             public ushort VendorId;
             public ushort DeviceId;
             public byte HomogeneousDepth;
             public byte OriginBottomLeft;
+            public byte GPUCount;
 
             public fixed ushort GPUs[8];
+
+            public uint MaxDrawCalls;
+            public uint MaxBlits;
+            public uint MaxTextureSize;
+            public uint MaxViews;
+            public uint MaxFramebuffers;
+            public uint MaxFramebufferAttachements;
+            public uint MaxPrograms;
+            public uint MaxShaders;
+            public uint MaxTextures;
+            public uint MaxTextureSamplers;
+            public uint MaxVertexDecls;
+            public uint MaxVertexStreams;
+            public uint MaxIndexBuffers;
+            public uint MaxVertexBuffers;
+            public uint MaxDynamicIndexBuffers;
+            public uint MaxDynamicVertexBuffers;
+            public uint MaxUniforms;
+            public uint MaxOcclusionQueries;
+
             public fixed byte Formats[TextureFormatCount];
         }
 #pragma warning restore 649
