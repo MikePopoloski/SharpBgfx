@@ -20,4 +20,4 @@ foreach ($dir in (ls -Directory)) {
 }
 
 Write-Output ""
-Write-Output ("Shader Build: {0} succeeded, {1} failed" -f $s,$e)
+Write-Output ("Shader Build: {0} succeeded, {1} failed" -f $Global:s,$Global:e)

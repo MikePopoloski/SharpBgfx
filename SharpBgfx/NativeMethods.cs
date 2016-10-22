@@ -320,7 +320,7 @@ namespace SharpBgfx {
         public static extern ushort bgfx_weld_vertices (ushort* output, ref VertexLayout.Data decl, IntPtr data, ushort num, float epsilon);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern byte bgfx_get_supported_renderers (RendererBackend[] backends);
+        public static extern byte bgfx_get_supported_renderers (byte max, RendererBackend[] backends);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern sbyte* bgfx_get_renderer_name (RendererBackend backend);

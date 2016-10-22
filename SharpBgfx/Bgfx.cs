@@ -236,7 +236,7 @@ namespace SharpBgfx {
         /// <returns></returns>
         public static RendererBackend[] GetSupportedBackends () {
             var types = new RendererBackend[(int)RendererBackend.Default];
-            var count = NativeMethods.bgfx_get_supported_renderers(types);
+            var count = NativeMethods.bgfx_get_supported_renderers((byte)types.Length, types);
 
             return types.Take(count).ToArray();
         }

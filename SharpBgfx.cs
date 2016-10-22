@@ -346,7 +346,7 @@ namespace SharpBgfx {
         /// <returns></returns>
         public static RendererBackend[] GetSupportedBackends () {
             var types = new RendererBackend[(int)RendererBackend.Default];
-            var count = NativeMethods.bgfx_get_supported_renderers(types);
+            var count = NativeMethods.bgfx_get_supported_renderers((byte)types.Length, types);
 
             return types.Take(count).ToArray();
         }
@@ -3103,6 +3103,11 @@ namespace SharpBgfx {
         /// Depth-stencil pointer to use instead of letting the library create its own.
         /// </summary>
         public IntPtr BackbufferDepthStencil;
+
+        /// <summary>
+        /// Occulus OVR session.
+        /// </summary>
+        public IntPtr OvrSession;
     }
 
     /// <summary>
@@ -4983,14 +4988,104 @@ namespace SharpBgfx {
         None = 0,
 
         /// <summary>
+        /// Device supports alpha to coverage.
+        /// </summary>
+        AlphaToCoverage = 0x1,
+
+        /// <summary>
+        /// Device supports independent blending of simultaneous render targets.
+        /// </summary>
+        BlendIndependent = 0x2,
+
+        /// <summary>
+        /// Device supports compute shaders.
+        /// </summary>
+        Compute = 0x4,
+
+        /// <summary>
+        /// Device supports conservative rasterization.
+        /// </summary>
+        ConservativeRasterization = 0x8,
+
+        /// <summary>
+        /// Device supports indirect drawing via GPU buffers.
+        /// </summary>
+        DrawIndirect = 0x10,
+
+        /// <summary>
+        /// Fragment shaders can access depth values.
+        /// </summary>
+        FragmentDepth = 0x20,
+
+        /// <summary>
+        /// Device supports ordering of fragment output.
+        /// </summary>
+        FragmentOrdering = 0x40,
+
+        /// <summary>
+        /// A graphics debugger is present.
+        /// </summary>
+        GraphicsDebugger = 0x80,
+
+        /// <summary>
+        /// Device supports high-DPI rendering.
+        /// </summary>
+        HighDPI = 0x100,
+
+        /// <summary>
+        /// Head mounted displays are supported.
+        /// </summary>
+        HeadMountedDisplay = 0x200,
+
+        /// <summary>
+        /// Device supports 32-bit indices.
+        /// </summary>
+        Index32 = 0x400,
+
+        /// <summary>
+        /// Device supports instancing.
+        /// </summary>
+        Instancing = 0x800,
+
+        /// <summary>
+        /// Device supports occlusion queries.
+        /// </summary>
+        OcclusionQuery = 0x1000,
+
+        /// <summary>
+        /// Device supports multithreaded rendering.
+        /// </summary>
+        RendererMultithreaded = 0x2000,
+
+        /// <summary>
+        /// Indicates whether the device can render to multiple swap chains.
+        /// </summary>
+        SwapChain = 0x4000,
+
+        /// <summary>
+        /// Device supports 2D texture arrays.
+        /// </summary>
+        Texture2DArray = 0x8000,
+
+        /// <summary>
+        /// Device supports 3D textures.
+        /// </summary>
+        Texture3D = 0x10000,
+
+        /// <summary>
+        /// Device supports texture blits.
+        /// </summary>
+        TextureBlit = 0x20000,
+
+        /// <summary>
         /// Device supports "Less than or equal to" texture comparison mode.
         /// </summary>
-        TextureCompareLessEqual = 0x1,
+        TextureCompareLessEqual = 0x80000,
 
         /// <summary>
         /// Device supports other texture comparison modes.
         /// </summary>
-        TextureCompareExtended = 0x2,
+        TextureCompareExtended = 0x0, // TODO: fix when bgfx gets fixed
 
         /// <summary>
         /// Device supports all texture comparison modes.
@@ -4998,114 +5093,24 @@ namespace SharpBgfx {
         TextureCompareAll = TextureCompareLessEqual | TextureCompareExtended,
 
         /// <summary>
-        /// Device supports 3D textures.
+        /// Device supports cubemap texture arrays.
         /// </summary>
-        Texture3D = 0x4,
-
-        /// <summary>
-        /// Device supports 16-bit floats as vertex attributes.
-        /// </summary>
-        VertexAttributeHalf = 0x8,
-
-        /// <summary>
-        /// UInt10 vertex attributes are supported.
-        /// </summary>
-        VertexAttributeUInt10 = 0x10,
-
-        /// <summary>
-        /// Device supports instancing.
-        /// </summary>
-        Instancing = 0x20,
-
-        /// <summary>
-        /// Device supports multithreaded rendering.
-        /// </summary>
-        RendererMultithreaded = 0x40,
-
-        /// <summary>
-        /// Fragment shaders can access depth values.
-        /// </summary>
-        FragmentDepth = 0x80,
-
-        /// <summary>
-        /// Device supports independent blending of simultaneous render targets.
-        /// </summary>
-        BlendIndependent = 0x100,
-
-        /// <summary>
-        /// Device supports compute shaders.
-        /// </summary>
-        Compute = 0x200,
-
-        /// <summary>
-        /// Device supports ordering of fragment output.
-        /// </summary>
-        FragmentOrdering = 0x400,
-
-        /// <summary>
-        /// Indicates whether the device can render to multiple swap chains.
-        /// </summary>
-        SwapChain = 0x800,
-
-        /// <summary>
-        /// Head mounted displays are supported.
-        /// </summary>
-        HeadMountedDisplay = 0x1000,
-
-        /// <summary>
-        /// Device supports 32-bit indices.
-        /// </summary>
-        Index32 = 0x2000,
-
-        /// <summary>
-        /// Device supports indirect drawing via GPU buffers.
-        /// </summary>
-        DrawIndirect = 0x4000,
-
-        /// <summary>
-        /// Device supports high-DPI rendering.
-        /// </summary>
-        HighDPI = 0x8000,
-
-        /// <summary>
-        /// Device supports texture blits.
-        /// </summary>
-        TextureBlit = 0x10000,
+        TextureCubeArray = 0x100000,
 
         /// <summary>
         /// Device supports reading back texture data.
         /// </summary>
-        TextureReadBack = 0x20000,
+        TextureReadBack = 0x200000,
 
         /// <summary>
-        /// Device supports occlusion queries.
+        /// Device supports 16-bit floats as vertex attributes.
         /// </summary>
-        OcclusionQuery = 0x40000,
+        VertexAttributeHalf = 0x400000,
 
         /// <summary>
-        /// Device supports alpha to coverage.
+        /// UInt10 vertex attributes are supported.
         /// </summary>
-        AlphaToCoverage = 0x80000,
-
-        /// <summary>
-        /// Device supports conservative rasterization.
-        /// </summary>
-        ConservativeRasterization = 0x100000,
-
-        /// <summary>
-        /// Device supports 2D texture arrays.
-        /// </summary>
-        Texture2DArray = 0x200000,
-
-        /// <summary>
-        /// Device supports cubemap texture arrays.
-        /// </summary>
-        TextureCubeArray = 0x400000,
-
-        /// <summary>
-        /// A graphics debugger is present.
-        /// </summary>
-        GraphicsDebugger = 0x800000
+        VertexAttributeUInt10 = 0x800000    
     }
 
     /// <summary>
@@ -5116,11 +5121,6 @@ namespace SharpBgfx {
         /// A debug check failed; the program can safely continue, but the issue should be investigated.
         /// </summary>
         DebugCheck,
-
-        /// <summary>
-        /// The user's hardware failed checks for the minimum required specs.
-        /// </summary>
-        MinimumRequiredSpecs,
 
         /// <summary>
         /// The program tried to compile an invalid shader.
@@ -6492,7 +6492,7 @@ namespace SharpBgfx {
         public static extern ushort bgfx_weld_vertices (ushort* output, ref VertexLayout.Data decl, IntPtr data, ushort num, float epsilon);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern byte bgfx_get_supported_renderers (RendererBackend[] backends);
+        public static extern byte bgfx_get_supported_renderers (byte max, RendererBackend[] backends);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern sbyte* bgfx_get_renderer_name (RendererBackend backend);
