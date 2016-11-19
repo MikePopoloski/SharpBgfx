@@ -4,13 +4,46 @@ namespace SharpBgfx {
     /// <summary>
     /// Represents a shader uniform.
     /// </summary>
-    public struct Uniform : IDisposable, IEquatable<Uniform> {
+    public unsafe struct Uniform : IDisposable, IEquatable<Uniform> {
         internal readonly ushort handle;
 
         /// <summary>
         /// Represents an invalid handle.
         /// </summary>
         public static readonly Uniform Invalid = new Uniform();
+
+        /// <summary>
+        /// The name of the uniform.
+        /// </summary>
+        public string Name {
+            get {
+                Info info;
+                NativeMethods.bgfx_get_uniform_info(handle, out info);
+                return new string(info.name);
+            }
+        }
+
+        /// <summary>
+        /// The type of the data represented by the uniform.
+        /// </summary>
+        public UniformType Type {
+            get {
+                Info info;
+                NativeMethods.bgfx_get_uniform_info(handle, out info);
+                return info.type;
+            }
+        }
+
+        /// <summary>
+        /// Size of the array, if the uniform is an array type.
+        /// </summary>
+        public int ArraySize {
+            get {
+                Info info;
+                NativeMethods.bgfx_get_uniform_info(handle, out info);
+                return info.arraySize;
+            }
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Uniform"/> struct.
@@ -110,6 +143,12 @@ namespace SharpBgfx {
         /// </returns>
         public static bool operator !=(Uniform left, Uniform right) {
             return !left.Equals(right);
+        }
+
+        internal struct Info {
+            public fixed sbyte name[256];
+            public UniformType type;
+            public ushort arraySize;
         }
     }
 }

@@ -52,7 +52,7 @@ namespace SharpBgfx {
         /// </summary>
         public TextureFormat Format { get; private set; }
 
-        Texture (ushort handle, ref TextureInfo info) {
+        internal Texture (ushort handle, ref TextureInfo info) {
             this.handle = handle;
 
             Width = info.Width;
@@ -265,10 +265,11 @@ namespace SharpBgfx {
         /// Reads the contents of the texture and stores them in memory pointed to by <paramref name="data"/>.
         /// </summary>
         /// <param name="data">The destination for the read image data.</param>
+        /// <param name="mip">The mip level to read.</param>
         /// <returns>The frame number on which the result will be available.</returns>
         /// <remarks>The texture must have been created with the <see cref="TextureFlags.ReadBack"/> flag.</remarks>
-        public int Read (IntPtr data) {
-            return (int)NativeMethods.bgfx_read_texture(handle, data);
+        public int Read (IntPtr data, int mip) {
+            return (int)NativeMethods.bgfx_read_texture(handle, data, (byte)mip);
         }
 
         /// <summary>

@@ -721,29 +721,6 @@ namespace SharpBgfx {
         }
 
         /// <summary>
-        /// Sets a texture to use for drawing primitives.
-        /// </summary>
-        /// <param name="textureUnit">The texture unit to set.</param>
-        /// <param name="sampler">The sampler uniform.</param>
-        /// <param name="frameBuffer">The frame buffer.</param>
-        /// <param name="attachment">The index of the frame buffer attachment to set as a texture.</param>
-        public static void SetTexture (byte textureUnit, Uniform sampler, FrameBuffer frameBuffer, byte attachment = 0) {
-            NativeMethods.bgfx_set_texture_from_frame_buffer(textureUnit, sampler.handle, frameBuffer.handle, attachment, uint.MaxValue);
-        }
-
-        /// <summary>
-        /// Sets a texture to use for drawing primitives.
-        /// </summary>
-        /// <param name="textureUnit">The texture unit to set.</param>
-        /// <param name="sampler">The sampler uniform.</param>
-        /// <param name="frameBuffer">The frame buffer.</param>
-        /// <param name="attachment">The index of the attachment to set.</param>
-        /// <param name="flags">Sampling flags that override the default flags in the texture itself.</param>
-        public static void SetTexture (byte textureUnit, Uniform sampler, FrameBuffer frameBuffer, byte attachment, TextureFlags flags) {
-            NativeMethods.bgfx_set_texture_from_frame_buffer(textureUnit, sampler.handle, frameBuffer.handle, attachment, (uint)flags);
-        }
-
-        /// <summary>
         /// Sets a texture mip as a compute image.
         /// </summary>
         /// <param name="stage">The buffer stage to set.</param>
@@ -754,19 +731,6 @@ namespace SharpBgfx {
         /// <param name="access">Access control flags.</param>
         public static void SetComputeImage (byte stage, Uniform sampler, Texture texture, byte mip, ComputeBufferAccess access, TextureFormat format = TextureFormat.Unknown) {
             NativeMethods.bgfx_set_image(stage, sampler.handle, texture.handle, mip, format, access);
-        }
-
-        /// <summary>
-        /// Sets a frame buffer attachment as a compute image.
-        /// </summary>
-        /// <param name="stage">The buffer stage to set.</param>
-        /// <param name="sampler">The sampler uniform.</param>
-        /// <param name="frameBuffer">The frame buffer.</param>
-        /// <param name="attachment">The attachment index.</param>
-        /// <param name="format">The format of the buffer data.</param>
-        /// <param name="access">Access control flags.</param>
-        public static void SetComputeImage (byte stage, Uniform sampler, FrameBuffer frameBuffer, byte attachment, ComputeBufferAccess access, TextureFormat format = TextureFormat.Unknown) {
-            NativeMethods.bgfx_set_image_from_frame_buffer(stage, sampler.handle, frameBuffer.handle, attachment, format, access);
         }
 
         /// <summary>

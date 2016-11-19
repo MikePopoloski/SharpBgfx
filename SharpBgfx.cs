@@ -831,29 +831,6 @@ namespace SharpBgfx {
         }
 
         /// <summary>
-        /// Sets a texture to use for drawing primitives.
-        /// </summary>
-        /// <param name="textureUnit">The texture unit to set.</param>
-        /// <param name="sampler">The sampler uniform.</param>
-        /// <param name="frameBuffer">The frame buffer.</param>
-        /// <param name="attachment">The index of the frame buffer attachment to set as a texture.</param>
-        public static void SetTexture (byte textureUnit, Uniform sampler, FrameBuffer frameBuffer, byte attachment = 0) {
-            NativeMethods.bgfx_set_texture_from_frame_buffer(textureUnit, sampler.handle, frameBuffer.handle, attachment, uint.MaxValue);
-        }
-
-        /// <summary>
-        /// Sets a texture to use for drawing primitives.
-        /// </summary>
-        /// <param name="textureUnit">The texture unit to set.</param>
-        /// <param name="sampler">The sampler uniform.</param>
-        /// <param name="frameBuffer">The frame buffer.</param>
-        /// <param name="attachment">The index of the attachment to set.</param>
-        /// <param name="flags">Sampling flags that override the default flags in the texture itself.</param>
-        public static void SetTexture (byte textureUnit, Uniform sampler, FrameBuffer frameBuffer, byte attachment, TextureFlags flags) {
-            NativeMethods.bgfx_set_texture_from_frame_buffer(textureUnit, sampler.handle, frameBuffer.handle, attachment, (uint)flags);
-        }
-
-        /// <summary>
         /// Sets a texture mip as a compute image.
         /// </summary>
         /// <param name="stage">The buffer stage to set.</param>
@@ -864,19 +841,6 @@ namespace SharpBgfx {
         /// <param name="access">Access control flags.</param>
         public static void SetComputeImage (byte stage, Uniform sampler, Texture texture, byte mip, ComputeBufferAccess access, TextureFormat format = TextureFormat.Unknown) {
             NativeMethods.bgfx_set_image(stage, sampler.handle, texture.handle, mip, format, access);
-        }
-
-        /// <summary>
-        /// Sets a frame buffer attachment as a compute image.
-        /// </summary>
-        /// <param name="stage">The buffer stage to set.</param>
-        /// <param name="sampler">The sampler uniform.</param>
-        /// <param name="frameBuffer">The frame buffer.</param>
-        /// <param name="attachment">The attachment index.</param>
-        /// <param name="format">The format of the buffer data.</param>
-        /// <param name="access">Access control flags.</param>
-        public static void SetComputeImage (byte stage, Uniform sampler, FrameBuffer frameBuffer, byte attachment, ComputeBufferAccess access, TextureFormat format = TextureFormat.Unknown) {
-            NativeMethods.bgfx_set_image_from_frame_buffer(stage, sampler.handle, frameBuffer.handle, attachment, format, access);
         }
 
         /// <summary>
@@ -1115,7 +1079,7 @@ namespace SharpBgfx {
         /// </summary>
         public TextureFormat Format { get; private set; }
 
-        Texture (ushort handle, ref TextureInfo info) {
+        internal Texture (ushort handle, ref TextureInfo info) {
             this.handle = handle;
 
             Width = info.Width;
@@ -1328,10 +1292,11 @@ namespace SharpBgfx {
         /// Reads the contents of the texture and stores them in memory pointed to by <paramref name="data"/>.
         /// </summary>
         /// <param name="data">The destination for the read image data.</param>
+        /// <param name="mip">The mip level to read.</param>
         /// <returns>The frame number on which the result will be available.</returns>
         /// <remarks>The texture must have been created with the <see cref="TextureFlags.ReadBack"/> flag.</remarks>
-        public int Read (IntPtr data) {
-            return (int)NativeMethods.bgfx_read_texture(handle, data);
+        public int Read (IntPtr data, int mip) {
+            return (int)NativeMethods.bgfx_read_texture(handle, data, (byte)mip);
         }
 
         /// <summary>
@@ -2235,57 +2200,13 @@ namespace SharpBgfx {
         }
 
         /// <summary>
-        /// Blits the contents of the framebuffer to a texture.
+        /// Gets the texture associated with a particular framebuffer attachment.
         /// </summary>
-        /// <param name="viewId">The view in which the blit will be ordered.</param>
-        /// <param name="dest">The destination texture.</param>
-        /// <param name="destX">The destination X position.</param>
-        /// <param name="destY">The destination Y position.</param>
-        /// <param name="attachment">The frame buffer attachment from which to blit.</param>
-        /// <param name="sourceX">The source X position.</param>
-        /// <param name="sourceY">The source Y position.</param>
-        /// <param name="width">The width of the region to blit.</param>
-        /// <param name="height">The height of the region to blit.</param>
-        /// <remarks>The destination texture must be created with the <see cref="TextureFlags.BlitDestination"/> flag.</remarks>
-        public void BlitTo (byte viewId, Texture dest, int destX, int destY, int attachment = 0, int sourceX = 0, int sourceY = 0,
-                            int width = ushort.MaxValue, int height = ushort.MaxValue) {
-            BlitTo(viewId, dest, 0, destX, destY, 0, attachment, 0, sourceX, sourceY, 0, width, height, 0);
-        }
-
-        /// <summary>
-        /// Blits the contents of the framebuffer to a texture.
-        /// </summary>
-        /// <param name="viewId">The view in which the blit will be ordered.</param>
-        /// <param name="dest">The destination texture.</param>
-        /// <param name="destMip">The destination mip level.</param>
-        /// <param name="destX">The destination X position.</param>
-        /// <param name="destY">The destination Y position.</param>
-        /// <param name="destZ">The destination Z position.</param>
-        /// <param name="attachment">The frame buffer attachment from which to blit.</param>
-        /// <param name="sourceMip">The source mip level.</param>
-        /// <param name="sourceX">The source X position.</param>
-        /// <param name="sourceY">The source Y position.</param>
-        /// <param name="sourceZ">The source Z position.</param>
-        /// <param name="width">The width of the region to blit.</param>
-        /// <param name="height">The height of the region to blit.</param>
-        /// <param name="depth">The depth of the region to blit.</param>
-        /// <remarks>The destination texture must be created with the <see cref="TextureFlags.BlitDestination"/> flag.</remarks>
-        public void BlitTo (byte viewId, Texture dest, int destMip, int destX, int destY, int destZ, int attachment = 0,
-                            int sourceMip = 0, int sourceX = 0, int sourceY = 0, int sourceZ = 0,
-                            int width = ushort.MaxValue, int height = ushort.MaxValue, int depth = ushort.MaxValue) {
-            NativeMethods.bgfx_blit_frame_buffer(viewId, dest.handle, (byte)destMip, (ushort)destX, (ushort)destY, (ushort)destZ,
-                handle, (byte)attachment, (byte)sourceMip, (ushort)sourceX, (ushort)sourceY, (ushort)sourceZ, (ushort)width, (ushort)height, (ushort)depth);
-        }
-
-        /// <summary>
-        /// Reads the contents of the frame buffer and stores them in memory pointed to by <paramref name="data"/>.
-        /// </summary>
-        /// <param name="attachment">The frame buffer attachment from which to read.</param>
-        /// <param name="data">The destination for the read image data.</param>
-        /// <returns>The frame number on which the result will be available.</returns>
-        /// <remarks>The attachment must have been created with the <see cref="TextureFlags.ReadBack"/> flag.</remarks>
-        public int Read (int attachment, IntPtr data) {
-            return (int)NativeMethods.bgfx_read_frame_buffer(handle, (byte)attachment, data);
+        /// <param name="attachment">The attachment index.</param>
+        /// <returns>The texture associated with the attachment.</returns>
+        public Texture GetTexture (int attachment = 0) {
+            var info = new Texture.TextureInfo();
+            return new Texture(NativeMethods.bgfx_get_texture(handle, (byte)attachment), ref info);
         }
 
         /// <summary>
@@ -4386,13 +4307,46 @@ namespace SharpBgfx {
     /// <summary>
     /// Represents a shader uniform.
     /// </summary>
-    public struct Uniform : IDisposable, IEquatable<Uniform> {
+    public unsafe struct Uniform : IDisposable, IEquatable<Uniform> {
         internal readonly ushort handle;
 
         /// <summary>
         /// Represents an invalid handle.
         /// </summary>
         public static readonly Uniform Invalid = new Uniform();
+
+        /// <summary>
+        /// The name of the uniform.
+        /// </summary>
+        public string Name {
+            get {
+                Info info;
+                NativeMethods.bgfx_get_uniform_info(handle, out info);
+                return new string(info.name);
+            }
+        }
+
+        /// <summary>
+        /// The type of the data represented by the uniform.
+        /// </summary>
+        public UniformType Type {
+            get {
+                Info info;
+                NativeMethods.bgfx_get_uniform_info(handle, out info);
+                return info.type;
+            }
+        }
+
+        /// <summary>
+        /// Size of the array, if the uniform is an array type.
+        /// </summary>
+        public int ArraySize {
+            get {
+                Info info;
+                NativeMethods.bgfx_get_uniform_info(handle, out info);
+                return info.arraySize;
+            }
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Uniform"/> struct.
@@ -4492,6 +4446,12 @@ namespace SharpBgfx {
         /// </returns>
         public static bool operator !=(Uniform left, Uniform right) {
             return !left.Equals(right);
+        }
+
+        internal struct Info {
+            public fixed sbyte name[256];
+            public UniformType type;
+            public ushort arraySize;
         }
     }
 
@@ -5078,14 +5038,14 @@ namespace SharpBgfx {
         TextureBlit = 0x20000,
 
         /// <summary>
+        /// Device supports other texture comparison modes.
+        /// </summary>
+        TextureCompareExtended = 0x40000,
+
+        /// <summary>
         /// Device supports "Less than or equal to" texture comparison mode.
         /// </summary>
         TextureCompareLessEqual = 0x80000,
-
-        /// <summary>
-        /// Device supports other texture comparison modes.
-        /// </summary>
-        TextureCompareExtended = 0x0, // TODO: fix when bgfx gets fixed
 
         /// <summary>
         /// Device supports all texture comparison modes.
@@ -6223,16 +6183,10 @@ namespace SharpBgfx {
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_texture (byte stage, ushort sampler, ushort texture, uint flags);
-
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_set_texture_from_frame_buffer (byte stage, ushort sampler, ushort frameBuffer, byte attachment, uint flags);
-
+        
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_image (byte stage, ushort sampler, ushort texture, byte mip, TextureFormat format, ComputeBufferAccess access);
-
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_set_image_from_frame_buffer (byte stage, ushort sampler, ushort frameBuffer, byte attachment, TextureFormat format, ComputeBufferAccess access);
-
+        
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_compute_index_buffer (byte stage, ushort handle, ComputeBufferAccess access);
 
@@ -6301,6 +6255,9 @@ namespace SharpBgfx {
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern ushort bgfx_create_uniform ([MarshalAs(UnmanagedType.LPStr)] string name, UniformType type, ushort arraySize);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_get_uniform_info (ushort handle, out Uniform.Info info);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_destroy_uniform (ushort handle);
@@ -6556,14 +6513,10 @@ namespace SharpBgfx {
                                              byte srcMip, ushort srcX, ushort srcY, ushort srcZ, ushort width, ushort height, ushort depth);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_blit_frame_buffer (byte id, ushort dst, byte dstMip, ushort dstX, ushort dstY, ushort dstZ, ushort src, byte attachment,
-                                                          byte srcMip, ushort srcX, ushort srcY, ushort srcZ, ushort width, ushort height, ushort depth);
+        public static extern uint bgfx_read_texture (ushort handle, IntPtr data, byte mip);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern uint bgfx_read_texture (ushort handle, IntPtr data);
-
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern uint bgfx_read_frame_buffer (ushort handle, byte attachment, IntPtr data);
+        public static extern ushort bgfx_get_texture (ushort handle, byte attachment);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern ushort bgfx_create_occlusion_query ();

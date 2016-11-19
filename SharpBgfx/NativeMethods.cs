@@ -51,16 +51,10 @@ namespace SharpBgfx {
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_texture (byte stage, ushort sampler, ushort texture, uint flags);
-
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_set_texture_from_frame_buffer (byte stage, ushort sampler, ushort frameBuffer, byte attachment, uint flags);
-
+        
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_image (byte stage, ushort sampler, ushort texture, byte mip, TextureFormat format, ComputeBufferAccess access);
-
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_set_image_from_frame_buffer (byte stage, ushort sampler, ushort frameBuffer, byte attachment, TextureFormat format, ComputeBufferAccess access);
-
+        
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_compute_index_buffer (byte stage, ushort handle, ComputeBufferAccess access);
 
@@ -129,6 +123,9 @@ namespace SharpBgfx {
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern ushort bgfx_create_uniform ([MarshalAs(UnmanagedType.LPStr)] string name, UniformType type, ushort arraySize);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_get_uniform_info (ushort handle, out Uniform.Info info);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_destroy_uniform (ushort handle);
@@ -384,14 +381,10 @@ namespace SharpBgfx {
                                              byte srcMip, ushort srcX, ushort srcY, ushort srcZ, ushort width, ushort height, ushort depth);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_blit_frame_buffer (byte id, ushort dst, byte dstMip, ushort dstX, ushort dstY, ushort dstZ, ushort src, byte attachment,
-                                                          byte srcMip, ushort srcX, ushort srcY, ushort srcZ, ushort width, ushort height, ushort depth);
+        public static extern uint bgfx_read_texture (ushort handle, IntPtr data, byte mip);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern uint bgfx_read_texture (ushort handle, IntPtr data);
-
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern uint bgfx_read_frame_buffer (ushort handle, byte attachment, IntPtr data);
+        public static extern ushort bgfx_get_texture (ushort handle, byte attachment);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern ushort bgfx_create_occlusion_query ();

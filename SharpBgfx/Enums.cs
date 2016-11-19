@@ -897,14 +897,14 @@ namespace SharpBgfx {
         TextureBlit = 0x20000,
 
         /// <summary>
+        /// Device supports other texture comparison modes.
+        /// </summary>
+        TextureCompareExtended = 0x40000,
+
+        /// <summary>
         /// Device supports "Less than or equal to" texture comparison mode.
         /// </summary>
         TextureCompareLessEqual = 0x80000,
-
-        /// <summary>
-        /// Device supports other texture comparison modes.
-        /// </summary>
-        TextureCompareExtended = 0x0, // TODO: fix when bgfx gets fixed
 
         /// <summary>
         /// Device supports all texture comparison modes.
