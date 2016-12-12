@@ -152,6 +152,10 @@ namespace SharpBgfx {
         public static extern void bgfx_calc_texture_size (ref Texture.TextureInfo info, ushort width, ushort height, ushort depth, [MarshalAs(UnmanagedType.U1)] bool cubeMap, [MarshalAs(UnmanagedType.U1)] bool hasMips, ushort numLayers, TextureFormat format);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        public static extern bool bgfx_is_texture_valid (ushort depth, [MarshalAs(UnmanagedType.U1)] bool cubeMap, ushort numLayers, TextureFormat format, TextureFlags flags);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern ushort bgfx_create_shader (MemoryBlock.DataPtr* memory);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]

@@ -1195,6 +1195,19 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// Checks whether a texture with the given parameters would be considered valid.
+        /// </summary>
+        /// <param name="depth">The depth of the texture.</param>
+        /// <param name="isCube"><c>true</c> if the texture contains a cubemap.</param>
+        /// <param name="arrayLayers">Number of layers in texture array.</param>
+        /// <param name="format">The format of the texture data.</param>
+        /// <param name="flags">Flags that control texture behavior.</param>
+        /// <returns></returns>
+        public static bool IsValid (int depth, bool isCube, int arrayLayers, TextureFormat format, TextureFlags flags = TextureFlags.None) {
+            return NativeMethods.bgfx_is_texture_valid((ushort)depth, isCube, (ushort)arrayLayers, format, flags);
+        }
+
+        /// <summary>
         /// Releases the texture.
         /// </summary>
         public void Dispose () {
@@ -2978,6 +2991,34 @@ namespace SharpBgfx {
             get { return data->WaitSubmit; }
         }
 
+        /// <summary>
+        /// The width of the back buffer.
+        /// </summary>
+        public int BackbufferWidth {
+            get { return data->Width; }
+        }
+
+        /// <summary>
+        /// The height of the back buffer.
+        /// </summary>
+        public int BackbufferHeight {
+            get { return data->Height; }
+        }
+
+        /// <summary>
+        /// The width of the debug text buffer.
+        /// </summary>
+        public int TextBufferWidth {
+            get { return data->TextWidth; }
+        }
+
+        /// <summary>
+        /// The height of the debug text buffer.
+        /// </summary>
+        public int TextBufferHeight {
+            get { return data->TextHeight; }
+        }
+
         internal PerfStats (Stats* data) {
             this.data = data;
         }
@@ -2992,6 +3033,10 @@ namespace SharpBgfx {
             public long GpuTimerFrequency;
             public long WaitRender;
             public long WaitSubmit;
+            public ushort Width;
+            public ushort Height;
+            public ushort TextWidth;
+            public ushort TextHeight;
         }
 #pragma warning restore 649
     }
@@ -6282,6 +6327,10 @@ namespace SharpBgfx {
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_calc_texture_size (ref Texture.TextureInfo info, ushort width, ushort height, ushort depth, [MarshalAs(UnmanagedType.U1)] bool cubeMap, [MarshalAs(UnmanagedType.U1)] bool hasMips, ushort numLayers, TextureFormat format);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        public static extern bool bgfx_is_texture_valid (ushort depth, [MarshalAs(UnmanagedType.U1)] bool cubeMap, ushort numLayers, TextureFormat format, TextureFlags flags);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern ushort bgfx_create_shader (MemoryBlock.DataPtr* memory);

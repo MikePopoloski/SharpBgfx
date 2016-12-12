@@ -168,6 +168,19 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// Checks whether a texture with the given parameters would be considered valid.
+        /// </summary>
+        /// <param name="depth">The depth of the texture.</param>
+        /// <param name="isCube"><c>true</c> if the texture contains a cubemap.</param>
+        /// <param name="arrayLayers">Number of layers in texture array.</param>
+        /// <param name="format">The format of the texture data.</param>
+        /// <param name="flags">Flags that control texture behavior.</param>
+        /// <returns></returns>
+        public static bool IsValid (int depth, bool isCube, int arrayLayers, TextureFormat format, TextureFlags flags = TextureFlags.None) {
+            return NativeMethods.bgfx_is_texture_valid((ushort)depth, isCube, (ushort)arrayLayers, format, flags);
+        }
+
+        /// <summary>
         /// Releases the texture.
         /// </summary>
         public void Dispose () {
