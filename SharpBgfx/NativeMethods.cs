@@ -5,6 +5,8 @@ using System.Security;
 namespace SharpBgfx {
     [SuppressUnmanagedCodeSecurity]
     unsafe static class NativeMethods {
+#pragma warning disable IDE1006 // Naming Styles
+
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_update_texture_2d (ushort handle, ushort layer, byte mip, ushort x, ushort y, ushort width, ushort height, MemoryBlock.DataPtr* memory, ushort pitch);
 
@@ -16,19 +18,15 @@ namespace SharpBgfx {
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAs(UnmanagedType.U1)]
-        public static extern bool bgfx_check_avail_transient_index_buffer (int num);
+        public static extern int bgfx_get_avail_transient_index_buffer (int num);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAs(UnmanagedType.U1)]
-        public static extern bool bgfx_check_avail_transient_vertex_buffer (int num, ref VertexLayout.Data decl);
+        public static extern int bgfx_get_avail_transient_vertex_buffer (int num, ref VertexLayout.Data decl);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAs(UnmanagedType.U1)]
-        public static extern bool bgfx_check_avail_instance_data_buffer (int num, ushort stride);
-
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        [return: MarshalAs(UnmanagedType.U1)]
-        public static extern bool bgfx_check_avail_transient_buffers (int numVertices, ref VertexLayout.Data decl, int numIndices);
+        public static extern int bgfx_get_avail_instance_data_buffer (int num, ushort stride);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_alloc_transient_index_buffer (out TransientIndexBuffer tib, int num);
@@ -401,6 +399,8 @@ namespace SharpBgfx {
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_condition (ushort handle, [MarshalAs(UnmanagedType.U1)] bool visible);
+
+#pragma warning restore IDE1006 // Naming Styles
 
 #if DEBUG
         const string DllName = "bgfx_debug.dll";

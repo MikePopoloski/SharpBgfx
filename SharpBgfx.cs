@@ -118,17 +118,6 @@ namespace SharpBgfx {
     /// </summary>
     public unsafe static class Bgfx {
         /// <summary>
-        /// Checks for available space to allocate transient index and vertex buffers.
-        /// </summary>
-        /// <param name="vertexCount">The number of vertices to allocate.</param>
-        /// <param name="layout">The layout of each vertex.</param>
-        /// <param name="indexCount">The number of indices to allocate.</param>
-        /// <returns><c>true</c> if there is sufficient space for both vertex and index buffers.</returns>
-        public static bool CheckAvailableTransientBufferSpace (int vertexCount, VertexLayout layout, int indexCount) {
-            return NativeMethods.bgfx_check_avail_transient_buffers(vertexCount, ref layout.data, indexCount);
-        }
-
-        /// <summary>
         /// Attempts to allocate both a transient vertex buffer and index buffer.
         /// </summary>
         /// <param name="vertexCount">The number of vertices to allocate.</param>
@@ -2519,13 +2508,13 @@ namespace SharpBgfx {
         }
 
         /// <summary>
-        /// Checks for available space to allocate an instance buffer.
+        /// Gets the available space that can be used to allocate an instance buffer.
         /// </summary>
-        /// <param name="count">The number of elements to allocate.</param>
+        /// <param name="count">The number of elements required.</param>
         /// <param name="stride">The stride of each element.</param>
-        /// <returns><c>true</c> if there is space available to allocate the buffer.</returns>
-        public static bool CheckAvailableSpace (int count, int stride) {
-            return NativeMethods.bgfx_check_avail_instance_data_buffer(count, (ushort)stride);
+        /// <returns>The number of available elements.</returns>
+        public static int GetAvailableSpace (int count, int stride) {
+            return NativeMethods.bgfx_get_avail_instance_data_buffer(count, (ushort)stride);
         }
 
         /// <summary>
@@ -2992,6 +2981,27 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// The number of draw calls submitted.
+        /// </summary>
+        public int DrawCallsSubmitted {
+            get { return data->NumDraw; }
+        }
+
+        /// <summary>
+        /// The number of compute calls submitted.
+        /// </summary>
+        public int ComputeCallsSubmitted {
+            get { return data->NumCompute; }
+        }
+
+        /// <summary>
+        /// Maximum observed GPU driver latency.
+        /// </summary>
+        public int MaxGpuLatency {
+            get { return data->MaxGpuLatency; }
+        }
+
+        /// <summary>
         /// The width of the back buffer.
         /// </summary>
         public int BackbufferWidth {
@@ -3033,6 +3043,9 @@ namespace SharpBgfx {
             public long GpuTimerFrequency;
             public long WaitRender;
             public long WaitSubmit;
+            public int NumDraw;
+            public int NumCompute;
+            public int MaxGpuLatency;
             public ushort Width;
             public ushort Height;
             public ushort TextWidth;
@@ -4152,12 +4165,12 @@ namespace SharpBgfx {
         }
 
         /// <summary>
-        /// Check if there is available space in the global transient index buffer.
+        /// Gets the available space in the global transient index buffer.
         /// </summary>
-        /// <param name="count">The number of 16-bit indices to allocate.</param>
-        /// <returns><c>true</c> if there is sufficient space for the give number of indices.</returns>
-        public static bool CheckAvailableSpace (int count) {
-            return NativeMethods.bgfx_check_avail_transient_index_buffer(count);
+        /// <param name="count">The number of 16-bit indices required.</param>
+        /// <returns>The number of available indices.</returns>
+        public static int GetAvailableSpace (int count) {
+            return NativeMethods.bgfx_get_avail_transient_index_buffer(count);
         }
 
         /// <summary>
@@ -4269,15 +4282,13 @@ namespace SharpBgfx {
         }
 
         /// <summary>
-        /// Check if there is available space in the global transient vertex buffer.
+        /// Gets the available space in the global transient vertex buffer.
         /// </summary>
-        /// <param name="count">The number of vertices to allocate.</param>
+        /// <param name="count">The number of vertices required.</param>
         /// <param name="layout">The layout of each vertex.</param>
-        /// <returns>
-        ///   <c>true</c> if there is sufficient space for the give number of vertices.
-        /// </returns>
-        public static bool CheckAvailableSpace (int count, VertexLayout layout) {
-            return NativeMethods.bgfx_check_avail_transient_vertex_buffer(count, ref layout.data);
+        /// <returns>The number of available vertices.</returns>
+        public static int GetAvailableSpace (int count, VertexLayout layout) {
+            return NativeMethods.bgfx_get_avail_transient_vertex_buffer(count, ref layout.data);
         }
 
         /// <summary>
@@ -6182,6 +6193,8 @@ namespace SharpBgfx {
 
     [SuppressUnmanagedCodeSecurity]
     unsafe static class NativeMethods {
+#pragma warning disable IDE1006 // Naming Styles
+
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_update_texture_2d (ushort handle, ushort layer, byte mip, ushort x, ushort y, ushort width, ushort height, MemoryBlock.DataPtr* memory, ushort pitch);
 
@@ -6193,19 +6206,15 @@ namespace SharpBgfx {
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAs(UnmanagedType.U1)]
-        public static extern bool bgfx_check_avail_transient_index_buffer (int num);
+        public static extern int bgfx_get_avail_transient_index_buffer (int num);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAs(UnmanagedType.U1)]
-        public static extern bool bgfx_check_avail_transient_vertex_buffer (int num, ref VertexLayout.Data decl);
+        public static extern int bgfx_get_avail_transient_vertex_buffer (int num, ref VertexLayout.Data decl);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAs(UnmanagedType.U1)]
-        public static extern bool bgfx_check_avail_instance_data_buffer (int num, ushort stride);
-
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        [return: MarshalAs(UnmanagedType.U1)]
-        public static extern bool bgfx_check_avail_transient_buffers (int numVertices, ref VertexLayout.Data decl, int numIndices);
+        public static extern int bgfx_get_avail_instance_data_buffer (int num, ushort stride);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_alloc_transient_index_buffer (out TransientIndexBuffer tib, int num);
@@ -6578,6 +6587,8 @@ namespace SharpBgfx {
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_condition (ushort handle, [MarshalAs(UnmanagedType.U1)] bool visible);
+
+#pragma warning restore IDE1006 // Naming Styles
 
 #if DEBUG
         const string DllName = "bgfx_debug.dll";

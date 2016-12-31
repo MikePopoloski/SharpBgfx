@@ -38,12 +38,12 @@ namespace SharpBgfx {
         }
 
         /// <summary>
-        /// Check if there is available space in the global transient index buffer.
+        /// Gets the available space in the global transient index buffer.
         /// </summary>
-        /// <param name="count">The number of 16-bit indices to allocate.</param>
-        /// <returns><c>true</c> if there is sufficient space for the give number of indices.</returns>
-        public static bool CheckAvailableSpace (int count) {
-            return NativeMethods.bgfx_check_avail_transient_index_buffer(count);
+        /// <param name="count">The number of 16-bit indices required.</param>
+        /// <returns>The number of available indices.</returns>
+        public static int GetAvailableSpace (int count) {
+            return NativeMethods.bgfx_get_avail_transient_index_buffer(count);
         }
 
         /// <summary>

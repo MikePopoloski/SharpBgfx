@@ -32,13 +32,13 @@ namespace SharpBgfx {
         }
 
         /// <summary>
-        /// Checks for available space to allocate an instance buffer.
+        /// Gets the available space that can be used to allocate an instance buffer.
         /// </summary>
-        /// <param name="count">The number of elements to allocate.</param>
+        /// <param name="count">The number of elements required.</param>
         /// <param name="stride">The stride of each element.</param>
-        /// <returns><c>true</c> if there is space available to allocate the buffer.</returns>
-        public static bool CheckAvailableSpace (int count, int stride) {
-            return NativeMethods.bgfx_check_avail_instance_data_buffer(count, (ushort)stride);
+        /// <returns>The number of available elements.</returns>
+        public static int GetAvailableSpace (int count, int stride) {
+            return NativeMethods.bgfx_get_avail_instance_data_buffer(count, (ushort)stride);
         }
 
         /// <summary>

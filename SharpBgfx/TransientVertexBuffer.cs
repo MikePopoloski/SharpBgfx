@@ -41,15 +41,13 @@ namespace SharpBgfx {
         }
 
         /// <summary>
-        /// Check if there is available space in the global transient vertex buffer.
+        /// Gets the available space in the global transient vertex buffer.
         /// </summary>
-        /// <param name="count">The number of vertices to allocate.</param>
+        /// <param name="count">The number of vertices required.</param>
         /// <param name="layout">The layout of each vertex.</param>
-        /// <returns>
-        ///   <c>true</c> if there is sufficient space for the give number of vertices.
-        /// </returns>
-        public static bool CheckAvailableSpace (int count, VertexLayout layout) {
-            return NativeMethods.bgfx_check_avail_transient_vertex_buffer(count, ref layout.data);
+        /// <returns>The number of available vertices.</returns>
+        public static int GetAvailableSpace (int count, VertexLayout layout) {
+            return NativeMethods.bgfx_get_avail_transient_vertex_buffer(count, ref layout.data);
         }
 
         /// <summary>

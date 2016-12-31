@@ -8,17 +8,6 @@ namespace SharpBgfx {
     /// </summary>
     public unsafe static class Bgfx {
         /// <summary>
-        /// Checks for available space to allocate transient index and vertex buffers.
-        /// </summary>
-        /// <param name="vertexCount">The number of vertices to allocate.</param>
-        /// <param name="layout">The layout of each vertex.</param>
-        /// <param name="indexCount">The number of indices to allocate.</param>
-        /// <returns><c>true</c> if there is sufficient space for both vertex and index buffers.</returns>
-        public static bool CheckAvailableTransientBufferSpace (int vertexCount, VertexLayout layout, int indexCount) {
-            return NativeMethods.bgfx_check_avail_transient_buffers(vertexCount, ref layout.data, indexCount);
-        }
-
-        /// <summary>
         /// Attempts to allocate both a transient vertex buffer and index buffer.
         /// </summary>
         /// <param name="vertexCount">The number of vertices to allocate.</param>

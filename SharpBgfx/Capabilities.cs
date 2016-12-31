@@ -440,6 +440,27 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// The number of draw calls submitted.
+        /// </summary>
+        public int DrawCallsSubmitted {
+            get { return data->NumDraw; }
+        }
+
+        /// <summary>
+        /// The number of compute calls submitted.
+        /// </summary>
+        public int ComputeCallsSubmitted {
+            get { return data->NumCompute; }
+        }
+
+        /// <summary>
+        /// Maximum observed GPU driver latency.
+        /// </summary>
+        public int MaxGpuLatency {
+            get { return data->MaxGpuLatency; }
+        }
+
+        /// <summary>
         /// The width of the back buffer.
         /// </summary>
         public int BackbufferWidth {
@@ -481,6 +502,9 @@ namespace SharpBgfx {
             public long GpuTimerFrequency;
             public long WaitRender;
             public long WaitSubmit;
+            public int NumDraw;
+            public int NumCompute;
+            public int MaxGpuLatency;
             public ushort Width;
             public ushort Height;
             public ushort TextWidth;
