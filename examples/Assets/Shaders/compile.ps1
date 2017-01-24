@@ -6,10 +6,10 @@ Function Compile ($filter, $type, $profile, $glProfile) {
 		$path = $file | Resolve-Path -Relative
         $outname = [io.path]::ChangeExtension($file.Name, "bin")
 		Write-Output ("Compiling {0}..." -f $path)
-		&..\..\..\Tools\shaderc.exe --platform linux -p $glProfile --type $type -f "$path" -o ".\bin\glsl\$outname" -i ..\
-		if ($LastExitCode -eq 0) { $Global:s++ } Else { $Global:e++ }
-        &..\..\..\Tools\shaderc.exe --platform windows -p $profile -O 3 --type $type -f "$path" -o ".\bin\dx11\$outname" -i ..\
-		if ($LastExitCode -eq 0) { $Global:s++ } Else { $Global:e++ }
+		&..\..\..\tools\shaderc.exe --platform linux -p $glProfile --type $type -f "$path" -o ".\bin\glsl\$outname" -i ..\
+		if ($LastExitCode -eq 0) { $Script:s++ } Else { $Script:e++ }
+        &..\..\..\tools\shaderc.exe --platform windows -p $profile -O 3 --type $type -f "$path" -o ".\bin\dx11\$outname" -i ..\
+		if ($LastExitCode -eq 0) { $Script:s++ } Else { $Script:e++ }
 	}
 }
 
@@ -20,4 +20,4 @@ foreach ($dir in (ls -Directory)) {
 }
 
 Write-Output ""
-Write-Output ("Shader Build: {0} succeeded, {1} failed" -f $Global:s,$Global:e)
+Write-Output ("Shader Build: {0} succeeded, {1} failed" -f $s,$e)
