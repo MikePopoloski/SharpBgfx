@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Drawing;
 using System.Threading;
-using System.Windows.Forms;
 using SharpBgfx;
 
 namespace Common {
     public class Sample {
-        EventQueue eventQueue = new EventQueue();
-        Form form;
+        Window window;
         Thread thread;
 
         public int WindowWidth {
@@ -21,57 +18,54 @@ namespace Common {
         }
 
         public Sample (string name, int windowWidth, int windowHeight) {
+            Thread.CurrentThread.Name = "OS Thread";
+
             WindowWidth = windowWidth;
             WindowHeight = windowHeight;
 
-            form = new Form {
-                Text = name,
-                ClientSize = new Size(windowWidth, windowHeight)
-            };
+            window = new Window(name, windowWidth, windowHeight);
+            window.Show();
 
-            form.ClientSizeChanged += (o, e) => eventQueue.Post(new SizeEvent(windowWidth, windowHeight));
-            form.FormClosing += OnFormClosing;
-            form.FormClosed += (o, e) => eventQueue.Post(new Event(EventType.Exit));
-
-            Bgfx.SetWindowHandle(form.Handle);
+            Bgfx.SetWindowHandle(window.Handle);
         }
 
         public void Run (Action<Sample> renderThread) {
-            thread = new Thread(() => renderThread(this));
+            thread = new Thread(() => {
+                renderThread(this);
+                window.Close();
+            });
             thread.Start();
 
-            Application.Run(form);
+            // run the native OS message loop on this thread
+            // this blocks until the window closes and the loop exits
+            window.RunMessageLoop();
+
+            // wait for the render thread to finish
+            thread.Join();
         }
 
-        public bool ProcessEvents (ResetFlags resetFlags) {
-            Event ev;
-            bool resizeRequired = false;
+        public bool ProcessEvents(ResetFlags resetFlags) {
+            WindowEvent? ev;
+            var reset = false;
 
-            while ((ev = eventQueue.Poll()) != null) {
-                switch (ev.Type) {
-                    case EventType.Exit:
+            while ((ev = window.Poll()) != null) {
+                var e = ev.Value;
+                switch (e.Type) {
+                    case WindowEventType.Exit:
                         return false;
 
-                    case EventType.Size:
-                        var size = (SizeEvent)ev;
-                        WindowWidth = size.Width;
-                        WindowHeight = size.Height;
-                        resizeRequired = true;
+                    case WindowEventType.Size:
+                        WindowWidth = e.Width;
+                        WindowHeight = e.Height;
+                        reset = true;
                         break;
                 }
             }
 
-            if (resizeRequired)
+            if (reset)
                 Bgfx.Reset(WindowWidth, WindowHeight, resetFlags);
 
             return true;
-        }
-
-        void OnFormClosing (object sender, FormClosingEventArgs e) {
-            // kill all rendering and shutdown before closing the
-            // window, or we'll get errors from the graphics driver
-            eventQueue.Post(new Event(EventType.Exit));
-            thread.Join();
         }
     }
 }

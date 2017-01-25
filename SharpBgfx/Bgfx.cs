@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace SharpBgfx {
     /// <summary>
@@ -236,7 +237,7 @@ namespace SharpBgfx {
         /// <param name="backend">The backend for which to retrieve a name.</param>
         /// <returns>The friendly name of the specified backend.</returns>
         public static string GetBackendName (RendererBackend backend) {
-            return new string(NativeMethods.bgfx_get_renderer_name(backend));
+            return Marshal.PtrToStringAnsi(new IntPtr(NativeMethods.bgfx_get_renderer_name(backend)));
         }
 
         /// <summary>

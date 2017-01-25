@@ -108,7 +108,7 @@ namespace SharpBgfx {
             if (savedDelegates != null)
                 throw new InvalidOperationException("Callbacks should only be initialized once; bgfx can only deal with one set at a time.");
 
-            var memory = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(CallbackShim)));
+            var memory = Marshal.AllocHGlobal(Marshal.SizeOf<CallbackShim>());
             var shim = (CallbackShim*)memory;
             var saver = new DelegateSaver(handler, shim);
 

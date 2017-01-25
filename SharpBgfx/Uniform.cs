@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace SharpBgfx {
     /// <summary>
@@ -19,7 +20,7 @@ namespace SharpBgfx {
             get {
                 Info info;
                 NativeMethods.bgfx_get_uniform_info(handle, out info);
-                return new string(info.name);
+                return Marshal.PtrToStringAnsi(new IntPtr(info.name));
             }
         }
 

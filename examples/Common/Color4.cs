@@ -6,7 +6,6 @@ namespace Common {
     /// <summary>
     /// A four-component (RGBA) color value where each channel is represented by a byte.
     /// </summary>
-    [Serializable]
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct Color4 : IEquatable<Color4>, IFormattable {
         /// <summary>

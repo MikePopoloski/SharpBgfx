@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Runtime.InteropServices;
 
 namespace Common {
     public interface IUniformGroup {
@@ -93,6 +94,7 @@ namespace Common {
     }
 
 #pragma warning disable 649  // Field 'Primitive.StartIndex' is never assigned to, and will always have its default value 0
+    [StructLayout(LayoutKind.Sequential)]
     struct Primitive {
         public int StartIndex;
         public int IndexCount;

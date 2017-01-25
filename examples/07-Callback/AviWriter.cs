@@ -64,7 +64,7 @@ class AviWriter : IDisposable {
         WriteHeader();
 
         // close it all down
-        writer.Close();
+        writer.Dispose();
         closed = true;
     }
 
@@ -87,7 +87,7 @@ class AviWriter : IDisposable {
 
         // write AVIMAINHEADER
         var chunk = OpenChunk(FourCC.AviHeader);
-        writer.Write((uint)decimal.Round(1000000m / fps));  // microseconds per frame
+        writer.Write((uint)Math.Round(1000000m / fps));     // microseconds per frame
         writer.Write((uint)(fps * frameSize));              // max bytes per second
         writer.Write(0);                                    // padding granularity
         writer.Write((uint)StandardFlags);                  // flags
