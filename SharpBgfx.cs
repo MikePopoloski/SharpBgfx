@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 Michael Popoloski
+// Copyright (c) 2015-2017 Michael Popoloski
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -192,31 +192,31 @@ namespace SharpBgfx {
         /// <summary>
         /// Swizzles an RGBA8 image to BGRA8.
         /// </summary>
+        /// <param name="destination">The destination image data.</param>
         /// <param name="width">The width of the image.</param>
         /// <param name="height">The height of the image.</param>
         /// <param name="pitch">The pitch of the image (in bytes).</param>
         /// <param name="source">The source image data.</param>
-        /// <param name="destination">The destination image data.</param>
         /// <remarks>
         /// This method can operate in-place on the image (i.e. src == dst).
         /// </remarks>
-        public static void ImageSwizzleBgra8 (int width, int height, int pitch, IntPtr source, IntPtr destination) {
-            NativeMethods.bgfx_image_swizzle_bgra8(width, height, pitch, source, destination);
+        public static void ImageSwizzleBgra8(IntPtr destination, int width, int height, int pitch, IntPtr source) {
+            NativeMethods.bgfx_image_swizzle_bgra8(destination, width, height, pitch, source);
         }
 
         /// <summary>
         /// Downsamples an RGBA8 image with a 2x2 pixel average filter.
         /// </summary>
+        /// <param name="destination">The destination image data.</param>
         /// <param name="width">The width of the image.</param>
         /// <param name="height">The height of the image.</param>
         /// <param name="pitch">The pitch of the image (in bytes).</param>
         /// <param name="source">The source image data.</param>
-        /// <param name="destination">The destination image data.</param>
         /// <remarks>
         /// This method can operate in-place on the image (i.e. src == dst).
         /// </remarks>
-        public static void ImageRgba8Downsample2x2 (int width, int height, int pitch, IntPtr source, IntPtr destination) {
-            NativeMethods.bgfx_image_rgba8_downsample_2x2(width, height, pitch, source, destination);
+        public static void ImageRgba8Downsample2x2 (IntPtr destination, int width, int height, int pitch, IntPtr source) {
+            NativeMethods.bgfx_image_rgba8_downsample_2x2(destination, width, height, pitch, source);
         }
 
         /// <summary>
@@ -6396,10 +6396,10 @@ namespace SharpBgfx {
         public static extern void bgfx_destroy_indirect_buffer (ushort handle);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_image_swizzle_bgra8 (int width, int height, int pitch, IntPtr src, IntPtr dst);
+        public static extern void bgfx_image_swizzle_bgra8 (IntPtr dst, int width, int height, int pitch, IntPtr src);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_image_rgba8_downsample_2x2 (int width, int height, int pitch, IntPtr src, IntPtr dst);
+        public static extern void bgfx_image_rgba8_downsample_2x2 (IntPtr dst, int width, int height, int pitch, IntPtr src);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_platform_data (ref PlatformData data);

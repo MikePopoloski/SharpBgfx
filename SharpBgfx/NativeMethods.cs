@@ -208,10 +208,10 @@ namespace SharpBgfx {
         public static extern void bgfx_destroy_indirect_buffer (ushort handle);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_image_swizzle_bgra8 (int width, int height, int pitch, IntPtr src, IntPtr dst);
+        public static extern void bgfx_image_swizzle_bgra8 (IntPtr dst, int width, int height, int pitch, IntPtr src);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_image_rgba8_downsample_2x2 (int width, int height, int pitch, IntPtr src, IntPtr dst);
+        public static extern void bgfx_image_rgba8_downsample_2x2 (IntPtr dst, int width, int height, int pitch, IntPtr src);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_platform_data (ref PlatformData data);
