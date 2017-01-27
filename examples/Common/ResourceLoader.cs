@@ -174,7 +174,7 @@ namespace Common {
         };
     }
 
-    unsafe struct MemoryReader : IDisposable {
+    unsafe class MemoryReader : IDisposable {
         GCHandle handle;
         byte* ptr;
         byte* end;
@@ -198,9 +198,12 @@ namespace Common {
         public T[] ReadArray<T>(int count) {
             var result = new T[count];
             var asBytes = Unsafe.As<byte[]>(result);
-            fixed (void* dest = asBytes)
-                Unsafe.CopyBlock(dest, ptr, (uint)count);
 
+            int byteCount = count * Unsafe.SizeOf<T>();
+            fixed (void* dest = asBytes)
+                Unsafe.CopyBlock(dest, ptr, (uint)byteCount);
+
+            ptr += byteCount;
             return result;
         }
 

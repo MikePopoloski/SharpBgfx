@@ -21,6 +21,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -324,7 +325,7 @@ namespace SharpBgfx {
                 backend,
                 (ushort)adapter.Vendor,
                 (ushort)adapter.DeviceId,
-                CallbackShim.CreateShim(callbackHandler),
+                CallbackShim.CreateShim(callbackHandler ?? new DefaultCallbackHandler()),
                 IntPtr.Zero
             );
         }
@@ -346,7 +347,7 @@ namespace SharpBgfx {
         /// <param name="backend">The backend for which to retrieve a name.</param>
         /// <returns>The friendly name of the specified backend.</returns>
         public static string GetBackendName (RendererBackend backend) {
-            return new string(NativeMethods.bgfx_get_renderer_name(backend));
+            return Marshal.PtrToStringAnsi(new IntPtr(NativeMethods.bgfx_get_renderer_name(backend)));
         }
 
         /// <summary>
@@ -1014,6 +1015,32 @@ namespace SharpBgfx {
         /// <param name="backFace">The stencil state to use for back faces.</param>
         public static void SetStencil (StencilFlags frontFace, StencilFlags backFace) {
             NativeMethods.bgfx_set_stencil((uint)frontFace, (uint)backFace);
+        }
+
+        class DefaultCallbackHandler : ICallbackHandler {
+            public void CaptureStarted(int width, int height, int pitch, TextureFormat format, bool flipVertical) {}
+            public void CaptureFrame(IntPtr data, int size) {}
+            public void CaptureFinished() {}
+            public int GetCachedSize(long id) { return 0; }
+            public bool GetCacheEntry(long id, IntPtr data, int size) { return false; }
+            public void SetCacheEntry(long id, IntPtr data, int size) {}
+            public void SaveScreenShot(string path, int width, int height, int pitch, IntPtr data, int size, bool flipVertical) {}
+
+            public void ReportDebug(string fileName, int line, string format, IntPtr args) {
+                sbyte* buffer = stackalloc sbyte[1024];
+                NativeMethods.bgfx_vsnprintf(buffer, new IntPtr(1024), format, args);
+                Debug.Write(Marshal.PtrToStringAnsi(new IntPtr(buffer)));
+            }
+
+            public void ReportError(ErrorType errorType, string message) {
+                if (errorType == ErrorType.DebugCheck)
+                    Debug.Write(message);
+                else {
+                    Debug.Write(string.Format("{0}: {1}", errorType, message));
+                    Debugger.Break();
+                    Environment.Exit(1);
+                }
+            }
         }
     }
 
@@ -2669,7 +2696,7 @@ namespace SharpBgfx {
                 throw new ArgumentNullException("data");
 
             var gcHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
-            var block = new MemoryBlock(gcHandle.AddrOfPinnedObject(), Marshal.SizeOf(typeof(T)) * data.Length);
+            var block = new MemoryBlock(gcHandle.AddrOfPinnedObject(), Marshal.SizeOf<T>() * data.Length);
 
             gcHandle.Free();
             return block;
@@ -2689,7 +2716,7 @@ namespace SharpBgfx {
                 throw new ArgumentNullException("data");
 
             var gcHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
-            return MakeRef(gcHandle.AddrOfPinnedObject(), Marshal.SizeOf(typeof(T)) * data.Length, GCHandle.ToIntPtr(gcHandle), ReleaseHandleCallback);
+            return MakeRef(gcHandle.AddrOfPinnedObject(), Marshal.SizeOf<T>() * data.Length, GCHandle.ToIntPtr(gcHandle), ReleaseHandleCallback);
         }
 
         /// <summary>
@@ -4378,7 +4405,7 @@ namespace SharpBgfx {
             get {
                 Info info;
                 NativeMethods.bgfx_get_uniform_info(handle, out info);
-                return new string(info.name);
+                return Marshal.PtrToStringAnsi(new IntPtr(info.name));
             }
         }
 
@@ -6588,6 +6615,9 @@ namespace SharpBgfx {
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_condition (ushort handle, [MarshalAs(UnmanagedType.U1)] bool visible);
 
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int bgfx_vsnprintf(sbyte* str, IntPtr count, [MarshalAs(UnmanagedType.LPStr)] string format, IntPtr argList);
+
 #pragma warning restore IDE1006 // Naming Styles
 
 #if DEBUG
@@ -6616,7 +6646,7 @@ namespace SharpBgfx {
             if (savedDelegates != null)
                 throw new InvalidOperationException("Callbacks should only be initialized once; bgfx can only deal with one set at a time.");
 
-            var memory = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(CallbackShim)));
+            var memory = Marshal.AllocHGlobal(Marshal.SizeOf<CallbackShim>());
             var shim = (CallbackShim*)memory;
             var saver = new DelegateSaver(handler, shim);
 
@@ -6753,5 +6783,10 @@ namespace SharpBgfx {
 
         static IntPtr shimMemory;
         static DelegateSaver savedDelegates;
+    }
+}
+namespace System.Security {
+    // Keep this around until .NET Core gets an actual implementation of it
+    class SuppressUnmanagedCodeSecurity : Attribute {
     }
 }
