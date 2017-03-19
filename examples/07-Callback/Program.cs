@@ -173,7 +173,7 @@ static class Program {
 
             // take a screenshot at frame 150
             if (frame == 150)
-                Bgfx.SaveScreenShot("frame150");
+                Bgfx.RequestScreenShot("frame150");
 
             // advance to next frame
             Bgfx.Frame();

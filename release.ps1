@@ -23,4 +23,4 @@ Copy-Item .build\win64_vs2017\bin\texturevRelease.exe ../SharpBgfx/tools/texture
 
 Pop-Location
 
-..\Amalgamate\Amalgamate\bin\Release\Amalgamate.exe SharpBgfx SharpBgfx.cs LICENSE
+&..\Amalgamate\Amalgamate\bin\Release\Amalgamate.exe SharpBgfx SharpBgfx.cs LICENSE

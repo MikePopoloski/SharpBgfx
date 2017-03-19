@@ -979,8 +979,17 @@ namespace SharpBgfx {
         /// Requests that a screenshot be saved. The ScreenshotTaken event will be fired to save the result.
         /// </summary>
         /// <param name="filePath">The file path that will be passed to the callback event.</param>
-        public static void SaveScreenShot (string filePath) {
-            NativeMethods.bgfx_save_screen_shot(filePath);
+        public static void RequestScreenShot(string filePath) {
+            NativeMethods.bgfx_request_screen_shot(ushort.MaxValue, filePath);
+        }
+
+        /// <summary>
+        /// Requests that a screenshot be saved. The ScreenshotTaken event will be fired to save the result.
+        /// </summary>
+        /// <param name="frameBuffer">The frame buffer to save.</param>
+        /// <param name="filePath">The file path that will be passed to the callback event.</param>
+        public static void RequestScreenShot (FrameBuffer frameBuffer, string filePath) {
+            NativeMethods.bgfx_request_screen_shot(frameBuffer.handle, filePath);
         }
 
         /// <summary>
@@ -2832,7 +2841,19 @@ namespace SharpBgfx {
         /// Gets the result of the query.
         /// </summary>
         public OcclusionQueryResult Result {
-            get { return NativeMethods.bgfx_get_result(handle); }
+            get { return NativeMethods.bgfx_get_result(handle, null); }
+        }
+
+        /// <summary>
+        /// Gets the number of pixels that passed the test. Only valid
+        /// if <see cref="Result"/> is also valid.
+        /// </summary>
+        public int PassingPixels {
+            get {
+                int pixels = 0;
+                NativeMethods.bgfx_get_result(handle, &pixels);
+                return pixels;
+            }
         }
 
         OcclusionQuery (ushort handle) {
@@ -5277,6 +5298,11 @@ namespace SharpBgfx {
         Render,
 
         /// <summary>
+        /// The internal semaphore timed out; rendering was skipped.
+        /// </summary>
+        Timeout,
+
+        /// <summary>
         /// Rendering is done; the program should exit.
         /// </summary>
         Exiting
@@ -6516,7 +6542,7 @@ namespace SharpBgfx {
         public static extern void bgfx_set_view_transform (byte id, float* view, float* proj);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_save_screen_shot ([MarshalAs(UnmanagedType.LPStr)] string filePath);
+        public static extern void bgfx_request_screen_shot (ushort handle, [MarshalAs(UnmanagedType.LPStr)] string filePath);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_state (ulong state, int rgba);
@@ -6610,7 +6636,7 @@ namespace SharpBgfx {
         public static extern void bgfx_destroy_occlusion_query (ushort handle);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern OcclusionQueryResult bgfx_get_result (ushort handle);
+        public static extern OcclusionQueryResult bgfx_get_result (ushort handle, int* pixels);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_condition (ushort handle, [MarshalAs(UnmanagedType.U1)] bool visible);

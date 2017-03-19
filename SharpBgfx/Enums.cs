@@ -1571,6 +1571,11 @@ namespace SharpBgfx {
         Render,
 
         /// <summary>
+        /// The internal semaphore timed out; rendering was skipped.
+        /// </summary>
+        Timeout,
+
+        /// <summary>
         /// Rendering is done; the program should exit.
         /// </summary>
         Exiting

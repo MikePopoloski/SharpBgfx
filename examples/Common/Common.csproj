@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup Label="Configuration">
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -6,11 +6,6 @@
     <TargetFramework>netstandard1.6</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="**\*.cs" />
-    <EmbeddedResource Include="**\*.resx" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="NETStandard.Library" Version="1.6.1" />
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.3.0" />
     <PackageReference Include="System.Threading.Thread" Version="4.3.0" />
   </ItemGroup>

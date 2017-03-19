@@ -1,17 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup Label="Configuration">
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
     <TargetFramework>netstandard1.6</TargetFramework>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputType>library</OutputType>
-  </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="**\*.cs" />
-    <EmbeddedResource Include="**\*.resx" />
-  </ItemGroup>
   <ItemGroup>
     <None Include="..\external\bgfx\bgfx.dll">
       <Link>bgfx.dll</Link>
@@ -21,8 +14,5 @@
       <Link>bgfx_debug.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="NETStandard.Library" Version="1.6.1" />
   </ItemGroup>
 </Project>

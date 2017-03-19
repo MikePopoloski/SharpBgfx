@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup Label="Configuration">
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -6,13 +6,6 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp1.0</TargetFramework>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="**\*.cs" />
-    <EmbeddedResource Include="**\*.resx" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.App" Version="1.0.1" />
-  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\SharpBgfx\SharpBgfx.csproj" />
     <ProjectReference Include="..\Common\Common.csproj" />

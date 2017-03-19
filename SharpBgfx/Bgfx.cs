@@ -870,8 +870,17 @@ namespace SharpBgfx {
         /// Requests that a screenshot be saved. The ScreenshotTaken event will be fired to save the result.
         /// </summary>
         /// <param name="filePath">The file path that will be passed to the callback event.</param>
-        public static void SaveScreenShot (string filePath) {
-            NativeMethods.bgfx_save_screen_shot(filePath);
+        public static void RequestScreenShot(string filePath) {
+            NativeMethods.bgfx_request_screen_shot(ushort.MaxValue, filePath);
+        }
+
+        /// <summary>
+        /// Requests that a screenshot be saved. The ScreenshotTaken event will be fired to save the result.
+        /// </summary>
+        /// <param name="frameBuffer">The frame buffer to save.</param>
+        /// <param name="filePath">The file path that will be passed to the callback event.</param>
+        public static void RequestScreenShot (FrameBuffer frameBuffer, string filePath) {
+            NativeMethods.bgfx_request_screen_shot(frameBuffer.handle, filePath);
         }
 
         /// <summary>

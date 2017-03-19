@@ -16,7 +16,19 @@ namespace SharpBgfx {
         /// Gets the result of the query.
         /// </summary>
         public OcclusionQueryResult Result {
-            get { return NativeMethods.bgfx_get_result(handle); }
+            get { return NativeMethods.bgfx_get_result(handle, null); }
+        }
+
+        /// <summary>
+        /// Gets the number of pixels that passed the test. Only valid
+        /// if <see cref="Result"/> is also valid.
+        /// </summary>
+        public int PassingPixels {
+            get {
+                int pixels = 0;
+                NativeMethods.bgfx_get_result(handle, &pixels);
+                return pixels;
+            }
         }
 
         OcclusionQuery (ushort handle) {
