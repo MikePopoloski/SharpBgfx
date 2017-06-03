@@ -518,7 +518,7 @@ namespace SharpBgfx {
         /// <summary>
         /// 11-11-10 color (float).
         /// </summary>
-        R11G11B10F,
+        RG11B10F,
 
         /// <summary>
         /// Unknown depth format.

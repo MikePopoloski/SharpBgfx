@@ -1,5 +1,5 @@
 Push-Location ../bgfx
-&../bx/tools/bin/windows/genie.exe --with-shared-lib --with-tools vs2017
+&../bx/tools/bin/windows/genie.exe --with-windows=10.0.14393.0 --with-shared-lib --with-tools vs2017
 
 & 'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\MSBuild.exe' .\.build\projects\vs2017\bgfx.sln /t:rebuild /p:configuration=Debug /p:platform=x64
 if ($LastExitCode -ne 0) {

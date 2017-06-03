@@ -653,19 +653,21 @@ namespace SharpBgfx {
         /// <summary>
         /// Sets the vertex buffer to use for drawing primitives.
         /// </summary>
+        /// <param name="stream">The index of the vertex stream to set.</param>
         /// <param name="vertexBuffer">The vertex buffer to set.</param>
-        public static void SetVertexBuffer (VertexBuffer vertexBuffer) {
-            NativeMethods.bgfx_set_vertex_buffer(vertexBuffer.handle, 0, -1);
+        public static void SetVertexBuffer (int stream, VertexBuffer vertexBuffer) {
+            NativeMethods.bgfx_set_vertex_buffer((byte)stream, vertexBuffer.handle, 0, -1);
         }
 
         /// <summary>
         /// Sets the vertex buffer to use for drawing primitives.
         /// </summary>
+        /// <param name="stream">The index of the vertex stream to set.</param>
         /// <param name="vertexBuffer">The vertex buffer to set.</param>
         /// <param name="firstVertex">The index of the first vertex to use.</param>
         /// <param name="count">The number of vertices to pull from the buffer.</param>
-        public static void SetVertexBuffer (VertexBuffer vertexBuffer, int firstVertex, int count) {
-            NativeMethods.bgfx_set_vertex_buffer(vertexBuffer.handle, firstVertex, count);
+        public static void SetVertexBuffer (int stream, VertexBuffer vertexBuffer, int firstVertex, int count) {
+            NativeMethods.bgfx_set_vertex_buffer((byte)stream, vertexBuffer.handle, firstVertex, count);
         }
 
         /// <summary>
@@ -689,19 +691,21 @@ namespace SharpBgfx {
         /// <summary>
         /// Sets the vertex buffer to use for drawing primitives.
         /// </summary>
+        /// <param name="stream">The index of the vertex stream to set.</param>
         /// <param name="vertexBuffer">The vertex buffer to set.</param>
-        public static void SetVertexBuffer (DynamicVertexBuffer vertexBuffer) {
-            NativeMethods.bgfx_set_dynamic_vertex_buffer(vertexBuffer.handle, 0, -1);
+        public static void SetVertexBuffer (int stream, DynamicVertexBuffer vertexBuffer) {
+            NativeMethods.bgfx_set_dynamic_vertex_buffer((byte)stream, vertexBuffer.handle, 0, -1);
         }
 
         /// <summary>
         /// Sets the vertex buffer to use for drawing primitives.
         /// </summary>
+        /// <param name="stream">The index of the vertex stream to set.</param>
         /// <param name="vertexBuffer">The vertex buffer to set.</param>
         /// <param name="startVertex">The index of the first vertex to use.</param>
         /// <param name="count">The number of vertices to pull from the buffer.</param>
-        public static void SetVertexBuffer (DynamicVertexBuffer vertexBuffer, int startVertex, int count) {
-            NativeMethods.bgfx_set_dynamic_vertex_buffer(vertexBuffer.handle, startVertex, count);
+        public static void SetVertexBuffer (int stream, DynamicVertexBuffer vertexBuffer, int startVertex, int count) {
+            NativeMethods.bgfx_set_dynamic_vertex_buffer((byte)stream, vertexBuffer.handle, startVertex, count);
         }
 
         /// <summary>
@@ -725,19 +729,21 @@ namespace SharpBgfx {
         /// <summary>
         /// Sets the vertex buffer to use for drawing primitives.
         /// </summary>
+        /// <param name="stream">The index of the vertex stream to set.</param>
         /// <param name="vertexBuffer">The vertex buffer to set.</param>
-        public static void SetVertexBuffer (TransientVertexBuffer vertexBuffer) {
-            NativeMethods.bgfx_set_transient_vertex_buffer(ref vertexBuffer, 0, -1);
+        public static void SetVertexBuffer (int stream, TransientVertexBuffer vertexBuffer) {
+            NativeMethods.bgfx_set_transient_vertex_buffer((byte)stream, ref vertexBuffer, 0, -1);
         }
 
         /// <summary>
         /// Sets the vertex buffer to use for drawing primitives.
         /// </summary>
+        /// <param name="stream">The index of the vertex stream to set.</param>
         /// <param name="vertexBuffer">The vertex buffer to set.</param>
         /// <param name="firstVertex">The index of the first vertex to use.</param>
         /// <param name="count">The number of vertices to pull from the buffer.</param>
-        public static void SetVertexBuffer (TransientVertexBuffer vertexBuffer, int firstVertex, int count) {
-            NativeMethods.bgfx_set_transient_vertex_buffer(ref vertexBuffer, firstVertex, count);
+        public static void SetVertexBuffer (int stream, TransientVertexBuffer vertexBuffer, int firstVertex, int count) {
+            NativeMethods.bgfx_set_transient_vertex_buffer((byte)stream, ref vertexBuffer, firstVertex, count);
         }
 
         /// <summary>
@@ -5921,7 +5927,7 @@ namespace SharpBgfx {
         /// <summary>
         /// 11-11-10 color (float).
         /// </summary>
-        R11G11B10F,
+        RG11B10F,
 
         /// <summary>
         /// Unknown depth format.
@@ -6584,10 +6590,10 @@ namespace SharpBgfx {
         public static extern void bgfx_set_dynamic_index_buffer (ushort handle, int firstIndex, int count);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_set_vertex_buffer (ushort handle, int startVertex, int count);
+        public static extern void bgfx_set_vertex_buffer (byte stream, ushort handle, int startVertex, int count);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_set_dynamic_vertex_buffer (ushort handle, int startVertex, int count);
+        public static extern void bgfx_set_dynamic_vertex_buffer (byte stream, ushort handle, int startVertex, int count);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_uniform (ushort handle, void* value, ushort arraySize);
@@ -6602,7 +6608,7 @@ namespace SharpBgfx {
         public static extern void bgfx_set_scissor_cached (ushort cache);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_set_transient_vertex_buffer (ref TransientVertexBuffer tvb, int startVertex, int numVertices);
+        public static extern void bgfx_set_transient_vertex_buffer (byte stream, ref TransientVertexBuffer tvb, int startVertex, int numVertices);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_transient_index_buffer (ref TransientIndexBuffer tib, int startIndex, int numIndices);

@@ -349,10 +349,10 @@ namespace SharpBgfx {
         public static extern void bgfx_set_dynamic_index_buffer (ushort handle, int firstIndex, int count);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_set_vertex_buffer (ushort handle, int startVertex, int count);
+        public static extern void bgfx_set_vertex_buffer (byte stream, ushort handle, int startVertex, int count);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_set_dynamic_vertex_buffer (ushort handle, int startVertex, int count);
+        public static extern void bgfx_set_dynamic_vertex_buffer (byte stream, ushort handle, int startVertex, int count);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_uniform (ushort handle, void* value, ushort arraySize);
@@ -367,7 +367,7 @@ namespace SharpBgfx {
         public static extern void bgfx_set_scissor_cached (ushort cache);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_set_transient_vertex_buffer (ref TransientVertexBuffer tvb, int startVertex, int numVertices);
+        public static extern void bgfx_set_transient_vertex_buffer (byte stream, ref TransientVertexBuffer tvb, int startVertex, int numVertices);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_transient_index_buffer (ref TransientIndexBuffer tib, int startIndex, int numIndices);

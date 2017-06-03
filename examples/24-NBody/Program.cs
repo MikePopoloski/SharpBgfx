@@ -139,7 +139,7 @@ static class Program {
             Bgfx.SetViewRect(0, 0, 0, sample.WindowWidth, sample.WindowHeight);
 
             // draw the particles
-            Bgfx.SetVertexBuffer(vb);
+            Bgfx.SetVertexBuffer(0, vb);
             Bgfx.SetIndexBuffer(ib);
             Bgfx.SetInstanceDataBuffer(currPositionBuffer0, 0, paramData.DispatchSize * ThreadGroupUpdateSize);
             Bgfx.SetRenderState(RenderState.ColorWrite | RenderState.BlendAdd | RenderState.DepthTestAlways);

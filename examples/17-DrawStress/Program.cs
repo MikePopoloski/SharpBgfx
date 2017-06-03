@@ -96,7 +96,7 @@ static class Program {
                         Bgfx.SetTransform(&transform.M11);
 
                         // set pipeline states
-                        Bgfx.SetVertexBuffer(vbh);
+                        Bgfx.SetVertexBuffer(0, vbh);
                         Bgfx.SetIndexBuffer(ibh);
                         Bgfx.SetRenderState(RenderState.Default);
 
