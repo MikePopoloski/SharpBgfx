@@ -74,7 +74,7 @@
         /// <returns><c>true</c> if the layout contains the attribute; otherwise, <c>false</c>.</returns>
         public unsafe bool HasAttribute (VertexAttributeUsage attribute) {
             fixed (Data* ptr = &data)
-                return ptr->Attributes[(int)attribute] != 0xff;
+                return ptr->Attributes[(int)attribute] != ushort.MaxValue;
         }
 
         internal unsafe struct Data {
