@@ -301,7 +301,7 @@ namespace SharpBgfx {
         public static extern void bgfx_set_palette_color (byte index, float* color);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_set_view_seq (byte id, [MarshalAs(UnmanagedType.U1)] bool enabled);
+        public static extern void bgfx_set_view_mode (byte id, ViewMode mode);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_view_transform (byte id, float* view, float* proj);

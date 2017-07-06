@@ -92,6 +92,16 @@ namespace SharpBgfx {
         Color1,
 
         /// <summary>
+        /// Third color channel.
+        /// </summary>
+        Color2,
+
+        /// <summary>
+        /// Fourth color channel.
+        /// </summary>
+        Color3,
+
+        /// <summary>
         /// Indices.
         /// </summary>
         Indices,
@@ -1579,5 +1589,30 @@ namespace SharpBgfx {
         /// Rendering is done; the program should exit.
         /// </summary>
         Exiting
+    }
+
+    /// <summary>
+    /// Specifies possible sorting modes for a view.
+    /// </summary>
+    public enum ViewMode {
+        /// <summary>
+        /// Default sorting method.
+        /// </summary>
+        Default,
+
+        /// <summary>
+        /// Do each draw in the order it is issued.
+        /// </summary>
+        Sequential,
+
+        /// <summary>
+        /// Sort each draw by depth, ascending.
+        /// </summary>
+        DepthAscending,
+
+        /// <summary>
+        /// Sort each draw by depth, descending.
+        /// </summary>
+        DepthDescending
     }
 }

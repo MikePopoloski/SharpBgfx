@@ -78,7 +78,7 @@
         }
 
         internal unsafe struct Data {
-            const int MaxAttribCount = 16;
+            const int MaxAttribCount = 18;
 
             public uint Hash;
             public ushort Stride;

@@ -206,12 +206,12 @@ namespace SharpBgfx {
         }
 
         /// <summary>
-		/// Initializes the graphics library on the specified adapter.
-		/// </summary>
-		/// <param name="backend">The backend API to use for rendering.</param>
+        /// Initializes the graphics library on the specified adapter.
+        /// </summary>
+        /// <param name="backend">The backend API to use for rendering.</param>
         /// <param name="adapter">The adapter on which to create the device.</param>
         /// <param name="callbackHandler">A set of handlers for various library callbacks.</param>
-		public static void Init (RendererBackend backend = RendererBackend.Default, Adapter adapter = default(Adapter), ICallbackHandler callbackHandler = null) {
+        public static void Init (RendererBackend backend = RendererBackend.Default, Adapter adapter = default(Adapter), ICallbackHandler callbackHandler = null) {
             NativeMethods.bgfx_init(
                 backend,
                 (ushort)adapter.Vendor,
@@ -455,12 +455,12 @@ namespace SharpBgfx {
         }
 
         /// <summary>
-        /// Enables or disables sequential mode for a view. Sequential mode issues draw calls in the order they are received.
+        /// Sets the sorting mode to use for the given view.
         /// </summary>
         /// <param name="id">The index of the view.</param>
-        /// <param name="enabled"><c>true</c> to enable sequential mode; otherwise, <c>false</c>.</param>
-        public static void SetViewSequential (byte id, bool enabled) {
-            NativeMethods.bgfx_set_view_seq(id, enabled);
+        /// <param name="mode">The sorting mode to use.</param>
+        public static void SetViewMode (byte id, ViewMode mode) {
+            NativeMethods.bgfx_set_view_mode(id, mode);
         }
 
         /// <summary>
