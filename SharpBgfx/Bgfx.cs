@@ -139,14 +139,19 @@ namespace SharpBgfx {
         /// <summary>
         /// Manually renders a frame. Use this to control the Bgfx render loop.
         /// </summary>
+        /// <param name="timeoutMs">
+        /// The amount of time to wait, in milliseconds, for the next frame to be rendered.
+        /// If the timeout is exceeded, the call
+        /// returns.
+        /// </param>
         /// <returns>The result of the render call.</returns>
         /// <remarks>
         /// Use this function if you don't want Bgfx to create and maintain a
         /// separate render thread. Call this once before <see cref="Bgfx.Init(RendererBackend, Adapter, ICallbackHandler)"/>
         /// to avoid having the thread created internally.
         /// </remarks>
-        public static RenderFrameResult ManuallyRenderFrame () {
-            return NativeMethods.bgfx_render_frame();
+        public static RenderFrameResult ManuallyRenderFrame (int timeoutMs = -1) {
+            return NativeMethods.bgfx_render_frame(timeoutMs);
         }
 
         /// <summary>

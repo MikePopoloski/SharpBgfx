@@ -248,14 +248,19 @@ namespace SharpBgfx {
         /// <summary>
         /// Manually renders a frame. Use this to control the Bgfx render loop.
         /// </summary>
+        /// <param name="timeoutMs">
+        /// The amount of time to wait, in milliseconds, for the next frame to be rendered.
+        /// If the timeout is exceeded, the call
+        /// returns.
+        /// </param>
         /// <returns>The result of the render call.</returns>
         /// <remarks>
         /// Use this function if you don't want Bgfx to create and maintain a
         /// separate render thread. Call this once before <see cref="Bgfx.Init(RendererBackend, Adapter, ICallbackHandler)"/>
         /// to avoid having the thread created internally.
         /// </remarks>
-        public static RenderFrameResult ManuallyRenderFrame () {
-            return NativeMethods.bgfx_render_frame();
+        public static RenderFrameResult ManuallyRenderFrame (int timeoutMs = -1) {
+            return NativeMethods.bgfx_render_frame(timeoutMs);
         }
 
         /// <summary>
@@ -6299,15 +6304,12 @@ namespace SharpBgfx {
         public static extern void bgfx_update_texture_cube (ushort handle, CubeMapFace side, ushort layer, byte mip, ushort x, ushort y, ushort width, ushort height, MemoryBlock.DataPtr* memory, ushort pitch);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        [return: MarshalAs(UnmanagedType.U1)]
         public static extern int bgfx_get_avail_transient_index_buffer (int num);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        [return: MarshalAs(UnmanagedType.U1)]
         public static extern int bgfx_get_avail_transient_vertex_buffer (int num, ref VertexLayout.Data decl);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        [return: MarshalAs(UnmanagedType.U1)]
         public static extern int bgfx_get_avail_instance_data_buffer (int num, ushort stride);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
@@ -6502,7 +6504,7 @@ namespace SharpBgfx {
         public static extern InternalData* bgfx_get_internal_data ();
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern RenderFrameResult bgfx_render_frame ();
+        public static extern RenderFrameResult bgfx_render_frame (int timeoutMs);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr bgfx_override_internal_texture_ptr (ushort handle, IntPtr ptr);
