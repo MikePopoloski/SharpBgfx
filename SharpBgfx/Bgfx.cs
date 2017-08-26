@@ -860,7 +860,7 @@ namespace SharpBgfx {
         public static void Dispatch (byte id, Program program, int xCount = 1, int yCount = 1, int zCount = 1) {
             // TODO: unused
             byte unused = 0;
-            NativeMethods.bgfx_dispatch(id, program.handle, (ushort)xCount, (ushort)yCount, (ushort)zCount, unused);
+            NativeMethods.bgfx_dispatch(id, program.handle, (uint)xCount, (uint)yCount, (uint)zCount, unused);
         }
 
         /// <summary>

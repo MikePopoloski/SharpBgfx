@@ -727,7 +727,12 @@ namespace SharpBgfx {
         /// <summary>
         /// Display debug text.
         /// </summary>
-        DisplayText = 0x8
+        DisplayText = 0x8,
+
+        /// <summary>
+        /// Enable the internal library performance profiler.
+        /// </summary>
+        Profiler = 0x10
     }
 
     /// <summary>
@@ -1387,12 +1392,12 @@ namespace SharpBgfx {
         /// <summary>
         /// Specifies the type of data in a compute buffer as being unsigned integers.
         /// </summary>
-        ComputeTypeUInt = 0x10,
+        ComputeTypeInt = 0x10,
 
         /// <summary>
         /// Specifies the type of data in a compute buffer as being signed integers.
         /// </summary>
-        ComputeTypeInt = 0x20,
+        ComputeTypeUInt = 0x20,
 
         /// <summary>
         /// Specifies the type of data in a compute buffer as being floating point values.

@@ -45,7 +45,7 @@ namespace SharpBgfx {
         public static extern InstanceDataBuffer.NativeStruct* bgfx_alloc_instance_data_buffer (int num, ushort stride);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int bgfx_dispatch (byte id, ushort program, ushort numX, ushort numY, ushort numZ, byte flags);
+        public static extern int bgfx_dispatch (byte id, ushort program, uint numX, uint numY, uint numZ, byte flags);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int bgfx_dispatch_indirect (byte id, ushort program, ushort indirectHandle, ushort start, ushort num, byte flags);

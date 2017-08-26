@@ -488,11 +488,152 @@ namespace SharpBgfx {
             get { return data->TextHeight; }
         }
 
+        /// <summary>
+        /// Gets a collection of statistics for each rendering view.
+        /// </summary>
+        public ViewStatsCollection Views {
+            get { return new ViewStatsCollection((ViewStatsNative*)(data + 1), data->NumViews); }
+        }
+
         internal PerfStats (Stats* data) {
             this.data = data;
         }
 
+        /// <summary>
+        /// Contains perf metrics for a single rendering view.
+        /// </summary>
+        public struct ViewStats {
+            ViewStatsNative* data;
+
+            /// <summary>
+            /// The name of the view.
+            /// </summary>
+            public string Name {
+                get { return new string(data->Name); }
+            }
+
+            /// <summary>
+            /// The amount of CPU time elapsed during processing of this view.
+            /// </summary>
+            public long CpuTimeElapsed {
+                get { return (long)data->CpuTimeElapsed; }
+            }
+
+            /// <summary>
+            /// The amount of GPU time elapsed during processing of this view.
+            /// </summary>
+            public long GpuTimeElapsed {
+                get { return (long)data->GpuTimeElapsed; }
+            }
+
+            internal ViewStats(ViewStatsNative* data) {
+                this.data = data;
+            }
+        }
+
+        /// <summary>
+        /// Provides access to a collection of view statistics.
+        /// </summary>
+        public struct ViewStatsCollection : IReadOnlyList<ViewStats> {
+            ViewStatsNative* data;
+            int count;
+
+            /// <summary>
+            /// Accesses the element at the specified index.
+            /// </summary>
+            /// <param name="index">The index of the element to retrieve.</param>
+            /// <returns>The element at the given index.</returns>
+            public ViewStats this[int index] {
+                get { return new ViewStats(data + index); }
+            }
+
+            /// <summary>
+            /// The number of elements in the collection.
+            /// </summary>
+            public int Count {
+                get { return count; }
+            }
+
+            internal ViewStatsCollection(ViewStatsNative* data, int count) {
+                this.data = data;
+                this.count = count;
+            }
+
+            /// <summary>
+            /// Gets an enumerator for the collection.
+            /// </summary>
+            /// <returns>A collection enumerator.</returns>
+            public Enumerator GetEnumerator() {
+                return new Enumerator(this);
+            }
+
+            IEnumerator<ViewStats> IEnumerable<ViewStats>.GetEnumerator() {
+                return GetEnumerator();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator() {
+                return GetEnumerator();
+            }
+
+            /// <summary>
+            /// Implements an enumerator for an AdapterCollection.
+            /// </summary>
+            public struct Enumerator : IEnumerator<ViewStats> {
+                ViewStatsCollection collection;
+                int index;
+
+                /// <summary>
+                /// The current enumerated item.
+                /// </summary>
+                public ViewStats Current {
+                    get { return collection[index]; }
+                }
+
+                object IEnumerator.Current {
+                    get { return Current; }
+                }
+
+                internal Enumerator(ViewStatsCollection collection) {
+                    this.collection = collection;
+                    index = -1;
+                }
+
+                /// <summary>
+                /// Advances to the next item in the sequence.
+                /// </summary>
+                /// <returns><c>true</c> if there are more items in the collection; otherwise, <c>false</c>.</returns>
+                public bool MoveNext() {
+                    var newIndex = index + 1;
+                    if (newIndex >= collection.Count)
+                        return false;
+
+                    index = newIndex;
+                    return true;
+                }
+
+                /// <summary>
+                /// Empty; does nothing.
+                /// </summary>
+                public void Dispose() {
+                }
+
+                /// <summary>
+                /// Not implemented.
+                /// </summary>
+                public void Reset() {
+                    throw new NotImplementedException();
+                }
+            }
+        }
+
 #pragma warning disable 649
+        internal struct ViewStatsNative {
+            public fixed char Name[256];
+            public byte View;
+            public ulong CpuTimeElapsed;
+            public ulong GpuTimeElapsed;
+        }
+
         internal struct Stats {
             public long CpuTimeBegin;
             public long CpuTimeEnd;
@@ -509,6 +650,7 @@ namespace SharpBgfx {
             public ushort Height;
             public ushort TextWidth;
             public ushort TextHeight;
+            public ushort NumViews;
         }
 #pragma warning restore 649
     }

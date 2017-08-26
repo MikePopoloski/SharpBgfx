@@ -35,5 +35,6 @@ _ReSharper*/
 *.vspx
 *.opendb
 packages/*
+.vs/*
 
 !/examples/Assets/Shaders/bin
