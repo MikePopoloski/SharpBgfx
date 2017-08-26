@@ -1,27 +1,26 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26228.9
+VisualStudioVersion = 15.0.26730.10
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpBgfx", "SharpBgfx\SharpBgfx.csproj", "{949721DA-4C0A-450F-9BB7-BC98EA5C3647}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpBgfx", "SharpBgfx\SharpBgfx.csproj", "{949721DA-4C0A-450F-9BB7-BC98EA5C3647}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{12451E4D-7EBC-4B36-B21F-57399B802017}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "examples\Common\Common.csproj", "{6DE50108-D6FA-437F-940A-578685E057E4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "examples\Common\Common.csproj", "{6DE50108-D6FA-437F-940A-578685E057E4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "00-HelloWorld", "examples\00-HelloWorld\00-HelloWorld.csproj", "{F8B7A9BA-00C8-434E-B53A-8BC15CC9AD70}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "00-HelloWorld", "examples\00-HelloWorld\00-HelloWorld.csproj", "{F8B7A9BA-00C8-434E-B53A-8BC15CC9AD70}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "01-Cubes", "examples\01-Cubes\01-Cubes.csproj", "{6C9D8313-50EA-4AEF-BA88-51505F9286A2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "01-Cubes", "examples\01-Cubes\01-Cubes.csproj", "{6C9D8313-50EA-4AEF-BA88-51505F9286A2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "07-Callback", "examples\07-Callback\07-Callback.csproj", "{8FA7B598-AB3F-4BCF-B805-1CA2C4F4AADD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "07-Callback", "examples\07-Callback\07-Callback.csproj", "{8FA7B598-AB3F-4BCF-B805-1CA2C4F4AADD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "13-Stencil", "examples\13-Stencil\13-Stencil.csproj", "{E350D2B2-BDBD-4276-806E-E0AB9E91DA54}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "13-Stencil", "examples\13-Stencil\13-Stencil.csproj", "{E350D2B2-BDBD-4276-806E-E0AB9E91DA54}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "17-DrawStress", "examples\17-DrawStress\17-DrawStress.csproj", "{D3DAFA4B-82BA-476A-8A03-ADAF6AA6D13A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "17-DrawStress", "examples\17-DrawStress\17-DrawStress.csproj", "{D3DAFA4B-82BA-476A-8A03-ADAF6AA6D13A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "24-NBody", "examples\24-NBody\24-NBody.csproj", "{BF3AAFC1-0027-454E-BEAD-D04FD3A70C79}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "24-NBody", "examples\24-NBody\24-NBody.csproj", "{BF3AAFC1-0027-454E-BEAD-D04FD3A70C79}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "05-Instancing", "examples\05-Instancing\05-Instancing.csproj", "{A4718139-62E0-4FBF-8039-C18054CD19BC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "05-Instancing", "examples\05-Instancing\05-Instancing.csproj", "{A4718139-62E0-4FBF-8039-C18054CD19BC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -131,16 +130,16 @@ Global
 		{BF3AAFC1-0027-454E-BEAD-D04FD3A70C79}.Release|x86.Build.0 = Release|Any CPU
 		{A4718139-62E0-4FBF-8039-C18054CD19BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A4718139-62E0-4FBF-8039-C18054CD19BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A4718139-62E0-4FBF-8039-C18054CD19BC}.Debug|x64.ActiveCfg = Debug|x64
-		{A4718139-62E0-4FBF-8039-C18054CD19BC}.Debug|x64.Build.0 = Debug|x64
-		{A4718139-62E0-4FBF-8039-C18054CD19BC}.Debug|x86.ActiveCfg = Debug|x86
-		{A4718139-62E0-4FBF-8039-C18054CD19BC}.Debug|x86.Build.0 = Debug|x86
+		{A4718139-62E0-4FBF-8039-C18054CD19BC}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A4718139-62E0-4FBF-8039-C18054CD19BC}.Debug|x64.Build.0 = Debug|Any CPU
+		{A4718139-62E0-4FBF-8039-C18054CD19BC}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A4718139-62E0-4FBF-8039-C18054CD19BC}.Debug|x86.Build.0 = Debug|Any CPU
 		{A4718139-62E0-4FBF-8039-C18054CD19BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A4718139-62E0-4FBF-8039-C18054CD19BC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A4718139-62E0-4FBF-8039-C18054CD19BC}.Release|x64.ActiveCfg = Release|x64
-		{A4718139-62E0-4FBF-8039-C18054CD19BC}.Release|x64.Build.0 = Release|x64
-		{A4718139-62E0-4FBF-8039-C18054CD19BC}.Release|x86.ActiveCfg = Release|x86
-		{A4718139-62E0-4FBF-8039-C18054CD19BC}.Release|x86.Build.0 = Release|x86
+		{A4718139-62E0-4FBF-8039-C18054CD19BC}.Release|x64.ActiveCfg = Release|Any CPU
+		{A4718139-62E0-4FBF-8039-C18054CD19BC}.Release|x64.Build.0 = Release|Any CPU
+		{A4718139-62E0-4FBF-8039-C18054CD19BC}.Release|x86.ActiveCfg = Release|Any CPU
+		{A4718139-62E0-4FBF-8039-C18054CD19BC}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -154,5 +153,8 @@ Global
 		{D3DAFA4B-82BA-476A-8A03-ADAF6AA6D13A} = {12451E4D-7EBC-4B36-B21F-57399B802017}
 		{BF3AAFC1-0027-454E-BEAD-D04FD3A70C79} = {12451E4D-7EBC-4B36-B21F-57399B802017}
 		{A4718139-62E0-4FBF-8039-C18054CD19BC} = {12451E4D-7EBC-4B36-B21F-57399B802017}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0E3D8A38-0584-46B5-B22A-C00B9F06E3E3}
 	EndGlobalSection
 EndGlobal
