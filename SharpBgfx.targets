@@ -1,0 +1,29 @@
+<Project>
+  <PropertyGroup>
+    <ShaderCPath>$(MSBuildThisFileDirectory)tools\shaderc.exe</ShaderCPath>
+    <ShaderIncludeDir>$(MSBuildThisFileDirectory)examples\Assets\Shaders</ShaderIncludeDir>
+  </PropertyGroup>
+
+  <Target Name="CompileShaders" AfterTargets="AfterBuild">
+    <ItemGroup>
+      <VertexShaders Condition=" '@(VertexShaders)' == '' " Include="vs_*.sc" />
+      <FragmentShaders Condition=" '@(FragmentShaders)' == '' " Include="fs_*.sc" />
+    </ItemGroup>
+
+    <PropertyGroup>
+      <ShaderOutputDir>$(TargetDir)bin\dx11\</ShaderOutputDir>
+    </PropertyGroup>
+
+    <MakeDir Directories="$(ShaderOutputDir)" />
+    <Exec Command="$(ShaderCPath) --platform windows --type vertex -p vs_4_0 -O 3 -f &quot;@(VertexShaders)&quot; -o &quot;$(ShaderOutputDir)%(VertexShaders.Filename).bin&quot; -i &quot;$(ShaderIncludeDir)&quot;" />
+    <Exec Command="$(ShaderCPath) --platform windows --type fragment -p ps_4_0 -O 3 -f &quot;@(FragmentShaders)&quot; -o &quot;$(ShaderOutputDir)%(FragmentShaders.Filename).bin&quot; -i &quot;$(ShaderIncludeDir)&quot;" />
+
+    <PropertyGroup>
+      <ShaderOutputDir>$(TargetDir)bin\glsl\</ShaderOutputDir>
+    </PropertyGroup>
+
+    <MakeDir Directories="$(ShaderOutputDir)" />
+    <Exec Command="$(ShaderCPath) --platform linux --type vertex -p 120 -f &quot;@(VertexShaders)&quot; -o &quot;$(ShaderOutputDir)%(VertexShaders.Filename).bin&quot; -i &quot;$(ShaderIncludeDir)&quot;" />
+    <Exec Command="$(ShaderCPath) --platform linux --type fragment -p 120 -f &quot;@(FragmentShaders)&quot; -o &quot;$(ShaderOutputDir)%(FragmentShaders.Filename).bin&quot; -i &quot;$(ShaderIncludeDir)&quot;" />
+  </Target>
+</Project>

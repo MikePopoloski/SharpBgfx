@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -10,13 +11,15 @@ namespace Common {
         static readonly string RootPath = "../Assets/";
 
         static string GetShaderPath() {
+            var basePath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+
             switch (Bgfx.GetCurrentBackend()) {
                 case RendererBackend.Direct3D11:
                 case RendererBackend.Direct3D12:
-                    return Path.Combine(RootPath, "Shaders/bin/dx11/");
+                    return Path.Combine(basePath, "bin", "dx11");
 
                 case RendererBackend.OpenGL:
-                    return Path.Combine(RootPath, "Shaders/bin/glsl/");
+                    return Path.Combine(basePath, "bin", "glsl");
 
                 case RendererBackend.OpenGLES:
                     return Path.Combine(RootPath, "Shaders/bin/gles/");
