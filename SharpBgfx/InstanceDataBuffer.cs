@@ -5,7 +5,7 @@ namespace SharpBgfx {
     /// Maintains a data buffer that contains instancing data.
     /// </summary>
     public unsafe struct InstanceDataBuffer : IEquatable<InstanceDataBuffer> {
-        internal readonly NativeStruct* ptr;
+        internal NativeStruct data;
 
         /// <summary>
         /// Represents an invalid handle.
@@ -15,12 +15,12 @@ namespace SharpBgfx {
         /// <summary>
         /// A pointer that can be filled with instance data.
         /// </summary>
-        public IntPtr Data { get { return ptr->data; } }
+        public IntPtr Data { get { return data.data; } }
 
         /// <summary>
         /// The size of the data buffer.
         /// </summary>
-        public int Size { get { return ptr->size; } }
+        public int Size { get { return data.size; } }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InstanceDataBuffer" /> struct.
@@ -28,7 +28,7 @@ namespace SharpBgfx {
         /// <param name="count">The number of elements in the buffer.</param>
         /// <param name="stride">The stride of each element.</param>
         public InstanceDataBuffer (int count, int stride) {
-            ptr = NativeMethods.bgfx_alloc_instance_data_buffer(count, (ushort)stride);
+            NativeMethods.bgfx_alloc_instance_data_buffer(out data, count, (ushort)stride);
         }
 
         /// <summary>
@@ -47,7 +47,9 @@ namespace SharpBgfx {
         /// <param name="other">The object to compare with this instance.</param>
         /// <returns><c>true</c> if the specified object is equal to this instance; otherwise, <c>false</c>.</returns>
         public bool Equals (InstanceDataBuffer other) {
-            return ptr == other.ptr;
+            return data.data == other.data.data &&
+                   data.offset == other.data.offset &&
+                   data.size == other.data.size;
         }
 
         /// <summary>
@@ -72,7 +74,7 @@ namespace SharpBgfx {
         /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
         /// </returns>
         public override int GetHashCode () {
-            return new IntPtr(ptr).GetHashCode();
+            return (data.data.GetHashCode() ^ data.offset) >> 13 ^ data.size;
         }
 
         /// <summary>

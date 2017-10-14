@@ -31,6 +31,20 @@ namespace SharpBgfx {
         void ReportDebug (string fileName, int line, string format, IntPtr args);
 
         /// <summary>
+        /// Called when a profiling region is entered.
+        /// </summary>
+        /// <param name="name">The name of the region.</param>
+        /// <param name="color">The color of the region.</param>
+        /// <param name="filePath">The path of the source file containing the region.</param>
+        /// <param name="line">The line number on which the region was started.</param>
+        void ProfilerBegin (string name, int color, string filePath, int line);
+
+        /// <summary>
+        /// Called when a profiling region is ended.
+        /// </summary>
+        void ProfilerEnd ();
+
+        /// <summary>
         /// Queries the size of a cache item.
         /// </summary>
         /// <param name="id">The cache entry ID.</param>
@@ -89,10 +103,13 @@ namespace SharpBgfx {
         void CaptureFrame (IntPtr data, int size);
     }
 
-    struct CallbackShim {
+    unsafe struct CallbackShim {
         IntPtr vtbl;
         IntPtr reportError;
         IntPtr reportDebug;
+        IntPtr profilerBegin;
+        IntPtr profilerBeginLiteral;
+        IntPtr profilerEnd;
         IntPtr getCachedSize;
         IntPtr getCacheEntry;
         IntPtr setCacheEntry;
@@ -140,6 +157,14 @@ namespace SharpBgfx {
         delegate void ReportDebugHandler (IntPtr thisPtr, string fileName, ushort line, string format, IntPtr args);
 
         [SuppressUnmanagedCodeSecurity]
+        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        delegate void ProfilerBeginHandler (IntPtr thisPtr, sbyte* name, int abgr, sbyte* filePath, ushort line);
+
+        [SuppressUnmanagedCodeSecurity]
+        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+        delegate void ProfilerEndHandler (IntPtr thisPtr);
+
+        [SuppressUnmanagedCodeSecurity]
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         delegate int GetCachedSizeHandler (IntPtr thisPtr, long id);
 
@@ -175,6 +200,9 @@ namespace SharpBgfx {
             ICallbackHandler handler;
             ReportErrorHandler reportError;
             ReportDebugHandler reportDebug;
+            ProfilerBeginHandler profilerBegin;
+            ProfilerBeginHandler profilerBeginLiteral;
+            ProfilerEndHandler profilerEnd;
             GetCachedSizeHandler getCachedSize;
             GetCacheEntryHandler getCacheEntry;
             SetCacheEntryHandler setCacheEntry;
@@ -187,6 +215,9 @@ namespace SharpBgfx {
                 this.handler = handler;
                 reportError = ReportError;
                 reportDebug = ReportDebug;
+                profilerBegin = ProfilerBegin;
+                profilerBeginLiteral = ProfilerBegin;
+                profilerEnd = ProfilerEnd;
                 getCachedSize = GetCachedSize;
                 getCacheEntry = GetCacheEntry;
                 setCacheEntry = SetCacheEntry;
@@ -197,6 +228,9 @@ namespace SharpBgfx {
 
                 shim->reportError = Marshal.GetFunctionPointerForDelegate(reportError);
                 shim->reportDebug = Marshal.GetFunctionPointerForDelegate(reportDebug);
+                shim->profilerBegin = Marshal.GetFunctionPointerForDelegate(profilerBegin);
+                shim->profilerBeginLiteral = Marshal.GetFunctionPointerForDelegate(profilerBeginLiteral);
+                shim->profilerEnd = Marshal.GetFunctionPointerForDelegate(profilerEnd);
                 shim->getCachedSize = Marshal.GetFunctionPointerForDelegate(getCachedSize);
                 shim->getCacheEntry = Marshal.GetFunctionPointerForDelegate(getCacheEntry);
                 shim->setCacheEntry = Marshal.GetFunctionPointerForDelegate(setCacheEntry);
@@ -212,6 +246,14 @@ namespace SharpBgfx {
 
             void ReportDebug (IntPtr thisPtr, string fileName, ushort line, string format, IntPtr args) {
                 handler.ReportDebug(fileName, line, format, args);
+            }
+
+            void ProfilerBegin (IntPtr thisPtr, sbyte* name, int color, sbyte* filePath, ushort line) {
+                handler.ProfilerBegin(new string(name), color, new string(filePath), line);
+            }
+
+            void ProfilerEnd (IntPtr thisPtr) {
+                handler.ProfilerEnd();
             }
 
             int GetCachedSize (IntPtr thisPtr, long id) {

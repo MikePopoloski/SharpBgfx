@@ -101,6 +101,12 @@ class CallbackHandler : ICallbackHandler {
         aviWriter = null;
     }
 
+    public void ProfilerBegin (string name, int color, string filePath, int line) {
+    }
+
+    public void ProfilerEnd () {
+    }
+
     static FileInfo GetCacheFile (long id) {
         // we use the cache id as the filename, and just dump in the current directory
         return new FileInfo(id.ToString("x"));

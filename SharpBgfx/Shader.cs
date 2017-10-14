@@ -46,6 +46,14 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// Sets the name of the shader, for debug display purposes.
+        /// </summary>
+        /// <param name="name">The name of the shader.</param>
+        public void SetName(string name) {
+            NativeMethods.bgfx_set_shader_name(handle, name);
+        }
+
+        /// <summary>
         /// Determines whether the specified object is equal to this instance.
         /// </summary>
         /// <param name="other">The object to compare with this instance.</param>

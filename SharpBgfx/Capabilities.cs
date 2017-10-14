@@ -370,6 +370,13 @@ namespace SharpBgfx {
         Stats* data;
 
         /// <summary>
+        /// CPU time between two <see cref="Bgfx.Frame"/> calls.
+        /// </summary>
+        public long CpuTimeFrame {
+            get { return data->CpuTimeFrame; }
+        }
+
+        /// <summary>
         /// CPU frame start time.
         /// </summary>
         public long CpuTimeStart {
@@ -458,6 +465,20 @@ namespace SharpBgfx {
         /// </summary>
         public int MaxGpuLatency {
             get { return data->MaxGpuLatency; }
+        }
+
+        /// <summary>
+        /// Maximum available GPU memory.
+        /// </summary>
+        public long MaxGpuMemory {
+            get { return data->GpuMemoryMax; }
+        }
+
+        /// <summary>
+        /// The amount of GPU memory currently in use.
+        /// </summary>
+        public long GpuMemoryUsed {
+            get { return data->GpuMemoryUsed; }
         }
 
         /// <summary>
@@ -635,6 +656,7 @@ namespace SharpBgfx {
         }
 
         internal struct Stats {
+            public long CpuTimeFrame;
             public long CpuTimeBegin;
             public long CpuTimeEnd;
             public long CpuTimerFrequency;
@@ -646,6 +668,8 @@ namespace SharpBgfx {
             public int NumDraw;
             public int NumCompute;
             public int MaxGpuLatency;
+            public long GpuMemoryMax;
+            public long GpuMemoryUsed;
             public ushort Width;
             public ushort Height;
             public ushort TextWidth;

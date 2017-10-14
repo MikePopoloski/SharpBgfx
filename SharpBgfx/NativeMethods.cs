@@ -36,7 +36,7 @@ namespace SharpBgfx {
         public static extern bool bgfx_alloc_transient_buffers (out TransientVertexBuffer tvb, ref VertexLayout.Data decl, ushort numVertices, out TransientIndexBuffer tib, ushort numIndices);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern InstanceDataBuffer.NativeStruct* bgfx_alloc_instance_data_buffer (int num, ushort stride);
+        public static extern void bgfx_alloc_instance_data_buffer (out InstanceDataBuffer.NativeStruct ptr, int num, ushort stride);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int bgfx_dispatch (byte id, ushort program, uint numX, uint numY, uint numZ, byte flags);
@@ -141,6 +141,9 @@ namespace SharpBgfx {
         public static extern ushort bgfx_create_texture_cube (ushort size, [MarshalAs(UnmanagedType.U1)] bool hasMips, ushort numLayers, TextureFormat format, TextureFlags flags, MemoryBlock.DataPtr* mem);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_set_texture_name(ushort handle, [MarshalAs(UnmanagedType.LPStr)] string name);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_destroy_texture (ushort handle);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
@@ -155,6 +158,9 @@ namespace SharpBgfx {
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern ushort bgfx_get_shader_uniforms (ushort handle, Uniform[] uniforms, ushort max);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_set_shader_name(ushort handle, [MarshalAs(UnmanagedType.LPStr)] string name);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_destroy_shader (ushort handle);
@@ -364,7 +370,7 @@ namespace SharpBgfx {
         public static extern void bgfx_set_transient_index_buffer (ref TransientIndexBuffer tib, int startIndex, int numIndices);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_set_instance_data_buffer (InstanceDataBuffer.NativeStruct* idb, ushort num);
+        public static extern void bgfx_set_instance_data_buffer (ref InstanceDataBuffer.NativeStruct idb, ushort num);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_instance_data_from_vertex_buffer (ushort handle, int startVertex, int count);

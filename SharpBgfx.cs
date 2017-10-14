@@ -56,6 +56,20 @@ namespace SharpBgfx {
         void ReportDebug (string fileName, int line, string format, IntPtr args);
 
         /// <summary>
+        /// Called when a profiling region is entered.
+        /// </summary>
+        /// <param name="name">The name of the region.</param>
+        /// <param name="color">The color of the region.</param>
+        /// <param name="filePath">The path of the source file containing the region.</param>
+        /// <param name="line">The line number on which the region was started.</param>
+        void ProfilerBegin (string name, int color, string filePath, int line);
+
+        /// <summary>
+        /// Called when a profiling region is ended.
+        /// </summary>
+        void ProfilerEnd ();
+
+        /// <summary>
         /// Queries the size of a cache item.
         /// </summary>
         /// <param name="id">The cache entry ID.</param>
@@ -756,8 +770,8 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="instanceData">The instance data.</param>
         /// <param name="count">The number of entries to pull from the buffer.</param>
-        public static void SetInstanceDataBuffer (InstanceDataBuffer instanceData, int count = -1) {
-            NativeMethods.bgfx_set_instance_data_buffer(instanceData.ptr, (ushort)count);
+        public static void SetInstanceDataBuffer (ref InstanceDataBuffer instanceData, int count = -1) {
+            NativeMethods.bgfx_set_instance_data_buffer(ref instanceData.data, (ushort)count);
         }
 
         /// <summary>
@@ -1038,6 +1052,8 @@ namespace SharpBgfx {
         }
 
         class DefaultCallbackHandler : ICallbackHandler {
+            public void ProfilerBegin (string name, int color, string filePath, int line) {}
+            public void ProfilerEnd () {}
             public void CaptureStarted(int width, int height, int pitch, TextureFormat format, bool flipVertical) {}
             public void CaptureFrame(IntPtr data, int size) {}
             public void CaptureFinished() {}
@@ -1248,6 +1264,14 @@ namespace SharpBgfx {
         /// </summary>
         public void Dispose () {
             NativeMethods.bgfx_destroy_texture(handle);
+        }
+
+        /// <summary>
+        /// Sets the name of the texture, for debug display purposes.
+        /// </summary>
+        /// <param name="name">The name of the texture.</param>
+        public void SetName(string name) {
+            NativeMethods.bgfx_set_texture_name(handle, name);
         }
 
         /// <summary>
@@ -2528,7 +2552,7 @@ namespace SharpBgfx {
     /// Maintains a data buffer that contains instancing data.
     /// </summary>
     public unsafe struct InstanceDataBuffer : IEquatable<InstanceDataBuffer> {
-        internal readonly NativeStruct* ptr;
+        internal NativeStruct data;
 
         /// <summary>
         /// Represents an invalid handle.
@@ -2538,12 +2562,12 @@ namespace SharpBgfx {
         /// <summary>
         /// A pointer that can be filled with instance data.
         /// </summary>
-        public IntPtr Data { get { return ptr->data; } }
+        public IntPtr Data { get { return data.data; } }
 
         /// <summary>
         /// The size of the data buffer.
         /// </summary>
-        public int Size { get { return ptr->size; } }
+        public int Size { get { return data.size; } }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InstanceDataBuffer" /> struct.
@@ -2551,7 +2575,7 @@ namespace SharpBgfx {
         /// <param name="count">The number of elements in the buffer.</param>
         /// <param name="stride">The stride of each element.</param>
         public InstanceDataBuffer (int count, int stride) {
-            ptr = NativeMethods.bgfx_alloc_instance_data_buffer(count, (ushort)stride);
+            NativeMethods.bgfx_alloc_instance_data_buffer(out data, count, (ushort)stride);
         }
 
         /// <summary>
@@ -2570,7 +2594,9 @@ namespace SharpBgfx {
         /// <param name="other">The object to compare with this instance.</param>
         /// <returns><c>true</c> if the specified object is equal to this instance; otherwise, <c>false</c>.</returns>
         public bool Equals (InstanceDataBuffer other) {
-            return ptr == other.ptr;
+            return data.data == other.data.data &&
+                   data.offset == other.data.offset &&
+                   data.size == other.data.size;
         }
 
         /// <summary>
@@ -2595,7 +2621,7 @@ namespace SharpBgfx {
         /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
         /// </returns>
         public override int GetHashCode () {
-            return new IntPtr(ptr).GetHashCode();
+            return (data.data.GetHashCode() ^ data.offset) >> 13 ^ data.size;
         }
 
         /// <summary>
@@ -2970,6 +2996,13 @@ namespace SharpBgfx {
         Stats* data;
 
         /// <summary>
+        /// CPU time between two <see cref="Bgfx.Frame"/> calls.
+        /// </summary>
+        public long CpuTimeFrame {
+            get { return data->CpuTimeFrame; }
+        }
+
+        /// <summary>
         /// CPU frame start time.
         /// </summary>
         public long CpuTimeStart {
@@ -3058,6 +3091,20 @@ namespace SharpBgfx {
         /// </summary>
         public int MaxGpuLatency {
             get { return data->MaxGpuLatency; }
+        }
+
+        /// <summary>
+        /// Maximum available GPU memory.
+        /// </summary>
+        public long MaxGpuMemory {
+            get { return data->GpuMemoryMax; }
+        }
+
+        /// <summary>
+        /// The amount of GPU memory currently in use.
+        /// </summary>
+        public long GpuMemoryUsed {
+            get { return data->GpuMemoryUsed; }
         }
 
         /// <summary>
@@ -3235,6 +3282,7 @@ namespace SharpBgfx {
         }
 
         internal struct Stats {
+            public long CpuTimeFrame;
             public long CpuTimeBegin;
             public long CpuTimeEnd;
             public long CpuTimerFrequency;
@@ -3246,6 +3294,8 @@ namespace SharpBgfx {
             public int NumDraw;
             public int NumCompute;
             public int MaxGpuLatency;
+            public long GpuMemoryMax;
+            public long GpuMemoryUsed;
             public ushort Width;
             public ushort Height;
             public ushort TextWidth;
@@ -3921,6 +3971,14 @@ namespace SharpBgfx {
         /// </summary>
         public void Dispose () {
             NativeMethods.bgfx_destroy_shader(handle);
+        }
+
+        /// <summary>
+        /// Sets the name of the shader, for debug display purposes.
+        /// </summary>
+        /// <param name="name">The name of the shader.</param>
+        public void SetName(string name) {
+            NativeMethods.bgfx_set_shader_name(handle, name);
         }
 
         /// <summary>
@@ -6470,7 +6528,7 @@ namespace SharpBgfx {
         public static extern bool bgfx_alloc_transient_buffers (out TransientVertexBuffer tvb, ref VertexLayout.Data decl, ushort numVertices, out TransientIndexBuffer tib, ushort numIndices);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern InstanceDataBuffer.NativeStruct* bgfx_alloc_instance_data_buffer (int num, ushort stride);
+        public static extern void bgfx_alloc_instance_data_buffer (out InstanceDataBuffer.NativeStruct ptr, int num, ushort stride);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int bgfx_dispatch (byte id, ushort program, uint numX, uint numY, uint numZ, byte flags);
@@ -6575,6 +6633,9 @@ namespace SharpBgfx {
         public static extern ushort bgfx_create_texture_cube (ushort size, [MarshalAs(UnmanagedType.U1)] bool hasMips, ushort numLayers, TextureFormat format, TextureFlags flags, MemoryBlock.DataPtr* mem);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_set_texture_name(ushort handle, [MarshalAs(UnmanagedType.LPStr)] string name);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_destroy_texture (ushort handle);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
@@ -6589,6 +6650,9 @@ namespace SharpBgfx {
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern ushort bgfx_get_shader_uniforms (ushort handle, Uniform[] uniforms, ushort max);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_set_shader_name(ushort handle, [MarshalAs(UnmanagedType.LPStr)] string name);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_destroy_shader (ushort handle);
@@ -6798,7 +6862,7 @@ namespace SharpBgfx {
         public static extern void bgfx_set_transient_index_buffer (ref TransientIndexBuffer tib, int startIndex, int numIndices);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_set_instance_data_buffer (InstanceDataBuffer.NativeStruct* idb, ushort num);
+        public static extern void bgfx_set_instance_data_buffer (ref InstanceDataBuffer.NativeStruct idb, ushort num);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_instance_data_from_vertex_buffer (ushort handle, int startVertex, int count);
@@ -6843,10 +6907,13 @@ namespace SharpBgfx {
 #endif
     }
 
-    struct CallbackShim {
+    unsafe struct CallbackShim {
         IntPtr vtbl;
         IntPtr reportError;
         IntPtr reportDebug;
+        IntPtr profilerBegin;
+        IntPtr profilerBeginLiteral;
+        IntPtr profilerEnd;
         IntPtr getCachedSize;
         IntPtr getCacheEntry;
         IntPtr setCacheEntry;
@@ -6894,6 +6961,14 @@ namespace SharpBgfx {
         delegate void ReportDebugHandler (IntPtr thisPtr, string fileName, ushort line, string format, IntPtr args);
 
         [SuppressUnmanagedCodeSecurity]
+        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        delegate void ProfilerBeginHandler (IntPtr thisPtr, sbyte* name, int abgr, sbyte* filePath, ushort line);
+
+        [SuppressUnmanagedCodeSecurity]
+        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+        delegate void ProfilerEndHandler (IntPtr thisPtr);
+
+        [SuppressUnmanagedCodeSecurity]
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         delegate int GetCachedSizeHandler (IntPtr thisPtr, long id);
 
@@ -6929,6 +7004,9 @@ namespace SharpBgfx {
             ICallbackHandler handler;
             ReportErrorHandler reportError;
             ReportDebugHandler reportDebug;
+            ProfilerBeginHandler profilerBegin;
+            ProfilerBeginHandler profilerBeginLiteral;
+            ProfilerEndHandler profilerEnd;
             GetCachedSizeHandler getCachedSize;
             GetCacheEntryHandler getCacheEntry;
             SetCacheEntryHandler setCacheEntry;
@@ -6941,6 +7019,9 @@ namespace SharpBgfx {
                 this.handler = handler;
                 reportError = ReportError;
                 reportDebug = ReportDebug;
+                profilerBegin = ProfilerBegin;
+                profilerBeginLiteral = ProfilerBegin;
+                profilerEnd = ProfilerEnd;
                 getCachedSize = GetCachedSize;
                 getCacheEntry = GetCacheEntry;
                 setCacheEntry = SetCacheEntry;
@@ -6951,6 +7032,9 @@ namespace SharpBgfx {
 
                 shim->reportError = Marshal.GetFunctionPointerForDelegate(reportError);
                 shim->reportDebug = Marshal.GetFunctionPointerForDelegate(reportDebug);
+                shim->profilerBegin = Marshal.GetFunctionPointerForDelegate(profilerBegin);
+                shim->profilerBeginLiteral = Marshal.GetFunctionPointerForDelegate(profilerBeginLiteral);
+                shim->profilerEnd = Marshal.GetFunctionPointerForDelegate(profilerEnd);
                 shim->getCachedSize = Marshal.GetFunctionPointerForDelegate(getCachedSize);
                 shim->getCacheEntry = Marshal.GetFunctionPointerForDelegate(getCacheEntry);
                 shim->setCacheEntry = Marshal.GetFunctionPointerForDelegate(setCacheEntry);
@@ -6966,6 +7050,14 @@ namespace SharpBgfx {
 
             void ReportDebug (IntPtr thisPtr, string fileName, ushort line, string format, IntPtr args) {
                 handler.ReportDebug(fileName, line, format, args);
+            }
+
+            void ProfilerBegin (IntPtr thisPtr, sbyte* name, int color, sbyte* filePath, ushort line) {
+                handler.ProfilerBegin(new string(name), color, new string(filePath), line);
+            }
+
+            void ProfilerEnd (IntPtr thisPtr) {
+                handler.ProfilerEnd();
             }
 
             int GetCachedSize (IntPtr thisPtr, long id) {
@@ -6999,10 +7091,5 @@ namespace SharpBgfx {
 
         static IntPtr shimMemory;
         static DelegateSaver savedDelegates;
-    }
-}
-namespace System.Security {
-    // Keep this around until .NET Core gets an actual implementation of it
-    class SuppressUnmanagedCodeSecurity : Attribute {
     }
 }

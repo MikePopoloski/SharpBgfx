@@ -188,6 +188,14 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// Sets the name of the texture, for debug display purposes.
+        /// </summary>
+        /// <param name="name">The name of the texture.</param>
+        public void SetName(string name) {
+            NativeMethods.bgfx_set_texture_name(handle, name);
+        }
+
+        /// <summary>
         /// Updates the data in a 2D texture.
         /// </summary>
         /// <param name="arrayLayer">The layer in a texture array to update.</param>

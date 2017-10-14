@@ -647,8 +647,8 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="instanceData">The instance data.</param>
         /// <param name="count">The number of entries to pull from the buffer.</param>
-        public static void SetInstanceDataBuffer (InstanceDataBuffer instanceData, int count = -1) {
-            NativeMethods.bgfx_set_instance_data_buffer(instanceData.ptr, (ushort)count);
+        public static void SetInstanceDataBuffer (ref InstanceDataBuffer instanceData, int count = -1) {
+            NativeMethods.bgfx_set_instance_data_buffer(ref instanceData.data, (ushort)count);
         }
 
         /// <summary>
@@ -929,6 +929,8 @@ namespace SharpBgfx {
         }
 
         class DefaultCallbackHandler : ICallbackHandler {
+            public void ProfilerBegin (string name, int color, string filePath, int line) {}
+            public void ProfilerEnd () {}
             public void CaptureStarted(int width, int height, int pitch, TextureFormat format, bool flipVertical) {}
             public void CaptureFrame(IntPtr data, int size) {}
             public void CaptureFinished() {}
