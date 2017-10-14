@@ -2,12 +2,6 @@
 using System.Runtime.InteropServices;
 using System.Security;
 
-namespace System.Security {
-    // Keep this around until .NET Core gets an actual implementation of it
-    class SuppressUnmanagedCodeSecurity : Attribute {
-    }
-}
-
 namespace SharpBgfx {
     [SuppressUnmanagedCodeSecurity]
     unsafe static class NativeMethods {
