@@ -1,11 +1,11 @@
-$input v_normal, v_view, v_texcoord0
+$input v_normal, v_view
 
 /*
  * Copyright 2013-2014 Dario Manesku. All rights reserved.
  * License: http://www.opensource.org/licenses/BSD-2-Clause
  */
 
-#include "../common.sh"
+#include "../common/common.sh"
 
 #define MAX_NUM_LIGHTS 5
 
@@ -16,14 +16,13 @@ uniform vec4 u_color;
 uniform vec4 u_specular_shininess;
 uniform vec4 u_lightPosRadius[MAX_NUM_LIGHTS];
 uniform vec4 u_lightRgbInnerR[MAX_NUM_LIGHTS];
-SAMPLER2D(u_texColor, 0);
 
-#define u_ambientPass  u_params.x
-#define u_lightingPass u_params.y
-#define u_lightCount   u_params.z
-#define u_lightIndex   u_params.w
-#define u_specular     u_specular_shininess.xyz
-#define u_shininess    u_specular_shininess.w
+#define u_ambientPass   u_params.x
+#define u_lightningPass u_params.y
+#define u_lightCount    u_params.z
+#define u_lightIndex    u_params.w
+#define u_specular      u_specular_shininess.xyz
+#define u_shininess     u_specular_shininess.w
 
 vec2 blinn(vec3 _lightDir, vec3 _normal, vec3 _viewDir)
 {
@@ -67,20 +66,19 @@ void main()
 	for(int ii = 0; ii < MAX_NUM_LIGHTS; ++ii)
 	{
 		float condition = 0.0;
-		if (u_lightCount > 1.0) // Stencil Reflection Scene.
+		if (u_lightCount > 1.0)
 		{
-			condition = 1.0 - step(u_lightCount, float(ii)); // True for every light up to u_lightCount.
+			condition = 1.0 - step(u_lightCount, float(ii));
 		}
-		else // Projection Shadows Scene.
+		else
 		{
-			condition = float(float(ii) == u_lightIndex); // True only for current light.
+			condition = float(float(ii) == u_lightIndex);
 		}
-
 		lightColor += calcLight(ii, v_view, normal, viewDir) * condition;
 	}
-	lightColor *= u_lightingPass;
+	lightColor *= u_lightningPass;
 
-	vec3 color = toLinear(texture2D(u_texColor, v_texcoord0)).xyz;
+	vec3 color = u_color.xyz;
 
 	vec3 ambient = toGamma(ambientColor * color);
 	vec3 diffuse = toGamma(lightColor * color);

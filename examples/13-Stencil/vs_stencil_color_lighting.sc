@@ -6,7 +6,7 @@ $output  v_normal, v_view
  * License: http://www.opensource.org/licenses/BSD-2-Clause
  */
 
-#include "../common.sh" 
+#include "../common/common.sh"
 
 void main()
 {

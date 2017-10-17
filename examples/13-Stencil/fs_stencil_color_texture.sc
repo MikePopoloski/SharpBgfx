@@ -5,7 +5,7 @@ $input v_texcoord0
  * License: http://www.opensource.org/licenses/BSD-2-Clause
  */
 
-#include "../common.sh"
+#include "../common/common.sh"
 uniform vec4 u_color;
 SAMPLER2D(u_texColor, 0);
 
