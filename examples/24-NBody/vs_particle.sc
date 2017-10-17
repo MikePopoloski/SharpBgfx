@@ -6,7 +6,7 @@ $output v_texCoord
  * License: http://www.opensource.org/licenses/BSD-2-Clause
  */
 
-#include "../common.sh"
+#include "../common/common.sh"
 #include "uniforms.sh"
 
 void main()
