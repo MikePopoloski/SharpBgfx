@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
     <ShaderCPath>$(MSBuildThisFileDirectory)tools\shaderc.exe</ShaderCPath>
-    <ShaderIncludeDir>$(MSBuildThisFileDirectory)examples\Assets\Shaders</ShaderIncludeDir>
+    <ShaderIncludeDir>$(MSBuildThisFileDirectory)include</ShaderIncludeDir>
   </PropertyGroup>
 
   <Target Name="CompileShaders" AfterTargets="AfterBuild">
