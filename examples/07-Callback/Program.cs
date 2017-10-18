@@ -89,7 +89,7 @@ class CallbackHandler : ICallbackHandler {
     }
 
     public void CaptureStarted (int width, int height, int pitch, TextureFormat format, bool flipVertical) {
-        aviWriter = new AviWriter(File.Create("capture.avi", pitch * height), width, height, 60, !flipVertical);
+        aviWriter = new AviWriter(File.Create("bin/capture.avi", pitch * height), width, height, 60, !flipVertical);
     }
 
     public void CaptureFrame (IntPtr data, int size) {
@@ -109,7 +109,7 @@ class CallbackHandler : ICallbackHandler {
 
     static FileInfo GetCacheFile (long id) {
         // we use the cache id as the filename, and just dump in the current directory
-        return new FileInfo(id.ToString("x"));
+        return new FileInfo(Path.Combine("bin", id.ToString("x")));
     }
 }
 
@@ -179,7 +179,7 @@ static class Program {
 
             // take a screenshot at frame 150
             if (frame == 150)
-                Bgfx.RequestScreenShot("frame150");
+                Bgfx.RequestScreenShot("bin/frame150");
 
             // advance to next frame
             Bgfx.Frame();
