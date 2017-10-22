@@ -7,7 +7,12 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <FragmentShaders Include="..\01-Cubes\fs_cubes.sc" Link="fs_cubes.sc" />    
+    <VertexShaders Include="..\01-Cubes\vs_cubes.sc" Link="vs_cubes.sc" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\SharpBgfx\SharpBgfx.csproj" />
     <ProjectReference Include="..\Common\Common.csproj" />
   </ItemGroup>
+  <Import Project="..\..\SharpBgfx.targets" />
 </Project>
