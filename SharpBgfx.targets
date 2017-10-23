@@ -1,38 +1,65 @@
 <Project>
-  <PropertyGroup>
-    <ShaderCPath>$(MSBuildThisFileDirectory)tools\shaderc.exe</ShaderCPath>
-    <ShaderIncludeDir>$(MSBuildThisFileDirectory)include</ShaderIncludeDir>
-  </PropertyGroup>
+    <PropertyGroup>
+        <ShaderCPath Condition=" $(ShaderCPath) == '' ">$(MSBuildThisFileDirectory)tools\shaderc.exe</ShaderCPath>
+        <ShaderIncludeDir Condition=" $(ShaderIncludeDir) == '' ">$(MSBuildThisFileDirectory)include</ShaderIncludeDir>
+        <VertexShaderIncludePattern Condition=" $(VertexShaderIncludePattern) == '' ">vs_*.sc</VertexShaderIncludePattern>
+        <FragmentShaderIncludePattern Condition=" $(FragmentShaderIncludePattern) == '' ">fs_*.sc</FragmentShaderIncludePattern>
+        <ComputeShaderIncludePattern Condition=" $(ComputeShaderIncludePattern) == '' ">cs_*.sc</ComputeShaderIncludePattern>
+        <ShaderOutputDir Condition=" $(ShaderOutputDir) == '' ">bin\</ShaderOutputDir>
+    </PropertyGroup>
 
-  <Target Name="CompileShaders" AfterTargets="AfterBuild">
     <ItemGroup>
-      <VertexShaders Condition=" '@(VertexShaders)' == '' " Include="vs_*.sc" />
-      <FragmentShaders Condition=" '@(FragmentShaders)' == '' " Include="fs_*.sc" />
-      <ComputeShaders Condition=" '@(ComputeShaders)' == '' " Include="cs_*.sc" />
+        <VertexShaders Include="$(VertexShaderIncludePattern)" />
+        <FragmentShaders Include="$(FragmentShaderIncludePattern)" />
+        <ComputeShaders Include="$(ComputeShaderIncludePattern)" />
     </ItemGroup>
-
+    
+    <!-- Build process hooks. -->
     <PropertyGroup>
-      <ShaderOutputDir>$(TargetDir)bin\dx11\</ShaderOutputDir>
+        <CleanDependsOn>CleanShaders;$(CoreCompileDependsOn)</CleanDependsOn>
+        <CoreCompileDependsOn>$(CoreCompileDependsOn);CompileShaders</CoreCompileDependsOn>
     </PropertyGroup>
+    
+    <Target Name="CleanShaders" BeforeTargets="CoreClean">    
+        <RemoveDir Condition=" Exists('$(IntermediateOutputPath)$(ShaderOutputDir)') "
+                   Directories="$(IntermediateOutputPath)$(ShaderOutputDir)" />
+    
+        <RemoveDir Condition=" Exists('$(TargetDir)$(ShaderOutputDir)') "
+                   Directories="$(TargetDir)$(ShaderOutputDir)" />
+    </Target>
+    
+    <Target Name="CompileShaders"
+            BeforeTargets="AfterBuild"
+            AfterTargets="CopyFilesToOutputDirectory"
+            DependsOnTargets="EnsureShaderIntermediateOutputDirectory;CompileVertexShaders;CompileFragmentShaders;CompileComputeShaders;CopyShaderBinariesToOutputDirectory" />
+    
+    <Target Name="EnsureShaderIntermediateOutputDirectory">
+        <MakeDir Directories="$(IntermediateOutputPath)$(ShaderOutputDir)dx11\" />
+        <MakeDir Directories="$(IntermediateOutputPath)$(ShaderOutputDir)glsl\" />
+    </Target>
+    
+    <Target Name="CompileVertexShaders" Inputs="@(VertexShaders)" Outputs="$(IntermediateOutputPath)$(ShaderOutputDir)dx11\%(VertexShaders.Filename).bin;$(IntermediateOutputPath)$(ShaderOutputDir)glsl\%(VertexShaders.Filename).bin">
+        <Exec Command="$(ShaderCPath) --platform windows --type vertex -p vs_4_0 -O 3 -f &quot;@(VertexShaders)&quot; -o &quot;$(IntermediateOutputPath)$(ShaderOutputDir)dx11\%(VertexShaders.Filename).bin&quot; -i &quot;$(ShaderIncludeDir)&quot;" />
+        <Exec Command="$(ShaderCPath) --platform linux --type vertex -p 120 -f &quot;@(VertexShaders)&quot; -o &quot;$(IntermediateOutputPath)$(ShaderOutputDir)glsl\%(VertexShaders.Filename).bin&quot; -i &quot;$(ShaderIncludeDir)&quot;" />    
+    </Target>
+    
+    <Target Name="CompileFragmentShaders" Inputs="@(FragmentShaders)" Outputs="$(IntermediateOutputPath)$(ShaderOutputDir)dx11\%(FragmentShaders.Filename).bin;$(IntermediateOutputPath)$(ShaderOutputDir)glsl\%(FragmentShaders.Filename).bin">        
+        <Exec Command="$(ShaderCPath) --platform windows --type fragment -p ps_4_0 -O 3 -f &quot;@(FragmentShaders)&quot; -o &quot;$(IntermediateOutputPath)$(ShaderOutputDir)dx11\%(FragmentShaders.Filename).bin&quot; -i &quot;$(ShaderIncludeDir)&quot;" />
+        <Exec Command="$(ShaderCPath) --platform linux --type fragment -p 120 -f &quot;@(FragmentShaders)&quot; -o &quot;$(IntermediateOutputPath)$(ShaderOutputDir)glsl\%(FragmentShaders.Filename).bin&quot; -i &quot;$(ShaderIncludeDir)&quot;" />    
+    </Target>
+        
+    <Target Name="CompileComputeShaders" Inputs="@(ComputeShaders)" Outputs="$(IntermediateOutputPath)$(ShaderOutputDir)dx11\%(ComputeShaders.Filename).bin;$(IntermediateOutputPath)$(ShaderOutputDir)glsl\%(ComputeShaders.Filename).bin">            
+        <Exec Command="$(ShaderCPath) --platform windows --type compute -p cs_5_0 -O 3 -f &quot;@(ComputeShaders)&quot; -o &quot;$(IntermediateOutputPath)$(ShaderOutputDir)dx11\%(ComputeShaders.Filename).bin&quot; -i &quot;$(ShaderIncludeDir)&quot;" />
+        <Exec Command="$(ShaderCPath) --platform linux --type compute -p 430 -f &quot;@(ComputeShaders)&quot; -o &quot;$(IntermediateOutputPath)$(ShaderOutputDir)glsl\%(ComputeShaders.Filename).bin&quot; -i &quot;$(ShaderIncludeDir)&quot;" />    
+    </Target>
+    
+    <Target Name="CopyShaderBinariesToOutputDirectory">
+        <ItemGroup>
+            <ShaderBinaries Include="$(IntermediateOutputPath)$(ShaderOutputDir)**\*.bin" />
+        </ItemGroup>
 
-    <MakeDir Directories="$(ShaderOutputDir)" />
-    <Exec Condition=" @(VertexShaders->Count()) &gt; 0 "
-          Command="$(ShaderCPath) --platform windows --type vertex -p vs_4_0 -O 3 -f &quot;@(VertexShaders)&quot; -o &quot;$(ShaderOutputDir)%(VertexShaders.Filename).bin&quot; -i &quot;$(ShaderIncludeDir)&quot;" />
-    <Exec Condition=" @(FragmentShaders->Count()) &gt; 0 "
-          Command="$(ShaderCPath) --platform windows --type fragment -p ps_4_0 -O 3 -f &quot;@(FragmentShaders)&quot; -o &quot;$(ShaderOutputDir)%(FragmentShaders.Filename).bin&quot; -i &quot;$(ShaderIncludeDir)&quot;" />
-    <Exec Condition=" @(ComputeShaders->Count()) &gt; 0 "
-          Command="$(ShaderCPath) --platform windows --type compute -p cs_5_0 -O 3 -f &quot;@(ComputeShaders)&quot; -o &quot;$(ShaderOutputDir)%(ComputeShaders.Filename).bin&quot; -i &quot;$(ShaderIncludeDir)&quot;" />
-
-    <PropertyGroup>
-      <ShaderOutputDir>$(TargetDir)bin\glsl\</ShaderOutputDir>
-    </PropertyGroup>
-
-    <MakeDir Directories="$(ShaderOutputDir)" />
-    <Exec Condition=" @(VertexShaders->Count()) &gt; 0 "
-          Command="$(ShaderCPath) --platform linux --type vertex -p 120 -f &quot;@(VertexShaders)&quot; -o &quot;$(ShaderOutputDir)%(VertexShaders.Filename).bin&quot; -i &quot;$(ShaderIncludeDir)&quot;" />
-    <Exec Condition=" @(FragmentShaders->Count()) &gt; 0 "
-          Command="$(ShaderCPath) --platform linux --type fragment -p 120 -f &quot;@(FragmentShaders)&quot; -o &quot;$(ShaderOutputDir)%(FragmentShaders.Filename).bin&quot; -i &quot;$(ShaderIncludeDir)&quot;" />
-    <Exec Condition=" @(ComputeShaders->Count()) &gt; 0 "
-          Command="$(ShaderCPath) --platform linux --type compute -p 430 -f &quot;@(ComputeShaders)&quot; -o &quot;$(ShaderOutputDir)%(ComputeShaders.Filename).bin&quot; -i &quot;$(ShaderIncludeDir)&quot;" />
-  </Target>
+        <Copy SourceFiles="@(ShaderBinaries)"
+              DestinationFolder="$(TargetDir)$(ShaderOutputDir)%(RecursiveDir)"
+              SkipUnchangedFiles="true" />
+    </Target>
 </Project>
