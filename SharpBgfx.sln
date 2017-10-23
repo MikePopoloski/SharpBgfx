@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.10
+VisualStudioVersion = 15.0.26730.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpBgfx", "SharpBgfx\SharpBgfx.csproj", "{949721DA-4C0A-450F-9BB7-BC98EA5C3647}"
 EndProject
@@ -21,6 +21,11 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "24-NBody", "examples\24-NBody\24-NBody.csproj", "{BF3AAFC1-0027-454E-BEAD-D04FD3A70C79}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "05-Instancing", "examples\05-Instancing\05-Instancing.csproj", "{A4718139-62E0-4FBF-8039-C18054CD19BC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{69425B33-89F3-4B25-BFB6-38918D7AA223}"
+	ProjectSection(SolutionItems) = preProject
+		SharpBgfx.targets = SharpBgfx.targets
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
