@@ -1,5 +1,8 @@
 <Project>
     <PropertyGroup>
+        <!-- Instucts Visual Studio to always start MSBuild when building. -->
+        <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+        
         <ShaderCPath Condition=" $(ShaderCPath) == '' ">$(MSBuildThisFileDirectory)tools\shaderc.exe</ShaderCPath>
         <ShaderIncludeDir Condition=" $(ShaderIncludeDir) == '' ">$(MSBuildThisFileDirectory)include</ShaderIncludeDir>
         <VertexShaderIncludePattern Condition=" $(VertexShaderIncludePattern) == '' ">vs_*.sc</VertexShaderIncludePattern>
