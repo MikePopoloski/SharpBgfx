@@ -10,4 +10,5 @@
     <ProjectReference Include="..\..\SharpBgfx\SharpBgfx.csproj" />
     <ProjectReference Include="..\Common\Common.csproj" />
   </ItemGroup>
+  <Import Project="..\..\SharpBgfx.targets" />
 </Project>
