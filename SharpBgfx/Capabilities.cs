@@ -468,6 +468,83 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// Number of allocated dynamic index buffers.
+        /// </summary>
+        public int DynamicIndexBufferCount {
+            get { return data->NumDynamicIndexBuffers; }
+        }
+
+        /// <summary>
+        /// Number of allocated dynamic vertex buffers.
+        /// </summary>
+        public int DynamicVertexBufferCount {
+            get { return data->NumDynamicVertexBuffers; }
+        }
+
+        /// <summary>
+        /// Number of allocated frame buffers.
+        /// </summary>
+        public int FrameBufferCount {
+            get { return data->NumFrameBuffers; }
+        }
+
+        /// <summary>
+        /// Number of allocated index buffers.
+        /// </summary>
+        public int IndexBufferCount {
+            get { return data->NumIndexBuffers; }
+        }
+
+        /// <summary>
+        /// Number of allocated occlusion queries.
+        /// </summary>
+        public int OcclusionQueryCount {
+            get { return data->NumOcclusionQueries; }
+        }
+
+        /// <summary>
+        /// Number of allocated shader programs.
+        /// </summary>
+        public int ProgramCount {
+            get { return data->NumPrograms; }
+        }
+
+        /// <summary>
+        /// Number of allocated shaders.
+        /// </summary>
+        public int ShaderCount {
+            get { return data->NumShaders; }
+        }
+
+        /// <summary>
+        /// Number of allocated textures.
+        /// </summary>
+        public int TextureCount {
+            get { return data->NumTextures; }
+        }
+
+        /// <summary>
+        /// Number of allocated uniforms.
+        /// </summary>
+        public int UniformCount {
+            get { return data->NumUniforms; }
+        }
+
+        /// <summary>
+        /// Number of allocated vertex buffers.
+        /// </summary>
+        public int VertexBufferCount {
+            get { return data->NumVertexBuffers; }
+        }
+
+        /// <summary>
+        /// Number of allocated vertex declarations.
+        /// </summary>
+        public int VertexDeclarationCount {
+            get { return data->NumVertexDecls; }
+        }
+
+        /// <summary>
         /// Maximum available GPU memory.
         /// </summary>
         public long MaxGpuMemory {
@@ -513,7 +590,7 @@ namespace SharpBgfx {
         /// Gets a collection of statistics for each rendering view.
         /// </summary>
         public ViewStatsCollection Views {
-            get { return new ViewStatsCollection((ViewStatsNative*)(data + 1), data->NumViews); }
+            get { return new ViewStatsCollection(data->ViewStats, data->NumViews); }
         }
 
         internal PerfStats (Stats* data) {
@@ -597,7 +674,7 @@ namespace SharpBgfx {
             }
 
             /// <summary>
-            /// Implements an enumerator for an AdapterCollection.
+            /// Implements an enumerator for a ViewStatsCollection.
             /// </summary>
             public struct Enumerator : IEnumerator<ViewStats> {
                 ViewStatsCollection collection;
@@ -647,12 +724,137 @@ namespace SharpBgfx {
             }
         }
 
+        /// <summary>
+        /// Contains perf metrics for a single encoder instance.
+        /// </summary>
+        public struct EncoderStats {
+            EncoderStatsNative* data;
+
+            /// <summary>
+            /// CPU frame start time.
+            /// </summary>
+            public long CpuTimeStart {
+                get { return data->CpuTimeBegin; }
+            }
+
+            /// <summary>
+            /// CPU frame end time.
+            /// </summary>
+            public long CpuTimeEnd {
+                get { return data->CpuTimeEnd; }
+            }
+
+            internal EncoderStats (EncoderStatsNative* data) {
+                this.data = data;
+            }
+        }
+
+        /// <summary>
+        /// Provides access to a collection of encoder statistics.
+        /// </summary>
+        public struct EncoderStatsCollection : IReadOnlyList<EncoderStats> {
+            EncoderStatsNative* data;
+            int count;
+
+            /// <summary>
+            /// Accesses the element at the specified index.
+            /// </summary>
+            /// <param name="index">The index of the element to retrieve.</param>
+            /// <returns>The element at the given index.</returns>
+            public EncoderStats this[int index] {
+                get { return new EncoderStats(data + index); }
+            }
+
+            /// <summary>
+            /// The number of elements in the collection.
+            /// </summary>
+            public int Count {
+                get { return count; }
+            }
+
+            internal EncoderStatsCollection (EncoderStatsNative* data, int count) {
+                this.data = data;
+                this.count = count;
+            }
+
+            /// <summary>
+            /// Gets an enumerator for the collection.
+            /// </summary>
+            /// <returns>A collection enumerator.</returns>
+            public Enumerator GetEnumerator () {
+                return new Enumerator(this);
+            }
+
+            IEnumerator<EncoderStats> IEnumerable<EncoderStats>.GetEnumerator () {
+                return GetEnumerator();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator () {
+                return GetEnumerator();
+            }
+
+            /// <summary>
+            /// Implements an enumerator for an EncoderStatsCollection.
+            /// </summary>
+            public struct Enumerator : IEnumerator<EncoderStats> {
+                EncoderStatsCollection collection;
+                int index;
+
+                /// <summary>
+                /// The current enumerated item.
+                /// </summary>
+                public EncoderStats Current {
+                    get { return collection[index]; }
+                }
+
+                object IEnumerator.Current {
+                    get { return Current; }
+                }
+
+                internal Enumerator (EncoderStatsCollection collection) {
+                    this.collection = collection;
+                    index = -1;
+                }
+
+                /// <summary>
+                /// Advances to the next item in the sequence.
+                /// </summary>
+                /// <returns><c>true</c> if there are more items in the collection; otherwise, <c>false</c>.</returns>
+                public bool MoveNext () {
+                    var newIndex = index + 1;
+                    if (newIndex >= collection.Count)
+                        return false;
+
+                    index = newIndex;
+                    return true;
+                }
+
+                /// <summary>
+                /// Empty; does nothing.
+                /// </summary>
+                public void Dispose () {
+                }
+
+                /// <summary>
+                /// Not implemented.
+                /// </summary>
+                public void Reset () {
+                    throw new NotImplementedException();
+                }
+            }
+        }
+
 #pragma warning disable 649
         internal struct ViewStatsNative {
             public fixed char Name[256];
-            public byte View;
+            public ushort View;
             public ulong CpuTimeElapsed;
             public ulong GpuTimeElapsed;
+        }
+
+        internal struct EncoderStatsNative {
+            public long CpuTimeBegin;
+            public long CpuTimeEnd;
         }
 
         internal struct Stats {
@@ -668,6 +870,17 @@ namespace SharpBgfx {
             public int NumDraw;
             public int NumCompute;
             public int MaxGpuLatency;
+            public ushort NumDynamicIndexBuffers;
+            public ushort NumDynamicVertexBuffers;
+            public ushort NumFrameBuffers;
+            public ushort NumIndexBuffers;
+            public ushort NumOcclusionQueries;
+            public ushort NumPrograms;
+            public ushort NumShaders;
+            public ushort NumTextures;
+            public ushort NumUniforms;
+            public ushort NumVertexBuffers;
+            public ushort NumVertexDecls;
             public long GpuMemoryMax;
             public long GpuMemoryUsed;
             public ushort Width;
@@ -675,6 +888,9 @@ namespace SharpBgfx {
             public ushort TextWidth;
             public ushort TextHeight;
             public ushort NumViews;
+            public ViewStatsNative* ViewStats;
+            public byte NumEncoders;
+            public EncoderStatsNative* EncoderStats;
         }
 #pragma warning restore 649
     }

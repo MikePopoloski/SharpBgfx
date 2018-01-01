@@ -347,7 +347,7 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="id">The index of the view.</param>
         /// <param name="name">The name of the view.</param>
-        public static void SetViewName (byte id, string name) {
+        public static void SetViewName (ushort id, string name) {
             NativeMethods.bgfx_set_view_name(id, name);
         }
 
@@ -359,7 +359,7 @@ namespace SharpBgfx {
         /// <param name="y">The Y coordinate of the viewport.</param>
         /// <param name="width">The width of the viewport, in pixels.</param>
         /// <param name="height">The height of the viewport, in pixels.</param>
-        public static void SetViewRect (byte id, int x, int y, int width, int height) {
+        public static void SetViewRect (ushort id, int x, int y, int width, int height) {
             NativeMethods.bgfx_set_view_rect(id, (ushort)x, (ushort)y, (ushort)width, (ushort)height);
         }
 
@@ -370,7 +370,7 @@ namespace SharpBgfx {
         /// <param name="x">The X coordinate of the viewport.</param>
         /// <param name="y">The Y coordinate of the viewport.</param>
         /// <param name="ratio">The ratio with which to automatically size the viewport.</param>
-        public static void SetViewRect (byte id, int x, int y, BackbufferRatio ratio) {
+        public static void SetViewRect (ushort id, int x, int y, BackbufferRatio ratio) {
             NativeMethods.bgfx_set_view_rect_auto(id, (ushort)x, (ushort)y, ratio);
         }
 
@@ -385,7 +385,7 @@ namespace SharpBgfx {
         /// <remarks>
         /// Set all values to zero to disable the scissor test.
         /// </remarks>
-        public static void SetViewScissor (byte id, int x, int y, int width, int height) {
+        public static void SetViewScissor (ushort id, int x, int y, int width, int height) {
             NativeMethods.bgfx_set_view_scissor(id, (ushort)x, (ushort)y, (ushort)width, (ushort)height);
         }
 
@@ -397,7 +397,7 @@ namespace SharpBgfx {
         /// <param name="colorRgba">The clear color.</param>
         /// <param name="depth">The value to fill the depth buffer.</param>
         /// <param name="stencil">The value to fill the stencil buffer.</param>
-        public static void SetViewClear (byte id, ClearTargets targets, int colorRgba, float depth = 1.0f, byte stencil = 0) {
+        public static void SetViewClear (ushort id, ClearTargets targets, int colorRgba, float depth = 1.0f, byte stencil = 0) {
             NativeMethods.bgfx_set_view_clear(id, targets, colorRgba, depth, stencil);
         }
 
@@ -417,7 +417,7 @@ namespace SharpBgfx {
         /// <param name="rt6">The color palette index for render target 6.</param>
         /// <param name="rt7">The color palette index for render target 7.</param>
         public static void SetViewClear (
-            byte id,
+            ushort id,
             ClearTargets targets,
             float depth,
             byte stencil,
@@ -464,7 +464,7 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="id">The index of the view.</param>
         /// <param name="mode">The sorting mode to use.</param>
-        public static void SetViewMode (byte id, ViewMode mode) {
+        public static void SetViewMode (ushort id, ViewMode mode) {
             NativeMethods.bgfx_set_view_mode(id, mode);
         }
 
@@ -474,7 +474,7 @@ namespace SharpBgfx {
         /// <param name="id">The index of the view.</param>
         /// <param name="view">The 4x4 view transform matrix.</param>
         /// <param name="projection">The 4x4 projection transform matrix.</param>
-        public static void SetViewTransform (byte id, float* view, float* projection) {
+        public static void SetViewTransform (ushort id, float* view, float* projection) {
             NativeMethods.bgfx_set_view_transform(id, view, projection);
         }
 
@@ -483,7 +483,7 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="id">The index of the view.</param>
         /// <param name="frameBuffer">The frame buffer to set.</param>
-        public static void SetViewFrameBuffer (byte id, FrameBuffer frameBuffer) {
+        public static void SetViewFrameBuffer (ushort id, FrameBuffer frameBuffer) {
             NativeMethods.bgfx_set_view_frame_buffer(id, frameBuffer.handle);
         }
 
@@ -790,7 +790,7 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="id">The index of the view to touch.</param>
         /// <returns>The number of draw calls.</returns>
-        public static int Touch (byte id) {
+        public static int Touch (ushort id) {
             return NativeMethods.bgfx_touch(id);
         }
 
@@ -798,7 +798,7 @@ namespace SharpBgfx {
         /// Resets all view settings to default.
         /// </summary>
         /// <param name="id">The index of the view to reset.</param>
-        public static void ResetView (byte id) {
+        public static void ResetView (ushort id) {
             NativeMethods.bgfx_reset_view(id);
         }
 
@@ -810,7 +810,7 @@ namespace SharpBgfx {
         /// <param name="depth">A depth value to use for sorting the batch.</param>
         /// <param name="preserveState"><c>true</c> to preserve internal draw state after the call.</param>
         /// <returns>The number of draw calls.</returns>
-        public static int Submit (byte id, Program program, int depth = 0, bool preserveState = false) {
+        public static int Submit (ushort id, Program program, int depth = 0, bool preserveState = false) {
             return NativeMethods.bgfx_submit(id, program.handle, depth, preserveState);
         }
 
@@ -823,7 +823,7 @@ namespace SharpBgfx {
         /// <param name="depth">A depth value to use for sorting the batch.</param>
         /// <param name="preserveState"><c>true</c> to preserve internal draw state after the call.</param>
         /// <returns>The number of draw calls.</returns>
-        public static int Submit (byte id, Program program, OcclusionQuery query, int depth = 0, bool preserveState = false) {
+        public static int Submit (ushort id, Program program, OcclusionQuery query, int depth = 0, bool preserveState = false) {
             return NativeMethods.bgfx_submit_occlusion_query(id, program.handle, query.handle, depth, preserveState);
         }
 
@@ -838,7 +838,7 @@ namespace SharpBgfx {
         /// <param name="depth">A depth value to use for sorting the batch.</param>
         /// <param name="preserveState"><c>true</c> to preserve internal draw state after the call.</param>
         /// <returns>The number of draw calls.</returns>
-        public static int Submit (byte id, Program program, IndirectBuffer indirectBuffer, int startIndex = 0, int count = 1, int depth = 0, bool preserveState = false) {
+        public static int Submit (ushort id, Program program, IndirectBuffer indirectBuffer, int startIndex = 0, int count = 1, int depth = 0, bool preserveState = false) {
             return NativeMethods.bgfx_submit_indirect(id, program.handle, indirectBuffer.handle, (ushort)startIndex, (ushort)count, depth, preserveState);
         }
 
@@ -857,7 +857,7 @@ namespace SharpBgfx {
         /// <param name="xCount">The size of the job in the first dimension.</param>
         /// <param name="yCount">The size of the job in the second dimension.</param>
         /// <param name="zCount">The size of the job in the third dimension.</param>
-        public static void Dispatch (byte id, Program program, int xCount = 1, int yCount = 1, int zCount = 1) {
+        public static void Dispatch (ushort id, Program program, int xCount = 1, int yCount = 1, int zCount = 1) {
             // TODO: unused
             byte unused = 0;
             NativeMethods.bgfx_dispatch(id, program.handle, (uint)xCount, (uint)yCount, (uint)zCount, unused);
@@ -871,7 +871,7 @@ namespace SharpBgfx {
         /// <param name="indirectBuffer">The buffer containing drawing commands.</param>
         /// <param name="startIndex">The index of the first command to process.</param>
         /// <param name="count">The number of commands to process from the buffer.</param>
-        public static void Dispatch (byte id, Program program, IndirectBuffer indirectBuffer, int startIndex = 0, int count = 1) {
+        public static void Dispatch (ushort id, Program program, IndirectBuffer indirectBuffer, int startIndex = 0, int count = 1) {
             // TODO: unused
             byte unused = 0;
             NativeMethods.bgfx_dispatch_indirect(id, program.handle, indirectBuffer.handle, (ushort)startIndex, (ushort)count, unused);
@@ -926,6 +926,14 @@ namespace SharpBgfx {
         /// <param name="backFace">The stencil state to use for back faces.</param>
         public static void SetStencil (StencilFlags frontFace, StencilFlags backFace) {
             NativeMethods.bgfx_set_stencil((uint)frontFace, (uint)backFace);
+        }
+
+        /// <summary>
+        /// Begins submission of commands via an encoder on this thread.
+        /// </summary>
+        /// <returns>An encoder instance that can be used to submit commands.</returns>
+        public static Encoder Begin () {
+            return new Encoder(NativeMethods.bgfx_begin());
         }
 
         class DefaultCallbackHandler : ICallbackHandler {

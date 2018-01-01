@@ -253,7 +253,7 @@ namespace SharpBgfx {
         /// <param name="width">The width of the region to blit.</param>
         /// <param name="height">The height of the region to blit.</param>
         /// <remarks>The destination texture must be created with the <see cref="TextureFlags.BlitDestination"/> flag.</remarks>
-        public void BlitTo (byte viewId, Texture dest, int destX, int destY, int sourceX = 0, int sourceY = 0,
+        public void BlitTo (ushort viewId, Texture dest, int destX, int destY, int sourceX = 0, int sourceY = 0,
                             int width = ushort.MaxValue, int height = ushort.MaxValue) {
             BlitTo(viewId, dest, 0, destX, destY, 0, 0, sourceX, sourceY, 0, width, height, 0);
         }
@@ -275,10 +275,53 @@ namespace SharpBgfx {
         /// <param name="height">The height of the region to blit.</param>
         /// <param name="depth">The depth of the region to blit.</param>
         /// <remarks>The destination texture must be created with the <see cref="TextureFlags.BlitDestination"/> flag.</remarks>
-        public void BlitTo (byte viewId, Texture dest, int destMip, int destX, int destY, int destZ,
+        public void BlitTo (ushort viewId, Texture dest, int destMip, int destX, int destY, int destZ,
                             int sourceMip = 0, int sourceX = 0, int sourceY = 0, int sourceZ = 0,
                             int width = ushort.MaxValue, int height = ushort.MaxValue, int depth = ushort.MaxValue) {
             NativeMethods.bgfx_blit(viewId, dest.handle, (byte)destMip, (ushort)destX, (ushort)destY, (ushort)destZ,
+                handle, (byte)sourceMip, (ushort)sourceX, (ushort)sourceY, (ushort)sourceZ, (ushort)width, (ushort)height, (ushort)depth);
+        }
+
+        /// <summary>
+        /// Blits the contents of the texture to another texture.
+        /// </summary>
+        /// <param name="encoder">The encoder used for threaded command submission.</param>
+        /// <param name="viewId">The view in which the blit will be ordered.</param>
+        /// <param name="dest">The destination texture.</param>
+        /// <param name="destX">The destination X position.</param>
+        /// <param name="destY">The destination Y position.</param>
+        /// <param name="sourceX">The source X position.</param>
+        /// <param name="sourceY">The source Y position.</param>
+        /// <param name="width">The width of the region to blit.</param>
+        /// <param name="height">The height of the region to blit.</param>
+        /// <remarks>The destination texture must be created with the <see cref="TextureFlags.BlitDestination"/> flag.</remarks>
+        public void BlitTo (Encoder encoder, ushort viewId, Texture dest, int destX, int destY, int sourceX = 0, int sourceY = 0,
+                            int width = ushort.MaxValue, int height = ushort.MaxValue) {
+            BlitTo(encoder, viewId, dest, 0, destX, destY, 0, 0, sourceX, sourceY, 0, width, height, 0);
+        }
+
+        /// <summary>
+        /// Blits the contents of the texture to another texture.
+        /// </summary>
+        /// <param name="encoder">The encoder used for threaded command submission.</param>
+        /// <param name="viewId">The view in which the blit will be ordered.</param>
+        /// <param name="dest">The destination texture.</param>
+        /// <param name="destMip">The destination mip level.</param>
+        /// <param name="destX">The destination X position.</param>
+        /// <param name="destY">The destination Y position.</param>
+        /// <param name="destZ">The destination Z position.</param>
+        /// <param name="sourceMip">The source mip level.</param>
+        /// <param name="sourceX">The source X position.</param>
+        /// <param name="sourceY">The source Y position.</param>
+        /// <param name="sourceZ">The source Z position.</param>
+        /// <param name="width">The width of the region to blit.</param>
+        /// <param name="height">The height of the region to blit.</param>
+        /// <param name="depth">The depth of the region to blit.</param>
+        /// <remarks>The destination texture must be created with the <see cref="TextureFlags.BlitDestination"/> flag.</remarks>
+        public void BlitTo (Encoder encoder, ushort viewId, Texture dest, int destMip, int destX, int destY, int destZ,
+                            int sourceMip = 0, int sourceX = 0, int sourceY = 0, int sourceZ = 0,
+                            int width = ushort.MaxValue, int height = ushort.MaxValue, int depth = ushort.MaxValue) {
+            NativeMethods.bgfx_encoder_blit(encoder.ptr, viewId, dest.handle, (byte)destMip, (ushort)destX, (ushort)destY, (ushort)destZ,
                 handle, (byte)sourceMip, (ushort)sourceX, (ushort)sourceY, (ushort)sourceZ, (ushort)width, (ushort)height, (ushort)depth);
         }
 
@@ -323,6 +366,17 @@ namespace SharpBgfx {
             MipLevels = mipCount;
             Format = format;
             return NativeMethods.bgfx_override_internal_texture(handle, (ushort)width, (ushort)height, (byte)mipCount, format, flags);
+        }
+
+        /// <summary>
+        /// Returns a direct pointer to the texture memory. 
+        /// </summary>
+        /// <returns>
+        /// A pointer to the texture's memory. If result is <see cref="IntPtr.Zero"/> direct access is
+        /// not supported. If the result is -1, the texture is pending creation.
+        /// </returns>
+        public IntPtr GetDirectAccess () {
+            return NativeMethods.bgfx_get_direct_access_ptr(handle);
         }
 
         /// <summary>

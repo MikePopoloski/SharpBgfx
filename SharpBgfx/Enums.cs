@@ -932,14 +932,19 @@ namespace SharpBgfx {
         TextureCubeArray = 0x100000,
 
         /// <summary>
+        /// Device supports directly accessing texture data.
+        /// </summary>
+        TextureDirectAccess = 0x200000,
+
+        /// <summary>
         /// Device supports reading back texture data.
         /// </summary>
-        TextureReadBack = 0x200000,
+        TextureReadBack = 0x400000,
 
         /// <summary>
         /// Device supports 16-bit floats as vertex attributes.
         /// </summary>
-        VertexAttributeHalf = 0x400000,
+        VertexAttributeHalf = 0x800000,
 
         /// <summary>
         /// UInt10 vertex attributes are supported.
