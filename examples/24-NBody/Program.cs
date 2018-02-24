@@ -142,7 +142,7 @@ static class Program {
             Bgfx.SetVertexBuffer(0, vb);
             Bgfx.SetIndexBuffer(ib);
             Bgfx.SetInstanceDataBuffer(currPositionBuffer0, 0, paramData.DispatchSize * ThreadGroupUpdateSize);
-            Bgfx.SetRenderState(RenderState.ColorWrite | RenderState.BlendAdd | RenderState.DepthTestAlways);
+            Bgfx.SetRenderState(RenderState.WriteRGB | RenderState.BlendAdd | RenderState.DepthTestAlways);
             if (useIndirect)
                 Bgfx.Submit(0, particleProgram, indirectBuffer);
             else

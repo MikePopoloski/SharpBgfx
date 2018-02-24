@@ -40,7 +40,7 @@ namespace SharpBgfx {
         /// <remarks>
         /// If the error type is not <see cref="ErrorType.DebugCheck"/>, bgfx is in an
         /// unrecoverable state and the application should terminate.
-        /// 
+        ///
         /// This method can be called from any thread.
         /// </remarks>
         void ReportError (ErrorType errorType, string message);
@@ -390,7 +390,7 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="color">The color with which to clear the background.</param>
         /// <param name="smallText"><c>true</c> to use a small font for debug output; <c>false</c> to use normal sized text.</param>
-        public static void DebugTextClear (DebugColor color = DebugColor.Transparent, bool smallText = false) {
+        public static void DebugTextClear (DebugColor color = DebugColor.Black, bool smallText = false) {
             var attr = (byte)((byte)color << 4);
             NativeMethods.bgfx_dbg_text_clear(attr, smallText);
         }
@@ -769,9 +769,10 @@ namespace SharpBgfx {
         /// Sets instance data to use for drawing primitives.
         /// </summary>
         /// <param name="instanceData">The instance data.</param>
+        /// <param name="start">The starting offset in the buffer.</param>
         /// <param name="count">The number of entries to pull from the buffer.</param>
-        public static void SetInstanceDataBuffer (ref InstanceDataBuffer instanceData, int count = -1) {
-            NativeMethods.bgfx_set_instance_data_buffer(ref instanceData.data, (ushort)count);
+        public static void SetInstanceDataBuffer (ref InstanceDataBuffer instanceData, int start = 0, int count = -1) {
+            NativeMethods.bgfx_set_instance_data_buffer(ref instanceData.data, (uint)start, (uint)count);
         }
 
         /// <summary>
@@ -849,13 +850,12 @@ namespace SharpBgfx {
         /// Sets a texture mip as a compute image.
         /// </summary>
         /// <param name="stage">The buffer stage to set.</param>
-        /// <param name="sampler">The sampler uniform.</param>
         /// <param name="texture">The texture to set.</param>
         /// <param name="mip">The index of the mip level within the texture to set.</param>
         /// <param name="format">The format of the buffer data.</param>
         /// <param name="access">Access control flags.</param>
-        public static void SetComputeImage (byte stage, Uniform sampler, Texture texture, byte mip, ComputeBufferAccess access, TextureFormat format = TextureFormat.Unknown) {
-            NativeMethods.bgfx_set_image(stage, sampler.handle, texture.handle, mip, format, access);
+        public static void SetComputeImage (byte stage, Texture texture, byte mip, ComputeBufferAccess access, TextureFormat format = TextureFormat.Unknown) {
+            NativeMethods.bgfx_set_image(stage, texture.handle, mip, format, access);
         }
 
         /// <summary>
@@ -1456,7 +1456,7 @@ namespace SharpBgfx {
         }
 
         /// <summary>
-        /// Returns a direct pointer to the texture memory. 
+        /// Returns a direct pointer to the texture memory.
         /// </summary>
         /// <returns>
         /// A pointer to the texture's memory. If result is <see cref="IntPtr.Zero"/> direct access is
@@ -1742,6 +1742,13 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// The maximum layers in a texture.
+        /// </summary>
+        public int MaxTextureLayers {
+            get { return (int)data->MaxTextureLayers; }
+        }
+
+        /// <summary>
         /// The maximum number of render views supported.
         /// </summary>
         public int MaxViews {
@@ -1999,6 +2006,7 @@ namespace SharpBgfx {
             public uint MaxDrawCalls;
             public uint MaxBlits;
             public uint MaxTextureSize;
+            public uint MaxTextureLayers;
             public uint MaxViews;
             public uint MaxFramebuffers;
             public uint MaxFramebufferAttachements;
@@ -2513,9 +2521,10 @@ namespace SharpBgfx {
         /// Sets instance data to use for drawing primitives.
         /// </summary>
         /// <param name="instanceData">The instance data.</param>
+        /// <param name="start">The starting offset in the buffer.</param>
         /// <param name="count">The number of entries to pull from the buffer.</param>
-        public void SetInstanceDataBuffer (ref InstanceDataBuffer instanceData, int count = -1) {
-            NativeMethods.bgfx_encoder_set_instance_data_buffer(ptr, ref instanceData.data, (ushort)count);
+        public void SetInstanceDataBuffer (ref InstanceDataBuffer instanceData, int start = 0, int count = -1) {
+            NativeMethods.bgfx_encoder_set_instance_data_buffer(ptr, ref instanceData.data, (uint)start, (uint)count);
         }
 
         /// <summary>
@@ -2587,18 +2596,16 @@ namespace SharpBgfx {
             return NativeMethods.bgfx_encoder_submit_indirect(ptr, id, program.handle, indirectBuffer.handle, (ushort)startIndex, (ushort)count, depth, preserveState);
         }
 
-
         /// <summary>
         /// Sets a texture mip as a compute image.
         /// </summary>
         /// <param name="stage">The buffer stage to set.</param>
-        /// <param name="sampler">The sampler uniform.</param>
         /// <param name="texture">The texture to set.</param>
         /// <param name="mip">The index of the mip level within the texture to set.</param>
         /// <param name="format">The format of the buffer data.</param>
         /// <param name="access">Access control flags.</param>
-        public void SetComputeImage (byte stage, Uniform sampler, Texture texture, byte mip, ComputeBufferAccess access, TextureFormat format = TextureFormat.Unknown) {
-            NativeMethods.bgfx_encoder_set_image(ptr, stage, sampler.handle, texture.handle, mip, format, access);
+        public void SetComputeImage (byte stage, Texture texture, byte mip, ComputeBufferAccess access, TextureFormat format = TextureFormat.Unknown) {
+            NativeMethods.bgfx_encoder_set_image(ptr, stage, texture.handle, mip, format, access);
         }
 
         /// <summary>
@@ -4253,19 +4260,34 @@ namespace SharpBgfx {
         public static readonly RenderState None = 0;
 
         /// <summary>
-        /// Enable writing color data to the framebuffer.
+        /// Enable writing the Red color channel to the framebuffer.
         /// </summary>
-        public static readonly RenderState ColorWrite = 0x0000000000000001;
+        public static readonly RenderState WriteR = 0x0000000000000001;
+
+        /// <summary>
+        /// Enable writing the Green color channel to the framebuffer.
+        /// </summary>
+        public static readonly RenderState WriteG = 0x0000000000000002;
+
+        /// <summary>
+        /// Enable writing the Blue color channel to the framebuffer.
+        /// </summary>
+        public static readonly RenderState WriteB = 0x0000000000000004;
 
         /// <summary>
         /// Enable writing alpha data to the framebuffer.
         /// </summary>
-        public static readonly RenderState AlphaWrite = 0x0000000000000002;
+        public static readonly RenderState WriteA = 0x0000000000000008;
 
         /// <summary>
         /// Enable writing to the depth buffer.
         /// </summary>
-        public static readonly RenderState DepthWrite = 0x0000000000000004;
+        public static readonly RenderState WriteZ = 0x0000004000000000;
+
+        /// <summary>
+        /// Enable writing all three color channels to the framebuffer.
+        /// </summary>
+        public static readonly RenderState WriteRGB = WriteR | WriteG | WriteB;
 
         /// <summary>
         /// Use a "less than" comparison to pass the depth test.
@@ -4466,9 +4488,9 @@ namespace SharpBgfx {
         /// Provides a set of sane defaults.
         /// </summary>
         public static readonly RenderState Default =
-            ColorWrite |
-            AlphaWrite |
-            DepthWrite |
+            WriteRGB |
+            WriteA |
+            WriteZ |
             DepthTestLess |
             CullClockwise |
             Multisampling;
@@ -5930,24 +5952,9 @@ namespace SharpBgfx {
     /// </summary>
     public enum DebugColor {
         /// <summary>
-        /// Transparent.
+        /// Black.
         /// </summary>
-        Transparent,
-
-        /// <summary>
-        /// Red.
-        /// </summary>
-        Red,
-
-        /// <summary>
-        /// Green.
-        /// </summary>
-        Green,
-
-        /// <summary>
-        /// Yellow.
-        /// </summary>
-        Yellow,
+        Black,
 
         /// <summary>
         /// Blue.
@@ -5955,9 +5962,9 @@ namespace SharpBgfx {
         Blue,
 
         /// <summary>
-        /// Purple.
+        /// Green.
         /// </summary>
-        Purple,
+        Green,
 
         /// <summary>
         /// Cyan.
@@ -5965,9 +5972,24 @@ namespace SharpBgfx {
         Cyan,
 
         /// <summary>
-        /// Gray.
+        /// Red.
         /// </summary>
-        Gray,
+        Red,
+
+        /// <summary>
+        /// Magenta.
+        /// </summary>
+        Magenta,
+
+        /// <summary>
+        /// Brown.
+        /// </summary>
+        Brown,
+
+        /// <summary>
+        /// Light gray.
+        /// </summary>
+        LightGray,
 
         /// <summary>
         /// Dark gray.
@@ -5975,9 +5997,9 @@ namespace SharpBgfx {
         DarkGray,
 
         /// <summary>
-        /// Light red.
+        /// Light blue.
         /// </summary>
-        LightRed,
+        LightBlue,
 
         /// <summary>
         /// Light green.
@@ -5985,24 +6007,24 @@ namespace SharpBgfx {
         LightGreen,
 
         /// <summary>
-        /// Light yellow.
-        /// </summary>
-        LightYellow,
-
-        /// <summary>
-        /// Light blue.
-        /// </summary>
-        LightBlue,
-
-        /// <summary>
-        /// Light purple.
-        /// </summary>
-        LightPurple,
-
-        /// <summary>
         /// Light cyan.
         /// </summary>
         LightCyan,
+
+        /// <summary>
+        /// Light red.
+        /// </summary>
+        LightRed,
+
+        /// <summary>
+        /// Light magenta.
+        /// </summary>
+        LightMagenta,
+
+        /// <summary>
+        /// Yellow.
+        /// </summary>
+        Yellow,
 
         /// <summary>
         /// White.
@@ -6185,7 +6207,7 @@ namespace SharpBgfx {
         /// <summary>
         /// UInt10 vertex attributes are supported.
         /// </summary>
-        VertexAttributeUInt10 = 0x800000    
+        VertexAttributeUInt10 = 0x800000
     }
 
     /// <summary>
@@ -7333,10 +7355,10 @@ namespace SharpBgfx {
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_texture (byte stage, ushort sampler, ushort texture, uint flags);
-        
+
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_set_image (byte stage, ushort sampler, ushort texture, byte mip, TextureFormat format, ComputeBufferAccess access);
-        
+        public static extern void bgfx_set_image (byte stage, ushort texture, byte mip, TextureFormat format, ComputeBufferAccess access);
+
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_compute_index_buffer (byte stage, ushort handle, ComputeBufferAccess access);
 
@@ -7660,7 +7682,7 @@ namespace SharpBgfx {
         public static extern void bgfx_set_transient_index_buffer (ref TransientIndexBuffer tib, int startIndex, int numIndices);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_set_instance_data_buffer (ref InstanceDataBuffer.NativeStruct idb, ushort num);
+        public static extern void bgfx_set_instance_data_buffer (ref InstanceDataBuffer.NativeStruct idb, uint start, uint num);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_instance_data_from_vertex_buffer (ushort handle, int startVertex, int count);
@@ -7748,7 +7770,7 @@ namespace SharpBgfx {
         public static extern void bgfx_encoder_set_transient_index_buffer(IntPtr encoder, ref TransientIndexBuffer tib, int startIndex, int numIndices);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_encoder_set_instance_data_buffer(IntPtr encoder, ref InstanceDataBuffer.NativeStruct idb, ushort num);
+        public static extern void bgfx_encoder_set_instance_data_buffer(IntPtr encoder, ref InstanceDataBuffer.NativeStruct idb, uint start, uint num);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_encoder_set_instance_data_from_vertex_buffer(IntPtr encoder, ushort handle, int startVertex, int count);
@@ -7772,7 +7794,7 @@ namespace SharpBgfx {
         public static extern int bgfx_encoder_submit_indirect(IntPtr encoder, ushort id, ushort programHandle, ushort indirectHandle, ushort start, ushort num, int depth, [MarshalAs(UnmanagedType.U1)] bool preserveState);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_encoder_set_image(IntPtr encoder, byte stage, ushort sampler, ushort texture, byte mip, TextureFormat format, ComputeBufferAccess access);
+        public static extern void bgfx_encoder_set_image(IntPtr encoder, byte stage, ushort texture, byte mip, TextureFormat format, ComputeBufferAccess access);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_encoder_set_compute_index_buffer(IntPtr encoder, byte stage, ushort handle, ComputeBufferAccess access);

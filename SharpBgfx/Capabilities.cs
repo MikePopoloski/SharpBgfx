@@ -45,6 +45,13 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// The maximum layers in a texture.
+        /// </summary>
+        public int MaxTextureLayers {
+            get { return (int)data->MaxTextureLayers; }
+        }
+
+        /// <summary>
         /// The maximum number of render views supported.
         /// </summary>
         public int MaxViews {
@@ -302,6 +309,7 @@ namespace SharpBgfx {
             public uint MaxDrawCalls;
             public uint MaxBlits;
             public uint MaxTextureSize;
+            public uint MaxTextureLayers;
             public uint MaxViews;
             public uint MaxFramebuffers;
             public uint MaxFramebufferAttachements;

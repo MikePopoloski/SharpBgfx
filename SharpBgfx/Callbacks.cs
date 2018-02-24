@@ -15,7 +15,7 @@ namespace SharpBgfx {
         /// <remarks>
         /// If the error type is not <see cref="ErrorType.DebugCheck"/>, bgfx is in an
         /// unrecoverable state and the application should terminate.
-        /// 
+        ///
         /// This method can be called from any thread.
         /// </remarks>
         void ReportError (ErrorType errorType, string message);

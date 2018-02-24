@@ -949,7 +949,7 @@ namespace SharpBgfx {
         /// <summary>
         /// UInt10 vertex attributes are supported.
         /// </summary>
-        VertexAttributeUInt10 = 0x800000    
+        VertexAttributeUInt10 = 0x800000
     }
 
     /// <summary>
@@ -1476,24 +1476,9 @@ namespace SharpBgfx {
     /// </summary>
     public enum DebugColor {
         /// <summary>
-        /// Transparent.
+        /// Black.
         /// </summary>
-        Transparent,
-
-        /// <summary>
-        /// Red.
-        /// </summary>
-        Red,
-
-        /// <summary>
-        /// Green.
-        /// </summary>
-        Green,
-
-        /// <summary>
-        /// Yellow.
-        /// </summary>
-        Yellow,
+        Black,
 
         /// <summary>
         /// Blue.
@@ -1501,9 +1486,9 @@ namespace SharpBgfx {
         Blue,
 
         /// <summary>
-        /// Purple.
+        /// Green.
         /// </summary>
-        Purple,
+        Green,
 
         /// <summary>
         /// Cyan.
@@ -1511,9 +1496,24 @@ namespace SharpBgfx {
         Cyan,
 
         /// <summary>
-        /// Gray.
+        /// Red.
         /// </summary>
-        Gray,
+        Red,
+
+        /// <summary>
+        /// Magenta.
+        /// </summary>
+        Magenta,
+
+        /// <summary>
+        /// Brown.
+        /// </summary>
+        Brown,
+
+        /// <summary>
+        /// Light gray.
+        /// </summary>
+        LightGray,
 
         /// <summary>
         /// Dark gray.
@@ -1521,9 +1521,9 @@ namespace SharpBgfx {
         DarkGray,
 
         /// <summary>
-        /// Light red.
+        /// Light blue.
         /// </summary>
-        LightRed,
+        LightBlue,
 
         /// <summary>
         /// Light green.
@@ -1531,24 +1531,24 @@ namespace SharpBgfx {
         LightGreen,
 
         /// <summary>
-        /// Light yellow.
-        /// </summary>
-        LightYellow,
-
-        /// <summary>
-        /// Light blue.
-        /// </summary>
-        LightBlue,
-
-        /// <summary>
-        /// Light purple.
-        /// </summary>
-        LightPurple,
-
-        /// <summary>
         /// Light cyan.
         /// </summary>
         LightCyan,
+
+        /// <summary>
+        /// Light red.
+        /// </summary>
+        LightRed,
+
+        /// <summary>
+        /// Light magenta.
+        /// </summary>
+        LightMagenta,
+
+        /// <summary>
+        /// Yellow.
+        /// </summary>
+        Yellow,
 
         /// <summary>
         /// White.

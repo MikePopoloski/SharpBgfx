@@ -369,7 +369,7 @@ namespace SharpBgfx {
         }
 
         /// <summary>
-        /// Returns a direct pointer to the texture memory. 
+        /// Returns a direct pointer to the texture memory.
         /// </summary>
         /// <returns>
         /// A pointer to the texture's memory. If result is <see cref="IntPtr.Zero"/> direct access is

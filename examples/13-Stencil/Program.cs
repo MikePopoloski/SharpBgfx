@@ -202,10 +202,10 @@ static class Program {
 
     static Dictionary<PrebuiltRenderState, RenderStateGroup> StateGroups = new Dictionary<PrebuiltRenderState, RenderStateGroup> {
         { PrebuiltRenderState.StencilReflectionCraftStencil, new RenderStateGroup(
-            RenderState.DepthWrite |
+            RenderState.WriteZ |
             RenderState.DepthTestLess |
             RenderState.Multisampling |
-            RenderState.ColorWrite,
+            RenderState.WriteRGB,
             uint.MaxValue,
             StencilFlags.TestAlways |
             StencilFlags.ReferenceValue(1) |
@@ -216,9 +216,9 @@ static class Program {
             StencilFlags.None)
         },
         { PrebuiltRenderState.StencilReflectionDrawReflected, new RenderStateGroup(
-            RenderState.ColorWrite |
-            RenderState.AlphaWrite |
-            RenderState.DepthWrite |
+            RenderState.WriteRGB |
+            RenderState.WriteA |
+            RenderState.WriteZ |
             RenderState.DepthTestLess |
             RenderState.CullCounterclockwise |
             RenderState.Multisampling |
@@ -233,8 +233,8 @@ static class Program {
             StencilFlags.None)
         },
         { PrebuiltRenderState.StencilReflectionBlendPlane, new RenderStateGroup(
-            RenderState.ColorWrite |
-            RenderState.DepthWrite |
+            RenderState.WriteRGB |
+            RenderState.WriteZ |
             RenderState.DepthTestLess |
             RenderState.BlendFunction(RenderState.BlendOne, RenderState.BlendSourceColor) |
             RenderState.CullClockwise |
@@ -244,8 +244,8 @@ static class Program {
             StencilFlags.None)
         },
         { PrebuiltRenderState.StencilReflectionDrawScene, new RenderStateGroup(
-            RenderState.ColorWrite |
-            RenderState.DepthWrite |
+            RenderState.WriteRGB |
+            RenderState.WriteZ |
             RenderState.DepthTestLess |
             RenderState.CullClockwise |
             RenderState.Multisampling,
@@ -254,9 +254,9 @@ static class Program {
             StencilFlags.None)
         },
         { PrebuiltRenderState.CustomBlendLightTexture, new RenderStateGroup(
-            RenderState.ColorWrite |
-            RenderState.AlphaWrite |
-            RenderState.DepthWrite |
+            RenderState.WriteRGB |
+            RenderState.WriteA |
+            RenderState.WriteZ |
             RenderState.DepthTestLess |
             RenderState.CullClockwise |
             RenderState.Multisampling |

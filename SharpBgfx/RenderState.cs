@@ -18,19 +18,34 @@ namespace SharpBgfx {
         public static readonly RenderState None = 0;
 
         /// <summary>
-        /// Enable writing color data to the framebuffer.
+        /// Enable writing the Red color channel to the framebuffer.
         /// </summary>
-        public static readonly RenderState ColorWrite = 0x0000000000000001;
+        public static readonly RenderState WriteR = 0x0000000000000001;
+
+        /// <summary>
+        /// Enable writing the Green color channel to the framebuffer.
+        /// </summary>
+        public static readonly RenderState WriteG = 0x0000000000000002;
+
+        /// <summary>
+        /// Enable writing the Blue color channel to the framebuffer.
+        /// </summary>
+        public static readonly RenderState WriteB = 0x0000000000000004;
 
         /// <summary>
         /// Enable writing alpha data to the framebuffer.
         /// </summary>
-        public static readonly RenderState AlphaWrite = 0x0000000000000002;
+        public static readonly RenderState WriteA = 0x0000000000000008;
 
         /// <summary>
         /// Enable writing to the depth buffer.
         /// </summary>
-        public static readonly RenderState DepthWrite = 0x0000000000000004;
+        public static readonly RenderState WriteZ = 0x0000004000000000;
+
+        /// <summary>
+        /// Enable writing all three color channels to the framebuffer.
+        /// </summary>
+        public static readonly RenderState WriteRGB = WriteR | WriteG | WriteB;
 
         /// <summary>
         /// Use a "less than" comparison to pass the depth test.
@@ -231,9 +246,9 @@ namespace SharpBgfx {
         /// Provides a set of sane defaults.
         /// </summary>
         public static readonly RenderState Default =
-            ColorWrite |
-            AlphaWrite |
-            DepthWrite |
+            WriteRGB |
+            WriteA |
+            WriteZ |
             DepthTestLess |
             CullClockwise |
             Multisampling;

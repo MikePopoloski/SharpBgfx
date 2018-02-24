@@ -264,9 +264,10 @@ namespace SharpBgfx {
         /// Sets instance data to use for drawing primitives.
         /// </summary>
         /// <param name="instanceData">The instance data.</param>
+        /// <param name="start">The starting offset in the buffer.</param>
         /// <param name="count">The number of entries to pull from the buffer.</param>
-        public void SetInstanceDataBuffer (ref InstanceDataBuffer instanceData, int count = -1) {
-            NativeMethods.bgfx_encoder_set_instance_data_buffer(ptr, ref instanceData.data, (ushort)count);
+        public void SetInstanceDataBuffer (ref InstanceDataBuffer instanceData, int start = 0, int count = -1) {
+            NativeMethods.bgfx_encoder_set_instance_data_buffer(ptr, ref instanceData.data, (uint)start, (uint)count);
         }
 
         /// <summary>
@@ -338,18 +339,16 @@ namespace SharpBgfx {
             return NativeMethods.bgfx_encoder_submit_indirect(ptr, id, program.handle, indirectBuffer.handle, (ushort)startIndex, (ushort)count, depth, preserveState);
         }
 
-
         /// <summary>
         /// Sets a texture mip as a compute image.
         /// </summary>
         /// <param name="stage">The buffer stage to set.</param>
-        /// <param name="sampler">The sampler uniform.</param>
         /// <param name="texture">The texture to set.</param>
         /// <param name="mip">The index of the mip level within the texture to set.</param>
         /// <param name="format">The format of the buffer data.</param>
         /// <param name="access">Access control flags.</param>
-        public void SetComputeImage (byte stage, Uniform sampler, Texture texture, byte mip, ComputeBufferAccess access, TextureFormat format = TextureFormat.Unknown) {
-            NativeMethods.bgfx_encoder_set_image(ptr, stage, sampler.handle, texture.handle, mip, format, access);
+        public void SetComputeImage (byte stage, Texture texture, byte mip, ComputeBufferAccess access, TextureFormat format = TextureFormat.Unknown) {
+            NativeMethods.bgfx_encoder_set_image(ptr, stage, texture.handle, mip, format, access);
         }
 
         /// <summary>
