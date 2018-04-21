@@ -8,27 +8,20 @@ using System.Runtime.InteropServices;
 
 namespace Common {
     public static class ResourceLoader {
-        static readonly string RootPath = "../Assets/";
+        static readonly string ExePath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+        static readonly string RootPath = Path.Combine(ExePath, "../../../../Assets/");
 
         static string GetShaderPath() {
-            var basePath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-
             switch (Bgfx.GetCurrentBackend()) {
                 case RendererBackend.Direct3D11:
                 case RendererBackend.Direct3D12:
-                    return Path.Combine(basePath, "bin", "dx11");
+                    return Path.Combine(ExePath, "bin", "dx11");
 
                 case RendererBackend.OpenGL:
-                    return Path.Combine(basePath, "bin", "glsl");
-
-                case RendererBackend.OpenGLES:
-                    return Path.Combine(RootPath, "Shaders/bin/gles/");
-
-                case RendererBackend.Direct3D9:
-                    return Path.Combine(RootPath, "Shaders/bin/dx9/");
+                    return Path.Combine(ExePath, "bin", "glsl");
 
                 default:
-                    throw new InvalidOperationException("Unknown renderer backend type.");
+                    throw new InvalidOperationException("Unsupported renderer backend.");
             }
         }
 
