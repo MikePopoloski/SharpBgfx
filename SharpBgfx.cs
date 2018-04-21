@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2017 Michael Popoloski
+// Copyright (c) 2015-2018 Michael Popoloski
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -336,17 +336,22 @@ namespace SharpBgfx {
         /// <summary>
         /// Initializes the graphics library on the specified adapter.
         /// </summary>
-        /// <param name="backend">The backend API to use for rendering.</param>
-        /// <param name="adapter">The adapter on which to create the device.</param>
-        /// <param name="callbackHandler">A set of handlers for various library callbacks.</param>
-        public static void Init (RendererBackend backend = RendererBackend.Default, Adapter adapter = default(Adapter), ICallbackHandler callbackHandler = null) {
-            NativeMethods.bgfx_init(
-                backend,
-                (ushort)adapter.Vendor,
-                (ushort)adapter.DeviceId,
-                CallbackShim.CreateShim(callbackHandler ?? new DefaultCallbackHandler()),
-                IntPtr.Zero
-            );
+        /// <param name="settings">Settings that control initialization, or <c>null</c> to use sane defaults.</param>
+        /// <returns><c>true</c> if initialization succeeds; otherwise, <c>false</c>.</returns>
+        public static bool Init (InitSettings settings = null) {
+            InitSettings.Native native;
+            NativeMethods.bgfx_init_ctor(&native);
+
+            settings = settings ?? new InitSettings();
+            native.Backend = settings.Backend;
+            native.VendorId = (ushort)settings.Adapter.Vendor;
+            native.DeviceId = (ushort)settings.Adapter.DeviceId;
+            native.Width = (uint)settings.Width;
+            native.Height = (uint)settings.Height;
+            native.Flags = (uint)settings.ResetFlags;
+            native.Callbacks = CallbackShim.CreateShim(settings.CallbackHandler ?? new DefaultCallbackHandler());
+
+            return NativeMethods.bgfx_init(&native);
         }
 
         /// <summary>
@@ -1085,6 +1090,83 @@ namespace SharpBgfx {
                     Environment.Exit(1);
                 }
             }
+        }
+    }
+
+    /// <summary>
+    /// Contains various settings used to initialize the library.
+    /// </summary>
+    public class InitSettings {
+        /// <summary>
+        /// The backend API to use for rendering.
+        /// </summary>
+        public RendererBackend Backend { get; set; }
+
+        /// <summary>
+        /// The adapter on which to create the device.
+        /// </summary>
+        public Adapter Adapter { get; set; }
+
+        /// <summary>
+        /// The initial width of the screen.
+        /// </summary>
+        public int Width { get; set; }
+
+        /// <summary>
+        /// The initial height of the screen.
+        /// </summary>
+        public int Height { get; set; }
+
+        /// <summary>
+        /// Various flags that control creation of the device.
+        /// </summary>
+        public ResetFlags ResetFlags { get; set; }
+
+        /// <summary>
+        /// A set of handlers for various library callbacks.
+        /// </summary>
+        public ICallbackHandler CallbackHandler { get; set; }
+
+        /// <summary>
+        /// Initializes a new intance of the <see cref="InitSettings"/> class.
+        /// </summary>
+        unsafe public InitSettings () {
+            Native native;
+            NativeMethods.bgfx_init_ctor(&native);
+
+            Backend = native.Backend;
+            Adapter = new Adapter((Vendor)native.VendorId, native.DeviceId);
+            Width = (int)native.Width;
+            Height = (int)native.Height;
+            ResetFlags = (ResetFlags)native.Flags;
+        }
+
+        /// <summary>
+        /// Initializes a new intance of the <see cref="InitSettings"/> class.
+        /// </summary>
+        /// <param name="width">The initial width of the screen.</param>
+        /// <param name="height">The initial height of the screen.</param>
+        /// <param name="resetFlags">Various flags that control creation of the device.</param>
+        public InitSettings (int width, int height, ResetFlags resetFlags = ResetFlags.None)
+            : this() {
+
+            Width = width;
+            Height = height;
+            ResetFlags = resetFlags;
+        }
+
+        internal struct Native {
+            public RendererBackend Backend;
+            public ushort VendorId;
+            public ushort DeviceId;
+            public uint Width;
+            public uint Height;
+            public uint Flags;
+            public ushort MaxEncoders;
+            public uint TransientVbSize;
+            public uint TransientIbSize;
+            public IntPtr Callbacks;
+            public IntPtr Allocator;
         }
     }
 
@@ -1854,6 +1936,27 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// The maximum number of encoder threads.
+        /// </summary>
+        public int MaxEncoders {
+            get { return (int)data->MaxEncoders; }
+        }
+
+        /// <summary>
+        /// The amount of transient vertex buffer space reserved.
+        /// </summary>
+        public int TransientVertexBufferSize {
+            get { return (int)data->TransientVbSize; }
+        }
+
+        /// <summary>
+        /// The amount of transient index buffer space reserved.
+        /// </summary>
+        public int TransientIndexBufferSize {
+            get { return (int)data->TransientIbSize; }
+        }
+
+        /// <summary>
         /// Indicates whether depth coordinates in NDC range from -1 to 1 (true) or 0 to 1 (false).
         /// </summary>
         public bool HomogeneousDepth {
@@ -1991,7 +2094,7 @@ namespace SharpBgfx {
 
 #pragma warning disable 649
         internal unsafe struct Caps {
-            const int TextureFormatCount = 48;
+            const int TextureFormatCount = 76;
 
             public RendererBackend Backend;
             public DeviceFeatures Supported;
@@ -2022,8 +2125,11 @@ namespace SharpBgfx {
             public uint MaxDynamicVertexBuffers;
             public uint MaxUniforms;
             public uint MaxOcclusionQueries;
+            public uint MaxEncoders;
+            public uint TransientVbSize;
+            public uint TransientIbSize;
 
-            public fixed byte Formats[TextureFormatCount];
+            public fixed ushort Formats[TextureFormatCount];
         }
 #pragma warning restore 649
     }
@@ -3752,6 +3858,34 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// The amount of memory used by textures.
+        /// </summary>
+        public long TextureMemoryUsed {
+            get { return data->TextureMemoryUsed; }
+        }
+
+        /// <summary>
+        /// The amount of memory used by render targets.
+        /// </summary>
+        public long RenderTargetMemoryUsed {
+            get { return data->RtMemoryUsed; }
+        }
+
+        /// <summary>
+        /// The number of transient vertex buffers used.
+        /// </summary>
+        public int TransientVertexBuffersUsed {
+            get { return data->TransientVbUsed; }
+        }
+
+        /// <summary>
+        /// The number of transient index buffers used.
+        /// </summary>
+        public int TransientIndexBuffersUsed {
+            get { return data->TransientIbUsed; }
+        }
+
+        /// <summary>
         /// Maximum available GPU memory.
         /// </summary>
         public long MaxGpuMemory {
@@ -4088,6 +4222,10 @@ namespace SharpBgfx {
             public ushort NumUniforms;
             public ushort NumVertexBuffers;
             public ushort NumVertexDecls;
+            public long TextureMemoryUsed;
+            public long RtMemoryUsed;
+            public int TransientVbUsed;
+            public int TransientIbUsed;
             public long GpuMemoryMax;
             public long GpuMemoryUsed;
             public ushort Width;
@@ -7640,7 +7778,11 @@ namespace SharpBgfx {
         public static extern sbyte* bgfx_get_renderer_name (RendererBackend backend);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_init (RendererBackend backend, ushort vendorId, ushort deviceId, IntPtr callbacks, IntPtr allocator);
+        public static extern void bgfx_init_ctor (InitSettings.Native* ptr);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        public static extern bool bgfx_init (InitSettings.Native* ptr);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_dbg_text_printf (ushort x, ushort y, byte color, [MarshalAs(UnmanagedType.LPStr)] string format, [MarshalAs(UnmanagedType.LPStr)] string args);

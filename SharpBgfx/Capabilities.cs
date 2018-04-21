@@ -157,6 +157,27 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// The maximum number of encoder threads.
+        /// </summary>
+        public int MaxEncoders {
+            get { return (int)data->MaxEncoders; }
+        }
+
+        /// <summary>
+        /// The amount of transient vertex buffer space reserved.
+        /// </summary>
+        public int TransientVertexBufferSize {
+            get { return (int)data->TransientVbSize; }
+        }
+
+        /// <summary>
+        /// The amount of transient index buffer space reserved.
+        /// </summary>
+        public int TransientIndexBufferSize {
+            get { return (int)data->TransientIbSize; }
+        }
+
+        /// <summary>
         /// Indicates whether depth coordinates in NDC range from -1 to 1 (true) or 0 to 1 (false).
         /// </summary>
         public bool HomogeneousDepth {
@@ -294,7 +315,7 @@ namespace SharpBgfx {
 
 #pragma warning disable 649
         internal unsafe struct Caps {
-            const int TextureFormatCount = 48;
+            const int TextureFormatCount = 76;
 
             public RendererBackend Backend;
             public DeviceFeatures Supported;
@@ -325,8 +346,11 @@ namespace SharpBgfx {
             public uint MaxDynamicVertexBuffers;
             public uint MaxUniforms;
             public uint MaxOcclusionQueries;
+            public uint MaxEncoders;
+            public uint TransientVbSize;
+            public uint TransientIbSize;
 
-            public fixed byte Formats[TextureFormatCount];
+            public fixed ushort Formats[TextureFormatCount];
         }
 #pragma warning restore 649
     }
@@ -550,6 +574,34 @@ namespace SharpBgfx {
         /// </summary>
         public int VertexDeclarationCount {
             get { return data->NumVertexDecls; }
+        }
+
+        /// <summary>
+        /// The amount of memory used by textures.
+        /// </summary>
+        public long TextureMemoryUsed {
+            get { return data->TextureMemoryUsed; }
+        }
+
+        /// <summary>
+        /// The amount of memory used by render targets.
+        /// </summary>
+        public long RenderTargetMemoryUsed {
+            get { return data->RtMemoryUsed; }
+        }
+
+        /// <summary>
+        /// The number of transient vertex buffers used.
+        /// </summary>
+        public int TransientVertexBuffersUsed {
+            get { return data->TransientVbUsed; }
+        }
+
+        /// <summary>
+        /// The number of transient index buffers used.
+        /// </summary>
+        public int TransientIndexBuffersUsed {
+            get { return data->TransientIbUsed; }
         }
 
         /// <summary>
@@ -889,6 +941,10 @@ namespace SharpBgfx {
             public ushort NumUniforms;
             public ushort NumVertexBuffers;
             public ushort NumVertexDecls;
+            public long TextureMemoryUsed;
+            public long RtMemoryUsed;
+            public int TransientVbUsed;
+            public int TransientIbUsed;
             public long GpuMemoryMax;
             public long GpuMemoryUsed;
             public ushort Width;
@@ -901,5 +957,82 @@ namespace SharpBgfx {
             public EncoderStatsNative* EncoderStats;
         }
 #pragma warning restore 649
+    }
+
+    /// <summary>
+    /// Contains various settings used to initialize the library.
+    /// </summary>
+    public class InitSettings {
+        /// <summary>
+        /// The backend API to use for rendering.
+        /// </summary>
+        public RendererBackend Backend { get; set; }
+
+        /// <summary>
+        /// The adapter on which to create the device.
+        /// </summary>
+        public Adapter Adapter { get; set; }
+
+        /// <summary>
+        /// The initial width of the screen.
+        /// </summary>
+        public int Width { get; set; }
+
+        /// <summary>
+        /// The initial height of the screen.
+        /// </summary>
+        public int Height { get; set; }
+
+        /// <summary>
+        /// Various flags that control creation of the device.
+        /// </summary>
+        public ResetFlags ResetFlags { get; set; }
+
+        /// <summary>
+        /// A set of handlers for various library callbacks.
+        /// </summary>
+        public ICallbackHandler CallbackHandler { get; set; }
+
+        /// <summary>
+        /// Initializes a new intance of the <see cref="InitSettings"/> class.
+        /// </summary>
+        unsafe public InitSettings () {
+            Native native;
+            NativeMethods.bgfx_init_ctor(&native);
+
+            Backend = native.Backend;
+            Adapter = new Adapter((Vendor)native.VendorId, native.DeviceId);
+            Width = (int)native.Width;
+            Height = (int)native.Height;
+            ResetFlags = (ResetFlags)native.Flags;
+        }
+
+        /// <summary>
+        /// Initializes a new intance of the <see cref="InitSettings"/> class.
+        /// </summary>
+        /// <param name="width">The initial width of the screen.</param>
+        /// <param name="height">The initial height of the screen.</param>
+        /// <param name="resetFlags">Various flags that control creation of the device.</param>
+        public InitSettings (int width, int height, ResetFlags resetFlags = ResetFlags.None)
+            : this() {
+
+            Width = width;
+            Height = height;
+            ResetFlags = resetFlags;
+        }
+
+        internal struct Native {
+            public RendererBackend Backend;
+            public ushort VendorId;
+            public ushort DeviceId;
+            public uint Width;
+            public uint Height;
+            public uint Flags;
+            public ushort MaxEncoders;
+            public uint TransientVbSize;
+            public uint TransientIbSize;
+            public IntPtr Callbacks;
+            public IntPtr Allocator;
+        }
     }
 }

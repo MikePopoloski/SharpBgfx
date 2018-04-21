@@ -213,17 +213,22 @@ namespace SharpBgfx {
         /// <summary>
         /// Initializes the graphics library on the specified adapter.
         /// </summary>
-        /// <param name="backend">The backend API to use for rendering.</param>
-        /// <param name="adapter">The adapter on which to create the device.</param>
-        /// <param name="callbackHandler">A set of handlers for various library callbacks.</param>
-        public static void Init (RendererBackend backend = RendererBackend.Default, Adapter adapter = default(Adapter), ICallbackHandler callbackHandler = null) {
-            NativeMethods.bgfx_init(
-                backend,
-                (ushort)adapter.Vendor,
-                (ushort)adapter.DeviceId,
-                CallbackShim.CreateShim(callbackHandler ?? new DefaultCallbackHandler()),
-                IntPtr.Zero
-            );
+        /// <param name="settings">Settings that control initialization, or <c>null</c> to use sane defaults.</param>
+        /// <returns><c>true</c> if initialization succeeds; otherwise, <c>false</c>.</returns>
+        public static bool Init (InitSettings settings = null) {
+            InitSettings.Native native;
+            NativeMethods.bgfx_init_ctor(&native);
+
+            settings = settings ?? new InitSettings();
+            native.Backend = settings.Backend;
+            native.VendorId = (ushort)settings.Adapter.Vendor;
+            native.DeviceId = (ushort)settings.Adapter.DeviceId;
+            native.Width = (uint)settings.Width;
+            native.Height = (uint)settings.Height;
+            native.Flags = (uint)settings.ResetFlags;
+            native.Callbacks = CallbackShim.CreateShim(settings.CallbackHandler ?? new DefaultCallbackHandler());
+
+            return NativeMethods.bgfx_init(&native);
         }
 
         /// <summary>

@@ -122,8 +122,12 @@ static class Program {
 
     static unsafe void RenderThread (Sample sample) {
         // initialize the renderer
-        Bgfx.Init(RendererBackend.OpenGL, callbackHandler: new CallbackHandler());
-        Bgfx.Reset(sample.WindowWidth, sample.WindowHeight, ResetFlags.MSAA16x | ResetFlags.Capture);
+        Bgfx.Init(new InitSettings {
+            Width = sample.WindowWidth,
+            Height = sample.WindowHeight,
+            ResetFlags = ResetFlags.MSAA16x | ResetFlags.Capture,
+            CallbackHandler = new CallbackHandler()
+        });
 
         // enable debug text
         Bgfx.SetDebugFeatures(DebugFeatures.DisplayText);
