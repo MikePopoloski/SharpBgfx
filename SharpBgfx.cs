@@ -346,6 +346,8 @@ namespace SharpBgfx {
             native.Backend = settings.Backend;
             native.VendorId = (ushort)settings.Adapter.Vendor;
             native.DeviceId = (ushort)settings.Adapter.DeviceId;
+            native.Debug = (byte)(settings.Debug ? 1 : 0);
+            native.Profiling = (byte)(settings.Profiling ? 1 : 0);
             native.Width = (uint)settings.Width;
             native.Height = (uint)settings.Height;
             native.Flags = (uint)settings.ResetFlags;
@@ -771,6 +773,14 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// Sets the number of auto-generated vertices for use with gl_VertexID.
+        /// </summary>
+        /// <param name="count">The number of auto-generated vertices.</param>
+        public static void SetVertexCount(int count) {
+            NativeMethods.bgfx_set_vertex_count(count);
+        }
+
+        /// <summary>
         /// Sets instance data to use for drawing primitives.
         /// </summary>
         /// <param name="instanceData">The instance data.</param>
@@ -1108,6 +1118,16 @@ namespace SharpBgfx {
         public Adapter Adapter { get; set; }
 
         /// <summary>
+        /// Enable debugging with the device.
+        /// </summary>
+        public bool Debug { get; set; }
+
+        /// <summary>
+        /// Enable profling with the device.
+        /// </summary>
+        public bool Profiling { get; set; }
+
+        /// <summary>
         /// The initial width of the screen.
         /// </summary>
         public int Width { get; set; }
@@ -1136,6 +1156,8 @@ namespace SharpBgfx {
 
             Backend = native.Backend;
             Adapter = new Adapter((Vendor)native.VendorId, native.DeviceId);
+            Debug = native.Debug != 0;
+            Profiling = native.Profiling != 0;
             Width = (int)native.Width;
             Height = (int)native.Height;
             ResetFlags = (ResetFlags)native.Flags;
@@ -1159,6 +1181,8 @@ namespace SharpBgfx {
             public RendererBackend Backend;
             public ushort VendorId;
             public ushort DeviceId;
+            public byte Debug;
+            public byte Profiling;
             public uint Width;
             public uint Height;
             public uint Flags;
@@ -1361,7 +1385,7 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="name">The name of the texture.</param>
         public void SetName(string name) {
-            NativeMethods.bgfx_set_texture_name(handle, name);
+            NativeMethods.bgfx_set_texture_name(handle, name, int.MaxValue);
         }
 
         /// <summary>
@@ -2094,7 +2118,7 @@ namespace SharpBgfx {
 
 #pragma warning disable 649
         internal unsafe struct Caps {
-            const int TextureFormatCount = 76;
+            const int TextureFormatCount = 84;
 
             public RendererBackend Backend;
             public DeviceFeatures Supported;
@@ -2621,6 +2645,14 @@ namespace SharpBgfx {
         /// <param name="count">The number of vertices to pull from the buffer.</param>
         public void SetVertexBuffer (int stream, TransientVertexBuffer vertexBuffer, int firstVertex, int count) {
             NativeMethods.bgfx_encoder_set_transient_vertex_buffer(ptr, (byte)stream, ref vertexBuffer, firstVertex, count);
+        }
+
+        /// <summary>
+        /// Sets the number of auto-generated vertices for use with gl_VertexID.
+        /// </summary>
+        /// <param name="count">The number of auto-generated vertices.</param>
+        public void SetVertexCount (int count) {
+            NativeMethods.bgfx_encoder_set_vertex_count(ptr, count);
         }
 
         /// <summary>
@@ -3939,6 +3971,15 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// Gets the number of primitives rendered with the given topology.
+        /// </summary>
+        /// <param name="topology">The topology whose primitive count should be returned.</param>
+        /// <returns>The number of primitives rendered.</returns>
+        public int GetPrimitiveCount(Topology topology) {
+            return (int)data->NumPrims[(int)topology];
+        }
+
+        /// <summary>
         /// Contains perf metrics for a single rendering view.
         /// </summary>
         public struct ViewStats {
@@ -4199,6 +4240,8 @@ namespace SharpBgfx {
         }
 
         internal struct Stats {
+            public const int NumTopologies = 5;
+
             public long CpuTimeFrame;
             public long CpuTimeBegin;
             public long CpuTimeEnd;
@@ -4226,6 +4269,7 @@ namespace SharpBgfx {
             public long RtMemoryUsed;
             public int TransientVbUsed;
             public int TransientIbUsed;
+            public fixed uint NumPrims[NumTopologies];
             public long GpuMemoryMax;
             public long GpuMemoryUsed;
             public ushort Width;
@@ -4928,7 +4972,7 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="name">The name of the shader.</param>
         public void SetName(string name) {
-            NativeMethods.bgfx_set_shader_name(handle, name);
+            NativeMethods.bgfx_set_shader_name(handle, name, int.MaxValue);
         }
 
         /// <summary>
@@ -6845,6 +6889,46 @@ namespace SharpBgfx {
         PTC24,
 
         /// <summary>
+        /// ATC RGB (4 bits per pixel)
+        /// </summary>
+        ATC,
+
+        /// <summary>
+        /// ATCE RGBA with explicit alpha (8 bits per pixel)
+        /// </summary>
+        ATCE,
+
+        /// <summary>
+        /// ATCE RGBA with interpolated alpha (8 bits per pixel)
+        /// </summary>
+        ATCI,
+
+        /// <summary>
+        /// ASTC 4x4 8.0 bpp
+        /// </summary>
+        ASTC4x4,
+
+        /// <summary>
+        /// ASTC 5x5 5.12 bpp
+        /// </summary>
+        ASTC5x5,
+
+        /// <summary>
+        /// ASTC 6x6 3.56 bpp
+        /// </summary>
+        ASTC6x6,
+
+        /// <summary>
+        /// ASTC 8x5 3.20 bpp
+        /// </summary>
+        ASTC8x5,
+
+        /// <summary>
+        /// ASTC 10x5 2.56 bpp
+        /// </summary>
+        ASTC10x5,
+
+        /// <summary>
         /// Unknown texture format.
         /// </summary>
         Unknown,
@@ -7227,6 +7311,36 @@ namespace SharpBgfx {
     }
 
     /// <summary>
+    /// Specifies possible primitive topologies.
+    /// </summary>
+    public enum Topology {
+        /// <summary>
+        /// List of triangles.
+        /// </summary>
+        TriangleList,
+
+        /// <summary>
+        /// Strip of triangles.
+        /// </summary>
+        TriangleStrip,
+
+        /// <summary>
+        /// List of lines.
+        /// </summary>
+        LineList,
+
+        /// <summary>
+        /// Strip of lines.
+        /// </summary>
+        LineStrip,
+
+        /// <summary>
+        /// List of points.
+        /// </summary>
+        PointList
+    }
+
+    /// <summary>
     /// Specifies the type of uniform data.
     /// </summary>
     public enum UniformType {
@@ -7588,7 +7702,7 @@ namespace SharpBgfx {
         public static extern ushort bgfx_create_texture_cube (ushort size, [MarshalAs(UnmanagedType.U1)] bool hasMips, ushort numLayers, TextureFormat format, TextureFlags flags, MemoryBlock.DataPtr* mem);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_set_texture_name(ushort handle, [MarshalAs(UnmanagedType.LPStr)] string name);
+        public static extern void bgfx_set_texture_name(ushort handle, [MarshalAs(UnmanagedType.LPStr)] string name, int len);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr bgfx_get_direct_access_ptr (ushort handle);
@@ -7610,7 +7724,7 @@ namespace SharpBgfx {
         public static extern ushort bgfx_get_shader_uniforms (ushort handle, Uniform[] uniforms, ushort max);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_set_shader_name(ushort handle, [MarshalAs(UnmanagedType.LPStr)] string name);
+        public static extern void bgfx_set_shader_name(ushort handle, [MarshalAs(UnmanagedType.LPStr)] string name, int len);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_destroy_shader (ushort handle);
@@ -7824,6 +7938,9 @@ namespace SharpBgfx {
         public static extern void bgfx_set_transient_index_buffer (ref TransientIndexBuffer tib, int startIndex, int numIndices);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_set_vertex_count (int numVertices);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_instance_data_buffer (ref InstanceDataBuffer.NativeStruct idb, uint start, uint num);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
@@ -7910,6 +8027,9 @@ namespace SharpBgfx {
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_encoder_set_transient_index_buffer(IntPtr encoder, ref TransientIndexBuffer tib, int startIndex, int numIndices);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_encoder_set_vertex_count (IntPtr encoder, int numVertices);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_encoder_set_instance_data_buffer(IntPtr encoder, ref InstanceDataBuffer.NativeStruct idb, uint start, uint num);

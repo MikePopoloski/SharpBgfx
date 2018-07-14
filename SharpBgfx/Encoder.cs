@@ -261,6 +261,14 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// Sets the number of auto-generated vertices for use with gl_VertexID.
+        /// </summary>
+        /// <param name="count">The number of auto-generated vertices.</param>
+        public void SetVertexCount (int count) {
+            NativeMethods.bgfx_encoder_set_vertex_count(ptr, count);
+        }
+
+        /// <summary>
         /// Sets instance data to use for drawing primitives.
         /// </summary>
         /// <param name="instanceData">The instance data.</param>

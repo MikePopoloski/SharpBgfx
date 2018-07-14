@@ -50,7 +50,7 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="name">The name of the shader.</param>
         public void SetName(string name) {
-            NativeMethods.bgfx_set_shader_name(handle, name);
+            NativeMethods.bgfx_set_shader_name(handle, name, int.MaxValue);
         }
 
         /// <summary>

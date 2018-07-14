@@ -281,6 +281,46 @@ namespace SharpBgfx {
         PTC24,
 
         /// <summary>
+        /// ATC RGB (4 bits per pixel)
+        /// </summary>
+        ATC,
+
+        /// <summary>
+        /// ATCE RGBA with explicit alpha (8 bits per pixel)
+        /// </summary>
+        ATCE,
+
+        /// <summary>
+        /// ATCE RGBA with interpolated alpha (8 bits per pixel)
+        /// </summary>
+        ATCI,
+
+        /// <summary>
+        /// ASTC 4x4 8.0 bpp
+        /// </summary>
+        ASTC4x4,
+
+        /// <summary>
+        /// ASTC 5x5 5.12 bpp
+        /// </summary>
+        ASTC5x5,
+
+        /// <summary>
+        /// ASTC 6x6 3.56 bpp
+        /// </summary>
+        ASTC6x6,
+
+        /// <summary>
+        /// ASTC 8x5 3.20 bpp
+        /// </summary>
+        ASTC8x5,
+
+        /// <summary>
+        /// ASTC 10x5 2.56 bpp
+        /// </summary>
+        ASTC10x5,
+
+        /// <summary>
         /// Unknown texture format.
         /// </summary>
         Unknown,
@@ -1624,5 +1664,35 @@ namespace SharpBgfx {
         /// Sort each draw by depth, descending.
         /// </summary>
         DepthDescending
+    }
+
+    /// <summary>
+    /// Specifies possible primitive topologies.
+    /// </summary>
+    public enum Topology {
+        /// <summary>
+        /// List of triangles.
+        /// </summary>
+        TriangleList,
+
+        /// <summary>
+        /// Strip of triangles.
+        /// </summary>
+        TriangleStrip,
+
+        /// <summary>
+        /// List of lines.
+        /// </summary>
+        LineList,
+
+        /// <summary>
+        /// Strip of lines.
+        /// </summary>
+        LineStrip,
+
+        /// <summary>
+        /// List of points.
+        /// </summary>
+        PointList
     }
 }

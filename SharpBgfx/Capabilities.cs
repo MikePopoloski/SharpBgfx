@@ -315,7 +315,7 @@ namespace SharpBgfx {
 
 #pragma warning disable 649
         internal unsafe struct Caps {
-            const int TextureFormatCount = 76;
+            const int TextureFormatCount = 84;
 
             public RendererBackend Backend;
             public DeviceFeatures Supported;
@@ -658,6 +658,15 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// Gets the number of primitives rendered with the given topology.
+        /// </summary>
+        /// <param name="topology">The topology whose primitive count should be returned.</param>
+        /// <returns>The number of primitives rendered.</returns>
+        public int GetPrimitiveCount(Topology topology) {
+            return (int)data->NumPrims[(int)topology];
+        }
+
+        /// <summary>
         /// Contains perf metrics for a single rendering view.
         /// </summary>
         public struct ViewStats {
@@ -918,6 +927,8 @@ namespace SharpBgfx {
         }
 
         internal struct Stats {
+            public const int NumTopologies = 5;
+
             public long CpuTimeFrame;
             public long CpuTimeBegin;
             public long CpuTimeEnd;
@@ -945,6 +956,7 @@ namespace SharpBgfx {
             public long RtMemoryUsed;
             public int TransientVbUsed;
             public int TransientIbUsed;
+            public fixed uint NumPrims[NumTopologies];
             public long GpuMemoryMax;
             public long GpuMemoryUsed;
             public ushort Width;
@@ -972,6 +984,16 @@ namespace SharpBgfx {
         /// The adapter on which to create the device.
         /// </summary>
         public Adapter Adapter { get; set; }
+
+        /// <summary>
+        /// Enable debugging with the device.
+        /// </summary>
+        public bool Debug { get; set; }
+
+        /// <summary>
+        /// Enable profling with the device.
+        /// </summary>
+        public bool Profiling { get; set; }
 
         /// <summary>
         /// The initial width of the screen.
@@ -1002,6 +1024,8 @@ namespace SharpBgfx {
 
             Backend = native.Backend;
             Adapter = new Adapter((Vendor)native.VendorId, native.DeviceId);
+            Debug = native.Debug != 0;
+            Profiling = native.Profiling != 0;
             Width = (int)native.Width;
             Height = (int)native.Height;
             ResetFlags = (ResetFlags)native.Flags;
@@ -1025,6 +1049,8 @@ namespace SharpBgfx {
             public RendererBackend Backend;
             public ushort VendorId;
             public ushort DeviceId;
+            public byte Debug;
+            public byte Profiling;
             public uint Width;
             public uint Height;
             public uint Flags;

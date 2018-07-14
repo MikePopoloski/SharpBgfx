@@ -192,7 +192,7 @@ namespace SharpBgfx {
         /// </summary>
         /// <param name="name">The name of the texture.</param>
         public void SetName(string name) {
-            NativeMethods.bgfx_set_texture_name(handle, name);
+            NativeMethods.bgfx_set_texture_name(handle, name, int.MaxValue);
         }
 
         /// <summary>

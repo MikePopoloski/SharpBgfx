@@ -223,6 +223,8 @@ namespace SharpBgfx {
             native.Backend = settings.Backend;
             native.VendorId = (ushort)settings.Adapter.Vendor;
             native.DeviceId = (ushort)settings.Adapter.DeviceId;
+            native.Debug = (byte)(settings.Debug ? 1 : 0);
+            native.Profiling = (byte)(settings.Profiling ? 1 : 0);
             native.Width = (uint)settings.Width;
             native.Height = (uint)settings.Height;
             native.Flags = (uint)settings.ResetFlags;
@@ -645,6 +647,14 @@ namespace SharpBgfx {
         /// <param name="count">The number of vertices to pull from the buffer.</param>
         public static void SetVertexBuffer (int stream, TransientVertexBuffer vertexBuffer, int firstVertex, int count) {
             NativeMethods.bgfx_set_transient_vertex_buffer((byte)stream, ref vertexBuffer, firstVertex, count);
+        }
+
+        /// <summary>
+        /// Sets the number of auto-generated vertices for use with gl_VertexID.
+        /// </summary>
+        /// <param name="count">The number of auto-generated vertices.</param>
+        public static void SetVertexCount(int count) {
+            NativeMethods.bgfx_set_vertex_count(count);
         }
 
         /// <summary>
