@@ -2008,6 +2008,10 @@ namespace SharpBgfx {
             get { return new AdapterCollection(data->GPUs, data->GPUCount); }
         }
 
+        static Capabilities() {
+            Debug.Assert(Caps.TextureFormatCount == Enum.GetValues(typeof(TextureFormat)).Length);
+        }
+
         internal Capabilities (Caps* data) {
             this.data = data;
         }
@@ -2118,7 +2122,7 @@ namespace SharpBgfx {
 
 #pragma warning disable 649
         internal unsafe struct Caps {
-            const int TextureFormatCount = 84;
+            public const int TextureFormatCount = 85;
 
             public RendererBackend Backend;
             public DeviceFeatures Supported;
@@ -3964,6 +3968,10 @@ namespace SharpBgfx {
         /// </summary>
         public ViewStatsCollection Views {
             get { return new ViewStatsCollection(data->ViewStats, data->NumViews); }
+        }
+
+        static PerfStats() {
+            Debug.Assert(Stats.NumTopologies == Enum.GetValues(typeof(Topology)).Length);
         }
 
         internal PerfStats (Stats* data) {
@@ -6922,6 +6930,11 @@ namespace SharpBgfx {
         /// ASTC 8x5 3.20 bpp
         /// </summary>
         ASTC8x5,
+
+        /// <summary>
+        /// ASTC 8x6 2.67 bpp
+        /// </summary>
+        ASTC8x6,
 
         /// <summary>
         /// ASTC 10x5 2.56 bpp

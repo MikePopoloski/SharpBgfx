@@ -57,6 +57,10 @@ static class Program {
         var clock = new Clock();
         clock.Start();
 
+        // check caps and stats, for testing purposes
+        Bgfx.GetCaps();
+        Bgfx.GetStats();
+
         // main loop
         while (sample.ProcessEvents(ResetFlags.Vsync)) {
             // tick the clock

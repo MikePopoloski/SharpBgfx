@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace SharpBgfx {
     /// <summary>
@@ -205,6 +206,10 @@ namespace SharpBgfx {
             get { return new AdapterCollection(data->GPUs, data->GPUCount); }
         }
 
+        static Capabilities() {
+            Debug.Assert(Caps.TextureFormatCount == Enum.GetValues(typeof(TextureFormat)).Length);
+        }
+
         internal Capabilities (Caps* data) {
             this.data = data;
         }
@@ -315,7 +320,7 @@ namespace SharpBgfx {
 
 #pragma warning disable 649
         internal unsafe struct Caps {
-            const int TextureFormatCount = 84;
+            public const int TextureFormatCount = 85;
 
             public RendererBackend Backend;
             public DeviceFeatures Supported;
@@ -651,6 +656,10 @@ namespace SharpBgfx {
         /// </summary>
         public ViewStatsCollection Views {
             get { return new ViewStatsCollection(data->ViewStats, data->NumViews); }
+        }
+
+        static PerfStats() {
+            Debug.Assert(Stats.NumTopologies == Enum.GetValues(typeof(Topology)).Length);
         }
 
         internal PerfStats (Stats* data) {

@@ -316,6 +316,11 @@ namespace SharpBgfx {
         ASTC8x5,
 
         /// <summary>
+        /// ASTC 8x6 2.67 bpp
+        /// </summary>
+        ASTC8x6,
+
+        /// <summary>
         /// ASTC 10x5 2.56 bpp
         /// </summary>
         ASTC10x5,
