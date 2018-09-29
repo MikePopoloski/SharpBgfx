@@ -697,21 +697,6 @@ namespace SharpBgfx {
         Capture = 0x200,
 
         /// <summary>
-        /// Enable head mounted display support.
-        /// </summary>
-        HeadMountedDisplay = 0x400,
-
-        /// <summary>
-        /// Enable debugging for head mounted display rendering.
-        /// </summary>
-        HeadMountedDisplayDebug = 0x800,
-
-        /// <summary>
-        /// Recenter the head mounted display.
-        /// </summary>
-        HeadMountedDisplayRecenter = 0x1000,
-
-        /// <summary>
         /// Flush all commands to the device after rendering.
         /// </summary>
         FlushAfterRender = 0x2000,
@@ -728,19 +713,24 @@ namespace SharpBgfx {
         SrgbBackbuffer = 0x8000,
 
         /// <summary>
+        /// Enable HDR10 rendering.
+        /// </summary>
+        HDR10 = 0x10000,
+
+        /// <summary>
         /// Enable High-DPI rendering.
         /// </summary>
-        HighDPI = 0x10000,
+        HighDPI = 0x20000,
 
         /// <summary>
         /// Enables depth clamping.
         /// </summary>
-        DepthClamp = 0x20000,
+        DepthClamp = 0x40000,
 
         /// <summary>
         /// Suspends rendering.
         /// </summary>
-        Suspend = 0x40000
+        Suspend = 0x80000
     }
 
     /// <summary>
@@ -907,84 +897,84 @@ namespace SharpBgfx {
         GraphicsDebugger = 0x80,
 
         /// <summary>
-        /// Device supports high-DPI rendering.
+        /// Devices supports HDR10 rendering.
         /// </summary>
-        HighDPI = 0x100,
+        HDR10 = 0x100,
 
         /// <summary>
-        /// Head mounted displays are supported.
+        /// Device supports high-DPI rendering.
         /// </summary>
-        HeadMountedDisplay = 0x200,
+        HighDPI = 0x400,
 
         /// <summary>
         /// Device supports 32-bit indices.
         /// </summary>
-        Index32 = 0x400,
+        Index32 = 0x800,
 
         /// <summary>
         /// Device supports instancing.
         /// </summary>
-        Instancing = 0x800,
+        Instancing = 0x1000,
 
         /// <summary>
         /// Device supports occlusion queries.
         /// </summary>
-        OcclusionQuery = 0x1000,
+        OcclusionQuery = 0x2000,
 
         /// <summary>
         /// Device supports multithreaded rendering.
         /// </summary>
-        RendererMultithreaded = 0x2000,
+        RendererMultithreaded = 0x4000,
 
         /// <summary>
         /// Indicates whether the device can render to multiple swap chains.
         /// </summary>
-        SwapChain = 0x4000,
+        SwapChain = 0x8000,
 
         /// <summary>
         /// Device supports 2D texture arrays.
         /// </summary>
-        Texture2DArray = 0x8000,
+        Texture2DArray = 0x10000,
 
         /// <summary>
         /// Device supports 3D textures.
         /// </summary>
-        Texture3D = 0x10000,
+        Texture3D = 0x20000,
 
         /// <summary>
         /// Device supports texture blits.
         /// </summary>
-        TextureBlit = 0x20000,
+        TextureBlit = 0xc0000,
 
-        /// <summary>
-        /// Device supports other texture comparison modes.
-        /// </summary>
-        TextureCompareExtended = 0x40000,
+        ///// <summary>
+        ///// Device supports other texture comparison modes.
+        ///// </summary>
+        //TextureCompareExtended = 0x40000,
 
         /// <summary>
         /// Device supports "Less than or equal to" texture comparison mode.
         /// </summary>
-        TextureCompareLessEqual = 0x80000,
+        TextureCompareLessEqual = 0x100000,
 
         /// <summary>
         /// Device supports all texture comparison modes.
         /// </summary>
-        TextureCompareAll = TextureCompareLessEqual | TextureCompareExtended,
+        TextureCompareAll = 0x80000, //TextureCompareLessEqual | TextureCompareExtended,
 
         /// <summary>
         /// Device supports cubemap texture arrays.
         /// </summary>
-        TextureCubeArray = 0x100000,
+        TextureCubeArray = 0x200000,
 
         /// <summary>
         /// Device supports directly accessing texture data.
         /// </summary>
-        TextureDirectAccess = 0x200000,
+        TextureDirectAccess = 0x400000,
 
         /// <summary>
         /// Device supports reading back texture data.
         /// </summary>
-        TextureReadBack = 0x400000,
+        TextureReadBack = 0x800000,
 
         /// <summary>
         /// Device supports 16-bit floats as vertex attributes.
@@ -994,7 +984,12 @@ namespace SharpBgfx {
         /// <summary>
         /// UInt10 vertex attributes are supported.
         /// </summary>
-        VertexAttributeUInt10 = 0x800000
+        VertexAttributeUInt10 = 0x1000000,
+
+        /// <summary>
+        /// Devices supports rendering with VertexID only.
+        /// </summary>
+        VertexID = 0x2000000
     }
 
     /// <summary>
@@ -1087,7 +1082,7 @@ namespace SharpBgfx {
     /// Specifies various texture flags.
     /// </summary>
     [Flags]
-    public enum TextureFlags {
+    public enum TextureFlags : long {
         /// <summary>
         /// No flags set.
         /// </summary>
@@ -1164,41 +1159,6 @@ namespace SharpBgfx {
         MipFilterPoint = 0x00000400,
 
         /// <summary>
-        /// Perform MSAA sampling on the texture.
-        /// </summary>
-        MSAASample = 0x00000800,
-
-        /// <summary>
-        /// The texture will be used as a render target.
-        /// </summary>
-        RenderTarget = 0x00001000,
-
-        /// <summary>
-        /// The render target texture support 2x multisampling.
-        /// </summary>
-        RenderTargetMultisample2x = 0x00002000,
-
-        /// <summary>
-        /// The render target texture support 4x multisampling.
-        /// </summary>
-        RenderTargetMultisample4x = 0x00003000,
-
-        /// <summary>
-        /// The render target texture support 8x multisampling.
-        /// </summary>
-        RenderTargetMultisample8x = 0x00004000,
-
-        /// <summary>
-        /// The render target texture support 16x multisampling.
-        /// </summary>
-        RenderTargetMultisample16x = 0x00005000,
-
-        /// <summary>
-        /// The texture is only writeable (render target).
-        /// </summary>
-        RenderTargetWriteOnly = 0x00008000,
-
-        /// <summary>
         /// Use a "less than" operator when comparing textures.
         /// </summary>
         CompareLess = 0x00010000,
@@ -1239,24 +1199,64 @@ namespace SharpBgfx {
         CompareAlways = 0x00080000,
 
         /// <summary>
+        /// Sample stencil instead of depth.
+        /// </summary>
+        SampleStencil = 0x100000,
+
+        /// <summary>
+        /// Perform MSAA sampling on the texture.
+        /// </summary>
+        MSAASample = 0x800000000,
+
+        /// <summary>
+        /// The texture will be used as a render target.
+        /// </summary>
+        RenderTarget = 0x1000000000,
+
+        /// <summary>
+        /// The render target texture support 2x multisampling.
+        /// </summary>
+        RenderTargetMultisample2x = 0x2000000000,
+
+        /// <summary>
+        /// The render target texture support 4x multisampling.
+        /// </summary>
+        RenderTargetMultisample4x = 0x3000000000,
+
+        /// <summary>
+        /// The render target texture support 8x multisampling.
+        /// </summary>
+        RenderTargetMultisample8x = 0x4000000000,
+
+        /// <summary>
+        /// The render target texture support 16x multisampling.
+        /// </summary>
+        RenderTargetMultisample16x = 0x5000000000,
+
+        /// <summary>
+        /// The texture is only writeable (render target).
+        /// </summary>
+        RenderTargetWriteOnly = 0x8000000000,
+
+        /// <summary>
         /// Texture is the target of compute shader writes.
         /// </summary>
-        ComputeWrite = 0x00100000,
+        ComputeWrite = 0x100000000000,
 
         /// <summary>
         /// Texture data is in non-linear sRGB format.
         /// </summary>
-        Srgb = 0x00200000,
+        Srgb = 0x200000000000,
 
         /// <summary>
         /// Texture can be used as the destination of a blit operation.
         /// </summary>
-        BlitDestination = 0x00400000,
+        BlitDestination = 0x400000000000,
 
         /// <summary>
         /// Texture data can be read back.
         /// </summary>
-        ReadBack = 0x00800000
+        ReadBack = 0x800000000000
     }
 
     /// <summary>

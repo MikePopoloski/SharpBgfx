@@ -102,6 +102,13 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// The maximum number of compute bindings that can be allocated.
+        /// </summary>
+        public int MaxComputeBindings {
+            get { return (int)data->MaxComputeBindings; }
+        }
+
+        /// <summary>
         /// The maximum number of vertex declarations that can be allocated.
         /// </summary>
         public int MaxVertexDecls {
@@ -343,6 +350,7 @@ namespace SharpBgfx {
             public uint MaxShaders;
             public uint MaxTextures;
             public uint MaxTextureSamplers;
+            public uint MaxComputeBindings;
             public uint MaxVertexDecls;
             public uint MaxVertexStreams;
             public uint MaxIndexBuffers;
@@ -1005,6 +1013,11 @@ namespace SharpBgfx {
         public bool Profiling { get; set; }
 
         /// <summary>
+        /// The initial texture format of the screen.
+        /// </summary>
+        public TextureFormat Format { get; set; }
+
+        /// <summary>
         /// The initial width of the screen.
         /// </summary>
         public int Width { get; set; }
@@ -1018,6 +1031,11 @@ namespace SharpBgfx {
         /// Various flags that control creation of the device.
         /// </summary>
         public ResetFlags ResetFlags { get; set; }
+
+        /// <summary>
+        /// The maximum allowed frame latency, or zero if you don't care.
+        /// </summary>
+        public int MaxFrameLatency { get; set; }
 
         /// <summary>
         /// A set of handlers for various library callbacks.
@@ -1035,9 +1053,11 @@ namespace SharpBgfx {
             Adapter = new Adapter((Vendor)native.VendorId, native.DeviceId);
             Debug = native.Debug != 0;
             Profiling = native.Profiling != 0;
+            Format = native.Format;
             Width = (int)native.Width;
             Height = (int)native.Height;
             ResetFlags = (ResetFlags)native.Flags;
+            MaxFrameLatency = native.MaxFrameLatency;
         }
 
         /// <summary>
@@ -1060,9 +1080,11 @@ namespace SharpBgfx {
             public ushort DeviceId;
             public byte Debug;
             public byte Profiling;
+            public TextureFormat Format;
             public uint Width;
             public uint Height;
             public uint Flags;
+            public byte MaxFrameLatency;
             public ushort MaxEncoders;
             public uint TransientVbSize;
             public uint TransientIbSize;

@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 class CallbackHandler : ICallbackHandler {
     AviWriter aviWriter;
 
-    public void ReportError (ErrorType errorType, string message) {
+    public void ReportError (string fileName, int line, ErrorType errorType, string message) {
         // break if the debugger is attached so we can look at the message
         Debugger.Break();
 

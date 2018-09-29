@@ -10,6 +10,8 @@ namespace SharpBgfx {
         /// <summary>
         /// Called when an error occurs in the library.
         /// </summary>
+        /// <param name="fileName">The name of the source file in which the message originated.</param>
+        /// <param name="line">The line number in which the message originated.</param>
         /// <param name="errorType">The type of error that occurred.</param>
         /// <param name="message">Message string detailing what went wrong.</param>
         /// <remarks>
@@ -18,7 +20,7 @@ namespace SharpBgfx {
         ///
         /// This method can be called from any thread.
         /// </remarks>
-        void ReportError (ErrorType errorType, string message);
+        void ReportError (string fileName, int line, ErrorType errorType, string message);
 
         /// <summary>
         /// Called to print debug messages.
@@ -150,7 +152,7 @@ namespace SharpBgfx {
 
         [SuppressUnmanagedCodeSecurity]
         [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Ansi)]
-        delegate void ReportErrorHandler (IntPtr thisPtr, ErrorType errorType, string message);
+        delegate void ReportErrorHandler (IntPtr thisPtr, string fileName, ushort line, ErrorType errorType, string message);
 
         [SuppressUnmanagedCodeSecurity]
         [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Ansi)]
@@ -240,8 +242,8 @@ namespace SharpBgfx {
                 shim->captureFrame = Marshal.GetFunctionPointerForDelegate(captureFrame);
             }
 
-            void ReportError (IntPtr thisPtr, ErrorType errorType, string message) {
-                handler.ReportError(errorType, message);
+            void ReportError (IntPtr thisPtr, string fileName, ushort line, ErrorType errorType, string message) {
+                handler.ReportError(fileName, line, errorType, message);
             }
 
             void ReportDebug (IntPtr thisPtr, string fileName, ushort line, string format, IntPtr args) {

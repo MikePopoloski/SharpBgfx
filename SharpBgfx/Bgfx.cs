@@ -186,6 +186,7 @@ namespace SharpBgfx {
             return new PerfStats(NativeMethods.bgfx_get_stats());
         }
 
+
         /// <summary>
         /// Resets graphics settings and surfaces.
         /// </summary>
@@ -193,7 +194,18 @@ namespace SharpBgfx {
         /// <param name="height">The height of the main window.</param>
         /// <param name="flags">Flags used to configure rendering output.</param>
         public static void Reset (int width, int height, ResetFlags flags = ResetFlags.None) {
-            NativeMethods.bgfx_reset(width, height, flags);
+            Reset(width, height, flags, (TextureFormat)TextureFormatCount);
+        }
+
+        /// <summary>
+        /// Resets graphics settings and surfaces.
+        /// </summary>
+        /// <param name="width">The width of the main window.</param>
+        /// <param name="height">The height of the main window.</param>
+        /// <param name="flags">Flags used to configure rendering output.</param>
+        /// <param name="format">The format of the backbuffer.</param>
+        public static void Reset (int width, int height, ResetFlags flags, TextureFormat format) {
+            NativeMethods.bgfx_reset(width, height, flags, format);
         }
 
         /// <summary>
@@ -225,9 +237,11 @@ namespace SharpBgfx {
             native.DeviceId = (ushort)settings.Adapter.DeviceId;
             native.Debug = (byte)(settings.Debug ? 1 : 0);
             native.Profiling = (byte)(settings.Profiling ? 1 : 0);
+            native.Format = settings.Format;
             native.Width = (uint)settings.Width;
             native.Height = (uint)settings.Height;
             native.Flags = (uint)settings.ResetFlags;
+            native.MaxFrameLatency = (byte)settings.MaxFrameLatency;
             native.Callbacks = CallbackShim.CreateShim(settings.CallbackHandler ?? new DefaultCallbackHandler());
 
             return NativeMethods.bgfx_init(&native);
@@ -658,6 +672,14 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// Sets the number of auto-generated indices for use with gl_InstanceID.
+        /// </summary>
+        /// <param name="count">The number of auto-generated instances.</param>
+        public static void SetInstanceCount (int count) {
+            NativeMethods.bgfx_set_instance_count(count);
+        }
+
+        /// <summary>
         /// Sets instance data to use for drawing primitives.
         /// </summary>
         /// <param name="instanceData">The instance data.</param>
@@ -951,6 +973,8 @@ namespace SharpBgfx {
             return new Encoder(NativeMethods.bgfx_begin());
         }
 
+        static readonly int TextureFormatCount = Enum.GetValues(typeof(TextureFormat)).Length;
+
         class DefaultCallbackHandler : ICallbackHandler {
             public void ProfilerBegin (string name, int color, string filePath, int line) {}
             public void ProfilerEnd () {}
@@ -968,7 +992,7 @@ namespace SharpBgfx {
                 Debug.Write(Marshal.PtrToStringAnsi(new IntPtr(buffer)));
             }
 
-            public void ReportError(ErrorType errorType, string message) {
+            public void ReportError(string fileName, int line, ErrorType errorType, string message) {
                 if (errorType == ErrorType.DebugCheck)
                     Debug.Write(message);
                 else {

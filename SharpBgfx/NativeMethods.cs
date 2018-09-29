@@ -244,7 +244,7 @@ namespace SharpBgfx {
         public static extern void bgfx_shutdown ();
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_reset (int width, int height, ResetFlags flags);
+        public static extern void bgfx_reset (int width, int height, ResetFlags flags, TextureFormat format);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int bgfx_frame ([MarshalAs(UnmanagedType.U1)] bool capture);
@@ -378,6 +378,9 @@ namespace SharpBgfx {
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_vertex_count (int numVertices);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_set_instance_count (int numInstances);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_instance_data_buffer (ref InstanceDataBuffer.NativeStruct idb, uint start, uint num);

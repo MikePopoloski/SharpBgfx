@@ -35,6 +35,8 @@ namespace SharpBgfx {
         /// <summary>
         /// Called when an error occurs in the library.
         /// </summary>
+        /// <param name="fileName">The name of the source file in which the message originated.</param>
+        /// <param name="line">The line number in which the message originated.</param>
         /// <param name="errorType">The type of error that occurred.</param>
         /// <param name="message">Message string detailing what went wrong.</param>
         /// <remarks>
@@ -43,7 +45,7 @@ namespace SharpBgfx {
         ///
         /// This method can be called from any thread.
         /// </remarks>
-        void ReportError (ErrorType errorType, string message);
+        void ReportError (string fileName, int line, ErrorType errorType, string message);
 
         /// <summary>
         /// Called to print debug messages.
@@ -309,6 +311,7 @@ namespace SharpBgfx {
             return new PerfStats(NativeMethods.bgfx_get_stats());
         }
 
+
         /// <summary>
         /// Resets graphics settings and surfaces.
         /// </summary>
@@ -316,7 +319,18 @@ namespace SharpBgfx {
         /// <param name="height">The height of the main window.</param>
         /// <param name="flags">Flags used to configure rendering output.</param>
         public static void Reset (int width, int height, ResetFlags flags = ResetFlags.None) {
-            NativeMethods.bgfx_reset(width, height, flags);
+            Reset(width, height, flags, (TextureFormat)TextureFormatCount);
+        }
+
+        /// <summary>
+        /// Resets graphics settings and surfaces.
+        /// </summary>
+        /// <param name="width">The width of the main window.</param>
+        /// <param name="height">The height of the main window.</param>
+        /// <param name="flags">Flags used to configure rendering output.</param>
+        /// <param name="format">The format of the backbuffer.</param>
+        public static void Reset (int width, int height, ResetFlags flags, TextureFormat format) {
+            NativeMethods.bgfx_reset(width, height, flags, format);
         }
 
         /// <summary>
@@ -348,9 +362,11 @@ namespace SharpBgfx {
             native.DeviceId = (ushort)settings.Adapter.DeviceId;
             native.Debug = (byte)(settings.Debug ? 1 : 0);
             native.Profiling = (byte)(settings.Profiling ? 1 : 0);
+            native.Format = settings.Format;
             native.Width = (uint)settings.Width;
             native.Height = (uint)settings.Height;
             native.Flags = (uint)settings.ResetFlags;
+            native.MaxFrameLatency = (byte)settings.MaxFrameLatency;
             native.Callbacks = CallbackShim.CreateShim(settings.CallbackHandler ?? new DefaultCallbackHandler());
 
             return NativeMethods.bgfx_init(&native);
@@ -781,6 +797,14 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// Sets the number of auto-generated indices for use with gl_InstanceID.
+        /// </summary>
+        /// <param name="count">The number of auto-generated instances.</param>
+        public static void SetInstanceCount (int count) {
+            NativeMethods.bgfx_set_instance_count(count);
+        }
+
+        /// <summary>
         /// Sets instance data to use for drawing primitives.
         /// </summary>
         /// <param name="instanceData">The instance data.</param>
@@ -1074,6 +1098,8 @@ namespace SharpBgfx {
             return new Encoder(NativeMethods.bgfx_begin());
         }
 
+        static readonly int TextureFormatCount = Enum.GetValues(typeof(TextureFormat)).Length;
+
         class DefaultCallbackHandler : ICallbackHandler {
             public void ProfilerBegin (string name, int color, string filePath, int line) {}
             public void ProfilerEnd () {}
@@ -1091,7 +1117,7 @@ namespace SharpBgfx {
                 Debug.Write(Marshal.PtrToStringAnsi(new IntPtr(buffer)));
             }
 
-            public void ReportError(ErrorType errorType, string message) {
+            public void ReportError(string fileName, int line, ErrorType errorType, string message) {
                 if (errorType == ErrorType.DebugCheck)
                     Debug.Write(message);
                 else {
@@ -1128,6 +1154,11 @@ namespace SharpBgfx {
         public bool Profiling { get; set; }
 
         /// <summary>
+        /// The initial texture format of the screen.
+        /// </summary>
+        public TextureFormat Format { get; set; }
+
+        /// <summary>
         /// The initial width of the screen.
         /// </summary>
         public int Width { get; set; }
@@ -1141,6 +1172,11 @@ namespace SharpBgfx {
         /// Various flags that control creation of the device.
         /// </summary>
         public ResetFlags ResetFlags { get; set; }
+
+        /// <summary>
+        /// The maximum allowed frame latency, or zero if you don't care.
+        /// </summary>
+        public int MaxFrameLatency { get; set; }
 
         /// <summary>
         /// A set of handlers for various library callbacks.
@@ -1158,9 +1194,11 @@ namespace SharpBgfx {
             Adapter = new Adapter((Vendor)native.VendorId, native.DeviceId);
             Debug = native.Debug != 0;
             Profiling = native.Profiling != 0;
+            Format = native.Format;
             Width = (int)native.Width;
             Height = (int)native.Height;
             ResetFlags = (ResetFlags)native.Flags;
+            MaxFrameLatency = native.MaxFrameLatency;
         }
 
         /// <summary>
@@ -1183,9 +1221,11 @@ namespace SharpBgfx {
             public ushort DeviceId;
             public byte Debug;
             public byte Profiling;
+            public TextureFormat Format;
             public uint Width;
             public uint Height;
             public uint Flags;
+            public byte MaxFrameLatency;
             public ushort MaxEncoders;
             public uint TransientVbSize;
             public uint TransientIbSize;
@@ -1904,6 +1944,13 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// The maximum number of compute bindings that can be allocated.
+        /// </summary>
+        public int MaxComputeBindings {
+            get { return (int)data->MaxComputeBindings; }
+        }
+
+        /// <summary>
         /// The maximum number of vertex declarations that can be allocated.
         /// </summary>
         public int MaxVertexDecls {
@@ -2145,6 +2192,7 @@ namespace SharpBgfx {
             public uint MaxShaders;
             public uint MaxTextures;
             public uint MaxTextureSamplers;
+            public uint MaxComputeBindings;
             public uint MaxVertexDecls;
             public uint MaxVertexStreams;
             public uint MaxIndexBuffers;
@@ -6310,84 +6358,84 @@ namespace SharpBgfx {
         GraphicsDebugger = 0x80,
 
         /// <summary>
-        /// Device supports high-DPI rendering.
+        /// Devices supports HDR10 rendering.
         /// </summary>
-        HighDPI = 0x100,
+        HDR10 = 0x100,
 
         /// <summary>
-        /// Head mounted displays are supported.
+        /// Device supports high-DPI rendering.
         /// </summary>
-        HeadMountedDisplay = 0x200,
+        HighDPI = 0x400,
 
         /// <summary>
         /// Device supports 32-bit indices.
         /// </summary>
-        Index32 = 0x400,
+        Index32 = 0x800,
 
         /// <summary>
         /// Device supports instancing.
         /// </summary>
-        Instancing = 0x800,
+        Instancing = 0x1000,
 
         /// <summary>
         /// Device supports occlusion queries.
         /// </summary>
-        OcclusionQuery = 0x1000,
+        OcclusionQuery = 0x2000,
 
         /// <summary>
         /// Device supports multithreaded rendering.
         /// </summary>
-        RendererMultithreaded = 0x2000,
+        RendererMultithreaded = 0x4000,
 
         /// <summary>
         /// Indicates whether the device can render to multiple swap chains.
         /// </summary>
-        SwapChain = 0x4000,
+        SwapChain = 0x8000,
 
         /// <summary>
         /// Device supports 2D texture arrays.
         /// </summary>
-        Texture2DArray = 0x8000,
+        Texture2DArray = 0x10000,
 
         /// <summary>
         /// Device supports 3D textures.
         /// </summary>
-        Texture3D = 0x10000,
+        Texture3D = 0x20000,
 
         /// <summary>
         /// Device supports texture blits.
         /// </summary>
-        TextureBlit = 0x20000,
+        TextureBlit = 0xc0000,
 
-        /// <summary>
-        /// Device supports other texture comparison modes.
-        /// </summary>
-        TextureCompareExtended = 0x40000,
+        ///// <summary>
+        ///// Device supports other texture comparison modes.
+        ///// </summary>
+        //TextureCompareExtended = 0x40000,
 
         /// <summary>
         /// Device supports "Less than or equal to" texture comparison mode.
         /// </summary>
-        TextureCompareLessEqual = 0x80000,
+        TextureCompareLessEqual = 0x100000,
 
         /// <summary>
         /// Device supports all texture comparison modes.
         /// </summary>
-        TextureCompareAll = TextureCompareLessEqual | TextureCompareExtended,
+        TextureCompareAll = 0x80000, //TextureCompareLessEqual | TextureCompareExtended,
 
         /// <summary>
         /// Device supports cubemap texture arrays.
         /// </summary>
-        TextureCubeArray = 0x100000,
+        TextureCubeArray = 0x200000,
 
         /// <summary>
         /// Device supports directly accessing texture data.
         /// </summary>
-        TextureDirectAccess = 0x200000,
+        TextureDirectAccess = 0x400000,
 
         /// <summary>
         /// Device supports reading back texture data.
         /// </summary>
-        TextureReadBack = 0x400000,
+        TextureReadBack = 0x800000,
 
         /// <summary>
         /// Device supports 16-bit floats as vertex attributes.
@@ -6397,7 +6445,12 @@ namespace SharpBgfx {
         /// <summary>
         /// UInt10 vertex attributes are supported.
         /// </summary>
-        VertexAttributeUInt10 = 0x800000
+        VertexAttributeUInt10 = 0x1000000,
+
+        /// <summary>
+        /// Devices supports rendering with VertexID only.
+        /// </summary>
+        VertexID = 0x2000000
     }
 
     /// <summary>
@@ -6582,21 +6635,6 @@ namespace SharpBgfx {
         Capture = 0x200,
 
         /// <summary>
-        /// Enable head mounted display support.
-        /// </summary>
-        HeadMountedDisplay = 0x400,
-
-        /// <summary>
-        /// Enable debugging for head mounted display rendering.
-        /// </summary>
-        HeadMountedDisplayDebug = 0x800,
-
-        /// <summary>
-        /// Recenter the head mounted display.
-        /// </summary>
-        HeadMountedDisplayRecenter = 0x1000,
-
-        /// <summary>
         /// Flush all commands to the device after rendering.
         /// </summary>
         FlushAfterRender = 0x2000,
@@ -6613,26 +6651,31 @@ namespace SharpBgfx {
         SrgbBackbuffer = 0x8000,
 
         /// <summary>
+        /// Enable HDR10 rendering.
+        /// </summary>
+        HDR10 = 0x10000,
+
+        /// <summary>
         /// Enable High-DPI rendering.
         /// </summary>
-        HighDPI = 0x10000,
+        HighDPI = 0x20000,
 
         /// <summary>
         /// Enables depth clamping.
         /// </summary>
-        DepthClamp = 0x20000,
+        DepthClamp = 0x40000,
 
         /// <summary>
         /// Suspends rendering.
         /// </summary>
-        Suspend = 0x40000
+        Suspend = 0x80000
     }
 
     /// <summary>
     /// Specifies various texture flags.
     /// </summary>
     [Flags]
-    public enum TextureFlags {
+    public enum TextureFlags : long {
         /// <summary>
         /// No flags set.
         /// </summary>
@@ -6709,41 +6752,6 @@ namespace SharpBgfx {
         MipFilterPoint = 0x00000400,
 
         /// <summary>
-        /// Perform MSAA sampling on the texture.
-        /// </summary>
-        MSAASample = 0x00000800,
-
-        /// <summary>
-        /// The texture will be used as a render target.
-        /// </summary>
-        RenderTarget = 0x00001000,
-
-        /// <summary>
-        /// The render target texture support 2x multisampling.
-        /// </summary>
-        RenderTargetMultisample2x = 0x00002000,
-
-        /// <summary>
-        /// The render target texture support 4x multisampling.
-        /// </summary>
-        RenderTargetMultisample4x = 0x00003000,
-
-        /// <summary>
-        /// The render target texture support 8x multisampling.
-        /// </summary>
-        RenderTargetMultisample8x = 0x00004000,
-
-        /// <summary>
-        /// The render target texture support 16x multisampling.
-        /// </summary>
-        RenderTargetMultisample16x = 0x00005000,
-
-        /// <summary>
-        /// The texture is only writeable (render target).
-        /// </summary>
-        RenderTargetWriteOnly = 0x00008000,
-
-        /// <summary>
         /// Use a "less than" operator when comparing textures.
         /// </summary>
         CompareLess = 0x00010000,
@@ -6784,24 +6792,64 @@ namespace SharpBgfx {
         CompareAlways = 0x00080000,
 
         /// <summary>
+        /// Sample stencil instead of depth.
+        /// </summary>
+        SampleStencil = 0x100000,
+
+        /// <summary>
+        /// Perform MSAA sampling on the texture.
+        /// </summary>
+        MSAASample = 0x800000000,
+
+        /// <summary>
+        /// The texture will be used as a render target.
+        /// </summary>
+        RenderTarget = 0x1000000000,
+
+        /// <summary>
+        /// The render target texture support 2x multisampling.
+        /// </summary>
+        RenderTargetMultisample2x = 0x2000000000,
+
+        /// <summary>
+        /// The render target texture support 4x multisampling.
+        /// </summary>
+        RenderTargetMultisample4x = 0x3000000000,
+
+        /// <summary>
+        /// The render target texture support 8x multisampling.
+        /// </summary>
+        RenderTargetMultisample8x = 0x4000000000,
+
+        /// <summary>
+        /// The render target texture support 16x multisampling.
+        /// </summary>
+        RenderTargetMultisample16x = 0x5000000000,
+
+        /// <summary>
+        /// The texture is only writeable (render target).
+        /// </summary>
+        RenderTargetWriteOnly = 0x8000000000,
+
+        /// <summary>
         /// Texture is the target of compute shader writes.
         /// </summary>
-        ComputeWrite = 0x00100000,
+        ComputeWrite = 0x100000000000,
 
         /// <summary>
         /// Texture data is in non-linear sRGB format.
         /// </summary>
-        Srgb = 0x00200000,
+        Srgb = 0x200000000000,
 
         /// <summary>
         /// Texture can be used as the destination of a blit operation.
         /// </summary>
-        BlitDestination = 0x00400000,
+        BlitDestination = 0x400000000000,
 
         /// <summary>
         /// Texture data can be read back.
         /// </summary>
-        ReadBack = 0x00800000
+        ReadBack = 0x800000000000
     }
 
     /// <summary>
@@ -7818,7 +7866,7 @@ namespace SharpBgfx {
         public static extern void bgfx_shutdown ();
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_reset (int width, int height, ResetFlags flags);
+        public static extern void bgfx_reset (int width, int height, ResetFlags flags, TextureFormat format);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int bgfx_frame ([MarshalAs(UnmanagedType.U1)] bool capture);
@@ -7952,6 +8000,9 @@ namespace SharpBgfx {
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_vertex_count (int numVertices);
+
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void bgfx_set_instance_count (int numInstances);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_instance_data_buffer (ref InstanceDataBuffer.NativeStruct idb, uint start, uint num);
@@ -8155,7 +8206,7 @@ namespace SharpBgfx {
 
         [SuppressUnmanagedCodeSecurity]
         [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Ansi)]
-        delegate void ReportErrorHandler (IntPtr thisPtr, ErrorType errorType, string message);
+        delegate void ReportErrorHandler (IntPtr thisPtr, string fileName, ushort line, ErrorType errorType, string message);
 
         [SuppressUnmanagedCodeSecurity]
         [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Ansi)]
@@ -8245,8 +8296,8 @@ namespace SharpBgfx {
                 shim->captureFrame = Marshal.GetFunctionPointerForDelegate(captureFrame);
             }
 
-            void ReportError (IntPtr thisPtr, ErrorType errorType, string message) {
-                handler.ReportError(errorType, message);
+            void ReportError (IntPtr thisPtr, string fileName, ushort line, ErrorType errorType, string message) {
+                handler.ReportError(fileName, line, errorType, message);
             }
 
             void ReportDebug (IntPtr thisPtr, string fileName, ushort line, string format, IntPtr args) {
