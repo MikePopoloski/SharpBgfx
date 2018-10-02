@@ -6405,12 +6405,12 @@ namespace SharpBgfx {
         /// <summary>
         /// Device supports texture blits.
         /// </summary>
-        TextureBlit = 0xc0000,
+        TextureBlit = 0x40000,
 
-        ///// <summary>
-        ///// Device supports other texture comparison modes.
-        ///// </summary>
-        //TextureCompareExtended = 0x40000,
+        /// <summary>
+        /// Device supports other texture comparison modes.
+        /// </summary>
+        TextureCompareExtended = 0x80000,
 
         /// <summary>
         /// Device supports "Less than or equal to" texture comparison mode.
@@ -6420,7 +6420,7 @@ namespace SharpBgfx {
         /// <summary>
         /// Device supports all texture comparison modes.
         /// </summary>
-        TextureCompareAll = 0x80000, //TextureCompareLessEqual | TextureCompareExtended,
+        TextureCompareAll = TextureCompareLessEqual | TextureCompareExtended,
 
         /// <summary>
         /// Device supports cubemap texture arrays.
@@ -6440,17 +6440,17 @@ namespace SharpBgfx {
         /// <summary>
         /// Device supports 16-bit floats as vertex attributes.
         /// </summary>
-        VertexAttributeHalf = 0x800000,
+        VertexAttributeHalf = 0x1000000,
 
         /// <summary>
         /// UInt10 vertex attributes are supported.
         /// </summary>
-        VertexAttributeUInt10 = 0x1000000,
+        VertexAttributeUInt10 = 0x2000000,
 
         /// <summary>
         /// Devices supports rendering with VertexID only.
         /// </summary>
-        VertexID = 0x2000000
+        VertexID = 0x4000000
     }
 
     /// <summary>
