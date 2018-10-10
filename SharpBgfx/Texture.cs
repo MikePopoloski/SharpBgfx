@@ -238,7 +238,7 @@ namespace SharpBgfx {
         /// <param name="memory">The new image data.</param>
         /// <param name="pitch">The pitch of the image data.</param>
         public void UpdateCube (CubeMapFace face, int arrayLayer, int mipLevel, int x, int y, int width, int height, MemoryBlock memory, int pitch) {
-            NativeMethods.bgfx_update_texture_cube(handle, face, (ushort)arrayLayer, (byte)mipLevel, (ushort)x, (ushort)y, (ushort)width, (ushort)height, memory.ptr, (ushort)pitch);
+            NativeMethods.bgfx_update_texture_cube(handle, (ushort)arrayLayer, face, (byte)mipLevel, (ushort)x, (ushort)y, (ushort)width, (ushort)height, memory.ptr, (ushort)pitch);
         }
 
         /// <summary>
