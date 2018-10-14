@@ -1053,11 +1053,11 @@ namespace SharpBgfx {
             Adapter = new Adapter((Vendor)native.VendorId, native.DeviceId);
             Debug = native.Debug != 0;
             Profiling = native.Profiling != 0;
-            Format = native.Format;
-            Width = (int)native.Width;
-            Height = (int)native.Height;
-            ResetFlags = (ResetFlags)native.Flags;
-            MaxFrameLatency = native.MaxFrameLatency;
+            Format = native.Resolution.Format;
+            Width = (int)native.Resolution.Width;
+            Height = (int)native.Resolution.Height;
+            ResetFlags = (ResetFlags)native.Resolution.Flags;
+            MaxFrameLatency = native.Resolution.MaxFrameLatency;
         }
 
         /// <summary>
@@ -1074,20 +1074,28 @@ namespace SharpBgfx {
             ResetFlags = resetFlags;
         }
 
+        internal struct ResolutionNative {
+            public TextureFormat Format;
+            public uint Width;
+            public uint Height;
+            public uint Flags;
+            public byte MaxFrameLatency;
+        }
+
+        internal struct InitLimits {
+            public ushort MaxEncoders;
+            public uint TransientVbSize;
+            public uint TransientIbSize;
+        }
+
         internal struct Native {
             public RendererBackend Backend;
             public ushort VendorId;
             public ushort DeviceId;
             public byte Debug;
             public byte Profiling;
-            public TextureFormat Format;
-            public uint Width;
-            public uint Height;
-            public uint Flags;
-            public byte MaxFrameLatency;
-            public ushort MaxEncoders;
-            public uint TransientVbSize;
-            public uint TransientIbSize;
+            public ResolutionNative Resolution;
+            public InitLimits Limits;
             public IntPtr Callbacks;
             public IntPtr Allocator;
         }
