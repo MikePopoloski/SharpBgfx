@@ -241,8 +241,10 @@ namespace SharpBgfx {
             native.Resolution.Width = (uint)settings.Width;
             native.Resolution.Height = (uint)settings.Height;
             native.Resolution.Flags = (uint)settings.ResetFlags;
+            native.Resolution.NumBackBuffers = (byte)settings.BackBufferCount;
             native.Resolution.MaxFrameLatency = (byte)settings.MaxFrameLatency;
             native.Callbacks = CallbackShim.CreateShim(settings.CallbackHandler ?? new DefaultCallbackHandler());
+            native.PlatformData = settings.PlatformData;
 
             return NativeMethods.bgfx_init(&native);
         }

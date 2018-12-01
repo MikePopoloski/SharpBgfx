@@ -6,6 +6,11 @@ namespace SharpBgfx {
     /// </summary>
     public struct Attachment {
         /// <summary>
+        /// Access control for using the attachment.
+        /// </summary>
+        public ComputeBufferAccess Access;
+
+        /// <summary>
         /// The attachment texture handle.
         /// </summary>
         public Texture Texture;
@@ -19,6 +24,11 @@ namespace SharpBgfx {
         /// Cube map face or depth layer/slice.
         /// </summary>
         public int Layer;
+
+        /// <summary>
+        /// Additional flags for framebuffer resolve.
+        /// </summary>
+        public ResolveFlags Resolve;
     }
 
     /// <summary>
@@ -64,9 +74,11 @@ namespace SharpBgfx {
             for (int i = 0; i < count; i++) {
                 var attachment = attachments[i];
                 native[i] = new NativeAttachment {
+                    access = attachment.Access,
                     handle = attachment.Texture.handle,
                     mip = (ushort)attachment.Mip,
-                    layer = (ushort)attachment.Layer
+                    layer = (ushort)attachment.Layer,
+                    resolve = attachment.Resolve
                 };
             }
 
@@ -184,9 +196,11 @@ namespace SharpBgfx {
         }
 
         internal struct NativeAttachment {
+            public ComputeBufferAccess access;
             public ushort handle;
             public ushort mip;
             public ushort layer;
+            public ResolveFlags resolve;
         }
     }
 }

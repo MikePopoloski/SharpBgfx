@@ -366,8 +366,10 @@ namespace SharpBgfx {
             native.Resolution.Width = (uint)settings.Width;
             native.Resolution.Height = (uint)settings.Height;
             native.Resolution.Flags = (uint)settings.ResetFlags;
+            native.Resolution.NumBackBuffers = (byte)settings.BackBufferCount;
             native.Resolution.MaxFrameLatency = (byte)settings.MaxFrameLatency;
             native.Callbacks = CallbackShim.CreateShim(settings.CallbackHandler ?? new DefaultCallbackHandler());
+            native.PlatformData = settings.PlatformData;
 
             return NativeMethods.bgfx_init(&native);
         }
@@ -1174,6 +1176,11 @@ namespace SharpBgfx {
         public ResetFlags ResetFlags { get; set; }
 
         /// <summary>
+        /// The number of backbuffers to create.
+        /// </summary>
+        public int BackBufferCount { get; set; }
+
+        /// <summary>
         /// The maximum allowed frame latency, or zero if you don't care.
         /// </summary>
         public int MaxFrameLatency { get; set; }
@@ -1182,6 +1189,11 @@ namespace SharpBgfx {
         /// A set of handlers for various library callbacks.
         /// </summary>
         public ICallbackHandler CallbackHandler { get; set; }
+
+        /// <summary>
+        /// Optional platform-specific initialization data.
+        /// </summary>
+        public PlatformData PlatformData { get; set; }
 
         /// <summary>
         /// Initializes a new intance of the <see cref="InitSettings"/> class.
@@ -1198,7 +1210,9 @@ namespace SharpBgfx {
             Width = (int)native.Resolution.Width;
             Height = (int)native.Resolution.Height;
             ResetFlags = (ResetFlags)native.Resolution.Flags;
+            BackBufferCount = native.Resolution.NumBackBuffers;
             MaxFrameLatency = native.Resolution.MaxFrameLatency;
+            PlatformData = native.PlatformData;
         }
 
         /// <summary>
@@ -1220,6 +1234,7 @@ namespace SharpBgfx {
             public uint Width;
             public uint Height;
             public uint Flags;
+            public byte NumBackBuffers;
             public byte MaxFrameLatency;
         }
 
@@ -1235,6 +1250,7 @@ namespace SharpBgfx {
             public ushort DeviceId;
             public byte Debug;
             public byte Profiling;
+            public PlatformData PlatformData;
             public ResolutionNative Resolution;
             public InitLimits Limits;
             public IntPtr Callbacks;
@@ -1839,6 +1855,11 @@ namespace SharpBgfx {
     /// </summary>
     public struct Attachment {
         /// <summary>
+        /// Access control for using the attachment.
+        /// </summary>
+        public ComputeBufferAccess Access;
+
+        /// <summary>
         /// The attachment texture handle.
         /// </summary>
         public Texture Texture;
@@ -1852,6 +1873,11 @@ namespace SharpBgfx {
         /// Cube map face or depth layer/slice.
         /// </summary>
         public int Layer;
+
+        /// <summary>
+        /// Additional flags for framebuffer resolve.
+        /// </summary>
+        public ResolveFlags Resolve;
     }
 
     /// <summary>
@@ -3010,9 +3036,11 @@ namespace SharpBgfx {
             for (int i = 0; i < count; i++) {
                 var attachment = attachments[i];
                 native[i] = new NativeAttachment {
+                    access = attachment.Access,
                     handle = attachment.Texture.handle,
                     mip = (ushort)attachment.Mip,
-                    layer = (ushort)attachment.Layer
+                    layer = (ushort)attachment.Layer,
+                    resolve = attachment.Resolve
                 };
             }
 
@@ -3130,9 +3158,11 @@ namespace SharpBgfx {
         }
 
         internal struct NativeAttachment {
+            public ComputeBufferAccess access;
             public ushort handle;
             public ushort mip;
             public ushort layer;
+            public ResolveFlags resolve;
         }
     }
 
@@ -3866,6 +3896,13 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// The number of blit calls submitted.
+        /// </summary>
+        public int BlitCallsSubmitted {
+            get { return data->NumBlit; }
+        }
+
+        /// <summary>
         /// Maximum observed GPU driver latency.
         /// </summary>
         public int MaxGpuLatency {
@@ -4317,6 +4354,7 @@ namespace SharpBgfx {
             public long WaitSubmit;
             public int NumDraw;
             public int NumCompute;
+            public int NumBlit;
             public int MaxGpuLatency;
             public ushort NumDynamicIndexBuffers;
             public ushort NumDynamicVertexBuffers;
@@ -4376,11 +4414,6 @@ namespace SharpBgfx {
         /// Depth-stencil pointer to use instead of letting the library create its own.
         /// </summary>
         public IntPtr BackbufferDepthStencil;
-
-        /// <summary>
-        /// Occulus OVR session.
-        /// </summary>
-        public IntPtr OvrSession;
     }
 
     /// <summary>
@@ -6677,6 +6710,21 @@ namespace SharpBgfx {
         /// Suspends rendering.
         /// </summary>
         Suspend = 0x80000
+    }
+
+    /// <summary>
+    /// Flags that control frame buffer resolve.
+    /// </summary>
+    public enum ResolveFlags : byte {
+        /// <summary>
+        /// No particular flags specified.
+        /// </summary>
+        None = 0,
+
+        /// <summary>
+        /// Automatically generate mipmaps.
+        /// </summary>
+        AutoGenMips = 0x1
     }
 
     /// <summary>

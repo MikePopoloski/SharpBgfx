@@ -1280,6 +1280,21 @@ namespace SharpBgfx {
     }
 
     /// <summary>
+    /// Flags that control frame buffer resolve.
+    /// </summary>
+    public enum ResolveFlags : byte {
+        /// <summary>
+        /// No particular flags specified.
+        /// </summary>
+        None = 0,
+
+        /// <summary>
+        /// Automatically generate mipmaps.
+        /// </summary>
+        AutoGenMips = 0x1
+    }
+
+    /// <summary>
     /// Addresses a particular face of a cube map.
     /// </summary>
     public enum CubeMapFace : byte {

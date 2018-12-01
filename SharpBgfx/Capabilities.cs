@@ -506,6 +506,13 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// The number of blit calls submitted.
+        /// </summary>
+        public int BlitCallsSubmitted {
+            get { return data->NumBlit; }
+        }
+
+        /// <summary>
         /// Maximum observed GPU driver latency.
         /// </summary>
         public int MaxGpuLatency {
@@ -957,6 +964,7 @@ namespace SharpBgfx {
             public long WaitSubmit;
             public int NumDraw;
             public int NumCompute;
+            public int NumBlit;
             public int MaxGpuLatency;
             public ushort NumDynamicIndexBuffers;
             public ushort NumDynamicVertexBuffers;
@@ -1033,6 +1041,11 @@ namespace SharpBgfx {
         public ResetFlags ResetFlags { get; set; }
 
         /// <summary>
+        /// The number of backbuffers to create.
+        /// </summary>
+        public int BackBufferCount { get; set; }
+
+        /// <summary>
         /// The maximum allowed frame latency, or zero if you don't care.
         /// </summary>
         public int MaxFrameLatency { get; set; }
@@ -1041,6 +1054,11 @@ namespace SharpBgfx {
         /// A set of handlers for various library callbacks.
         /// </summary>
         public ICallbackHandler CallbackHandler { get; set; }
+
+        /// <summary>
+        /// Optional platform-specific initialization data.
+        /// </summary>
+        public PlatformData PlatformData { get; set; }
 
         /// <summary>
         /// Initializes a new intance of the <see cref="InitSettings"/> class.
@@ -1057,7 +1075,9 @@ namespace SharpBgfx {
             Width = (int)native.Resolution.Width;
             Height = (int)native.Resolution.Height;
             ResetFlags = (ResetFlags)native.Resolution.Flags;
+            BackBufferCount = native.Resolution.NumBackBuffers;
             MaxFrameLatency = native.Resolution.MaxFrameLatency;
+            PlatformData = native.PlatformData;
         }
 
         /// <summary>
@@ -1079,6 +1099,7 @@ namespace SharpBgfx {
             public uint Width;
             public uint Height;
             public uint Flags;
+            public byte NumBackBuffers;
             public byte MaxFrameLatency;
         }
 
@@ -1094,6 +1115,7 @@ namespace SharpBgfx {
             public ushort DeviceId;
             public byte Debug;
             public byte Profiling;
+            public PlatformData PlatformData;
             public ResolutionNative Resolution;
             public InitLimits Limits;
             public IntPtr Callbacks;
