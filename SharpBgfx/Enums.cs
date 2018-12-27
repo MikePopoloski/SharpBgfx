@@ -1134,6 +1134,21 @@ namespace SharpBgfx {
         BorderW = 0x00000030,
 
         /// <summary>
+        /// Mirror the texture in the U,V, and W coordinates.
+        /// </summary>
+        MirrorUVW = MirrorU | MirrorV | MirrorW,
+
+        /// <summary>
+        /// Clamp the texture in the U,V, and W coordinates.
+        /// </summary>
+        ClampUVW = ClampU | ClampV | ClampW,
+
+        /// <summary>
+        /// Use a border color for addresses outside the range in the U,V, and W coordinates.
+        /// </summary>
+        BorderUVW = BorderU | BorderV | BorderW,
+
+        /// <summary>
         /// Use point filtering for texture minification.
         /// </summary>
         MinFilterPoint = 0x00000040,
@@ -1157,6 +1172,11 @@ namespace SharpBgfx {
         /// Use point filtering for texture mipmaps.
         /// </summary>
         MipFilterPoint = 0x00000400,
+
+        /// <summary>
+        /// Use point filtering for minification, magnification, and texture mipmaps.
+        /// </summary>
+        FilterPoint = MinFilterPoint | MagFilterPoint | MipFilterPoint,
 
         /// <summary>
         /// Use a "less than" operator when comparing textures.

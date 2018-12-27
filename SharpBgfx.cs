@@ -1022,9 +1022,7 @@ namespace SharpBgfx {
         /// <param name="yCount">The size of the job in the second dimension.</param>
         /// <param name="zCount">The size of the job in the third dimension.</param>
         public static void Dispatch (ushort id, Program program, int xCount = 1, int yCount = 1, int zCount = 1) {
-            // TODO: unused
-            byte unused = 0;
-            NativeMethods.bgfx_dispatch(id, program.handle, (uint)xCount, (uint)yCount, (uint)zCount, unused);
+            NativeMethods.bgfx_dispatch(id, program.handle, (uint)xCount, (uint)yCount, (uint)zCount);
         }
 
         /// <summary>
@@ -1036,9 +1034,7 @@ namespace SharpBgfx {
         /// <param name="startIndex">The index of the first command to process.</param>
         /// <param name="count">The number of commands to process from the buffer.</param>
         public static void Dispatch (ushort id, Program program, IndirectBuffer indirectBuffer, int startIndex = 0, int count = 1) {
-            // TODO: unused
-            byte unused = 0;
-            NativeMethods.bgfx_dispatch_indirect(id, program.handle, indirectBuffer.handle, (ushort)startIndex, (ushort)count, unused);
+            NativeMethods.bgfx_dispatch_indirect(id, program.handle, indirectBuffer.handle, (ushort)startIndex, (ushort)count);
         }
 
         /// <summary>
@@ -2891,9 +2887,7 @@ namespace SharpBgfx {
         /// <param name="yCount">The size of the job in the second dimension.</param>
         /// <param name="zCount">The size of the job in the third dimension.</param>
         public void Dispatch (ushort id, Program program, int xCount = 1, int yCount = 1, int zCount = 1) {
-            // TODO: unused
-            byte unused = 0;
-            NativeMethods.bgfx_encoder_dispatch(ptr, id, program.handle, (uint)xCount, (uint)yCount, (uint)zCount, unused);
+            NativeMethods.bgfx_encoder_dispatch(ptr, id, program.handle, (uint)xCount, (uint)yCount, (uint)zCount);
         }
 
         /// <summary>
@@ -2905,9 +2899,7 @@ namespace SharpBgfx {
         /// <param name="startIndex">The index of the first command to process.</param>
         /// <param name="count">The number of commands to process from the buffer.</param>
         public void Dispatch (ushort id, Program program, IndirectBuffer indirectBuffer, int startIndex = 0, int count = 1) {
-            // TODO: unused
-            byte unused = 0;
-            NativeMethods.bgfx_encoder_dispatch_indirect(ptr, id, program.handle, indirectBuffer.handle, (ushort)startIndex, (ushort)count, unused);
+            NativeMethods.bgfx_encoder_dispatch_indirect(ptr, id, program.handle, indirectBuffer.handle, (ushort)startIndex, (ushort)count);
         }
 
         /// <summary>
@@ -6783,6 +6775,21 @@ namespace SharpBgfx {
         BorderW = 0x00000030,
 
         /// <summary>
+        /// Mirror the texture in the U,V, and W coordinates.
+        /// </summary>
+        MirrorUVW = MirrorU | MirrorV | MirrorW,
+
+        /// <summary>
+        /// Clamp the texture in the U,V, and W coordinates.
+        /// </summary>
+        ClampUVW = ClampU | ClampV | ClampW,
+
+        /// <summary>
+        /// Use a border color for addresses outside the range in the U,V, and W coordinates.
+        /// </summary>
+        BorderUVW = BorderU | BorderV | BorderW,
+
+        /// <summary>
         /// Use point filtering for texture minification.
         /// </summary>
         MinFilterPoint = 0x00000040,
@@ -6806,6 +6813,11 @@ namespace SharpBgfx {
         /// Use point filtering for texture mipmaps.
         /// </summary>
         MipFilterPoint = 0x00000400,
+
+        /// <summary>
+        /// Use point filtering for minification, magnification, and texture mipmaps.
+        /// </summary>
+        FilterPoint = MinFilterPoint | MagFilterPoint | MipFilterPoint,
 
         /// <summary>
         /// Use a "less than" operator when comparing textures.
@@ -7717,10 +7729,10 @@ namespace SharpBgfx {
         public static extern void bgfx_alloc_instance_data_buffer (out InstanceDataBuffer.NativeStruct ptr, int num, ushort stride);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int bgfx_dispatch (ushort id, ushort program, uint numX, uint numY, uint numZ, byte flags);
+        public static extern int bgfx_dispatch (ushort id, ushort program, uint numX, uint numY, uint numZ);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int bgfx_dispatch_indirect (ushort id, ushort program, ushort indirectHandle, ushort start, ushort num, byte flags);
+        public static extern int bgfx_dispatch_indirect (ushort id, ushort program, ushort indirectHandle, ushort start, ushort num);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_texture (byte stage, ushort sampler, ushort texture, uint flags);
@@ -8194,10 +8206,10 @@ namespace SharpBgfx {
         public static extern void bgfx_encoder_set_compute_indirect_buffer(IntPtr encoder, byte stage, ushort handle, ComputeBufferAccess access);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int bgfx_encoder_dispatch(IntPtr encoder, ushort id, ushort program, uint numX, uint numY, uint numZ, byte flags);
+        public static extern int bgfx_encoder_dispatch(IntPtr encoder, ushort id, ushort program, uint numX, uint numY, uint numZ);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int bgfx_encoder_dispatch_indirect(IntPtr encoder, ushort id, ushort program, ushort indirectHandle, ushort start, ushort num, byte flags);
+        public static extern int bgfx_encoder_dispatch_indirect(IntPtr encoder, ushort id, ushort program, ushort indirectHandle, ushort start, ushort num);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_encoder_discard(IntPtr encoder);
