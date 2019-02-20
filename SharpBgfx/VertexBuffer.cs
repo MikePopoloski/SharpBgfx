@@ -23,6 +23,14 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// Sets the name of the vertex buffer, for debug display purposes.
+        /// </summary>
+        /// <param name="name">The name of the texture.</param>
+        public void SetName(string name) {
+            NativeMethods.bgfx_set_vertex_buffer_name(handle, name, int.MaxValue);
+        }
+
+        /// <summary>
         /// Releases the vertex buffer.
         /// </summary>
         public void Dispose () {

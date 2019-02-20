@@ -626,9 +626,9 @@ namespace SharpBgfx {
     /// </summary>
     public enum UniformType {
         /// <summary>
-        /// Single integer.
+        /// Texture sampler.
         /// </summary>
-        Int1,
+        Sampler,
 
         /// <summary>
         /// 4D vector.
@@ -892,69 +892,74 @@ namespace SharpBgfx {
         FragmentOrdering = 0x40,
 
         /// <summary>
+        /// Read/write framebuffer attachments are supported.
+        /// </summary>
+        FramebufferRW = 0x80,
+
+        /// <summary>
         /// A graphics debugger is present.
         /// </summary>
-        GraphicsDebugger = 0x80,
+        GraphicsDebugger = 0x100,
 
         /// <summary>
         /// Devices supports HDR10 rendering.
         /// </summary>
-        HDR10 = 0x100,
+        HDR10 = 0x400,
 
         /// <summary>
         /// Device supports high-DPI rendering.
         /// </summary>
-        HighDPI = 0x400,
+        HighDPI = 0x800,
 
         /// <summary>
         /// Device supports 32-bit indices.
         /// </summary>
-        Index32 = 0x800,
+        Index32 = 0x1000,
 
         /// <summary>
         /// Device supports instancing.
         /// </summary>
-        Instancing = 0x1000,
+        Instancing = 0x2000,
 
         /// <summary>
         /// Device supports occlusion queries.
         /// </summary>
-        OcclusionQuery = 0x2000,
+        OcclusionQuery = 0x4000,
 
         /// <summary>
         /// Device supports multithreaded rendering.
         /// </summary>
-        RendererMultithreaded = 0x4000,
+        RendererMultithreaded = 0x8000,
 
         /// <summary>
         /// Indicates whether the device can render to multiple swap chains.
         /// </summary>
-        SwapChain = 0x8000,
+        SwapChain = 0x10000,
 
         /// <summary>
         /// Device supports 2D texture arrays.
         /// </summary>
-        Texture2DArray = 0x10000,
+        Texture2DArray = 0x20000,
 
         /// <summary>
         /// Device supports 3D textures.
         /// </summary>
-        Texture3D = 0x20000,
+        Texture3D = 0x40000,
 
         /// <summary>
         /// Device supports texture blits.
         /// </summary>
-        TextureBlit = 0x40000,
+        TextureBlit = 0x80000,
 
         /// <summary>
         /// Device supports other texture comparison modes.
         /// </summary>
-        TextureCompareExtended = 0x80000,
+        TextureCompareExtended = 0x100000,
 
         /// <summary>
         /// Device supports "Less than or equal to" texture comparison mode.
         /// </summary>
-        TextureCompareLessEqual = 0x100000,
+        TextureCompareLessEqual = 0x200000,
 
         /// <summary>
         /// Device supports all texture comparison modes.
@@ -964,32 +969,32 @@ namespace SharpBgfx {
         /// <summary>
         /// Device supports cubemap texture arrays.
         /// </summary>
-        TextureCubeArray = 0x200000,
+        TextureCubeArray = 0x400000,
 
         /// <summary>
         /// Device supports directly accessing texture data.
         /// </summary>
-        TextureDirectAccess = 0x400000,
+        TextureDirectAccess = 0x800000,
 
         /// <summary>
         /// Device supports reading back texture data.
         /// </summary>
-        TextureReadBack = 0x800000,
+        TextureReadBack = 0x1000000,
 
         /// <summary>
         /// Device supports 16-bit floats as vertex attributes.
         /// </summary>
-        VertexAttributeHalf = 0x1000000,
+        VertexAttributeHalf = 0x2000000,
 
         /// <summary>
         /// UInt10 vertex attributes are supported.
         /// </summary>
-        VertexAttributeUInt10 = 0x2000000,
+        VertexAttributeUInt10 = 0x4000000,
 
         /// <summary>
         /// Devices supports rendering with VertexID only.
         /// </summary>
-        VertexID = 0x4000000
+        VertexID = 0x8000000
     }
 
     /// <summary>

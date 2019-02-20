@@ -37,7 +37,7 @@ static class Program {
         var fieldstoneTex = ResourceLoader.LoadTexture("fieldstone-rgba.dds");
 
         // create uniforms
-        var colorTextureHandle = new Uniform("u_texColor", UniformType.Int1);
+        var colorTextureHandle = new Uniform("u_texColor", UniformType.Sampler);
         var uniforms = new Uniforms();
         uniforms.SubmitConstUniforms();
 

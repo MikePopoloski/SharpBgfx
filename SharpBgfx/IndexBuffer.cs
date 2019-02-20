@@ -22,6 +22,14 @@ namespace SharpBgfx {
         }
 
         /// <summary>
+        /// Sets the name of the index buffer, for debug display purposes.
+        /// </summary>
+        /// <param name="name">The name of the texture.</param>
+        public void SetName(string name) {
+            NativeMethods.bgfx_set_index_buffer_name(handle, name, int.MaxValue);
+        }
+
+        /// <summary>
         /// Releases the index buffer.
         /// </summary>
         public void Dispose () {
