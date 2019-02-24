@@ -99,15 +99,15 @@ namespace SharpBgfx {
             handle = NativeMethods.bgfx_create_frame_buffer_from_handles(count, native, destroyTextures);
         }
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="FrameBuffer"/> struct.
-		/// </summary>
-		/// <param name="windowHandle">The OS window handle to which the frame buffer is attached.</param>
-		/// <param name="width">The width of the render target.</param>
-		/// <param name="height">The height of the render target.</param>
-		/// <param name="format">Window back buffer color format.</param>
-		/// <param name="depthFormat">A desired format for a depth buffer, if applicable.</param>
-		public FrameBuffer (IntPtr windowHandle, int width, int height, TextureFormat format = TextureFormat.Count, TextureFormat depthFormat = TextureFormat.Count) {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FrameBuffer"/> struct.
+        /// </summary>
+        /// <param name="windowHandle">The OS window handle to which the frame buffer is attached.</param>
+        /// <param name="width">The width of the render target.</param>
+        /// <param name="height">The height of the render target.</param>
+        /// <param name="format">Window back buffer color format.</param>
+        /// <param name="depthFormat">A desired format for a depth buffer, if applicable.</param>
+        public FrameBuffer (IntPtr windowHandle, int width, int height, TextureFormat format = TextureFormat.Count, TextureFormat depthFormat = TextureFormat.Count) {
             handle = NativeMethods.bgfx_create_frame_buffer_from_nwh(windowHandle, (ushort)width, (ushort)height, format, depthFormat);
         }
 
