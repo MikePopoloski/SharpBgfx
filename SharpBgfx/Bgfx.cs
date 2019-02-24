@@ -982,7 +982,7 @@ namespace SharpBgfx {
                 if (errorType == ErrorType.DebugCheck)
                     Debug.Write(message);
                 else {
-                    Debug.Write($"{fileName} ({line})  {errorType}: {message}");
+                    Debug.Write(string.Format("{0} ({1})  {2}: {3}", fileName, line, errorType, message));
                     Debugger.Break();
                     Environment.Exit(1);
                 }

@@ -213,10 +213,6 @@ namespace SharpBgfx {
             get { return new AdapterCollection(data->GPUs, data->GPUCount); }
         }
 
-        static Capabilities() {
-            //Debug.Assert(Caps.TextureFormatCount == (int)TextureFormat.Count);
-        }
-
         internal Capabilities (Caps* data) {
             this.data = data;
         }

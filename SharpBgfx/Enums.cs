@@ -620,11 +620,11 @@ namespace SharpBgfx {
         /// </summary>
         D0S8,
 
-        /// <summary>
-        /// 
-        /// </summary>
-        Count
-    }
+		/// <summary>
+		/// The count of all texture formats. Not a valid value.
+		/// </summary>
+		Count
+	}
 
     /// <summary>
     /// Specifies the type of uniform data.
