@@ -193,18 +193,8 @@ namespace SharpBgfx {
         /// <param name="width">The width of the main window.</param>
         /// <param name="height">The height of the main window.</param>
         /// <param name="flags">Flags used to configure rendering output.</param>
-        public static void Reset (int width, int height, ResetFlags flags = ResetFlags.None) {
-            Reset(width, height, flags, (TextureFormat)TextureFormatCount);
-        }
-
-        /// <summary>
-        /// Resets graphics settings and surfaces.
-        /// </summary>
-        /// <param name="width">The width of the main window.</param>
-        /// <param name="height">The height of the main window.</param>
-        /// <param name="flags">Flags used to configure rendering output.</param>
         /// <param name="format">The format of the backbuffer.</param>
-        public static void Reset (int width, int height, ResetFlags flags, TextureFormat format) {
+        public static void Reset (int width, int height, ResetFlags flags = ResetFlags.None, TextureFormat format = TextureFormat.Count) {
             NativeMethods.bgfx_reset(width, height, flags, format);
         }
 
@@ -971,8 +961,6 @@ namespace SharpBgfx {
             return new Encoder(NativeMethods.bgfx_begin());
         }
 
-        static readonly int TextureFormatCount = Enum.GetValues(typeof(TextureFormat)).Length;
-
         class DefaultCallbackHandler : ICallbackHandler {
             public void ProfilerBegin (string name, int color, string filePath, int line) {}
             public void ProfilerEnd () {}
@@ -994,7 +982,7 @@ namespace SharpBgfx {
                 if (errorType == ErrorType.DebugCheck)
                     Debug.Write(message);
                 else {
-                    Debug.Write(string.Format("{0}: {1}", errorType, message));
+                    Debug.Write($"{fileName} ({line})  {errorType}: {message}");
                     Debugger.Break();
                     Environment.Exit(1);
                 }

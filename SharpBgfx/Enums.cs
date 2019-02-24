@@ -618,7 +618,12 @@ namespace SharpBgfx {
         /// <summary>
         /// 8-bit stencil.
         /// </summary>
-        D0S8
+        D0S8,
+
+        /// <summary>
+        /// 
+        /// </summary>
+        Count
     }
 
     /// <summary>

@@ -106,8 +106,8 @@ namespace SharpBgfx {
         /// <param name="width">The width of the render target.</param>
         /// <param name="height">The height of the render target.</param>
         /// <param name="depthFormat">A desired format for a depth buffer, if applicable.</param>
-        public FrameBuffer (IntPtr windowHandle, int width, int height, TextureFormat depthFormat = TextureFormat.UnknownDepth) {
-            handle = NativeMethods.bgfx_create_frame_buffer_from_nwh(windowHandle, (ushort)width, (ushort)height, depthFormat);
+        public FrameBuffer (IntPtr windowHandle, int width, int height, TextureFormat format = TextureFormat.Count, TextureFormat depthFormat = TextureFormat.Count) {
+            handle = NativeMethods.bgfx_create_frame_buffer_from_nwh(windowHandle, (ushort)width, (ushort)height, format, depthFormat);
         }
 
         /// <summary>
