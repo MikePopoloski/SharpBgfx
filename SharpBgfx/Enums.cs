@@ -618,7 +618,12 @@ namespace SharpBgfx {
         /// <summary>
         /// 8-bit stencil.
         /// </summary>
-        D0S8
+        D0S8,
+
+        /// <summary>
+        /// The count of all texture formats. Not a valid value.
+        /// </summary>
+        Count
     }
 
     /// <summary>

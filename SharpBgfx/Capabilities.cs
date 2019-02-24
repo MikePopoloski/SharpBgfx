@@ -213,10 +213,6 @@ namespace SharpBgfx {
             get { return new AdapterCollection(data->GPUs, data->GPUCount); }
         }
 
-        static Capabilities() {
-            Debug.Assert(Caps.TextureFormatCount == Enum.GetValues(typeof(TextureFormat)).Length);
-        }
-
         internal Capabilities (Caps* data) {
             this.data = data;
         }
@@ -327,8 +323,6 @@ namespace SharpBgfx {
 
 #pragma warning disable 649
         internal unsafe struct Caps {
-            public const int TextureFormatCount = 85;
-
             public RendererBackend Backend;
             public DeviceFeatures Supported;
             public ushort VendorId;
@@ -363,7 +357,7 @@ namespace SharpBgfx {
             public uint TransientVbSize;
             public uint TransientIbSize;
 
-            public fixed ushort Formats[TextureFormatCount];
+            public fixed ushort Formats[(int)TextureFormat.Count];
         }
 #pragma warning restore 649
     }
