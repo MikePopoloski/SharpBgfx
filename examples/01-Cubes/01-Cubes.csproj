@@ -7,8 +7,16 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="ImGui.NET" Version="1.67.0" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\SharpBgfx\SharpBgfx.csproj" />
     <ProjectReference Include="..\Common\Common.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="ImGui.NET">
+      <HintPath>imgui\ImGui.NET.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <Import Project="..\..\SharpBgfx.targets" />
 </Project>
