@@ -1040,6 +1040,11 @@ namespace SharpBgfx {
         public int BackBufferCount { get; set; }
 
         /// <summary>
+        /// The number of thread encoders. Usually number of jobs thread + the main thread.
+        /// </summary>
+        public int MaxEncoders { get; set; }
+
+        /// <summary>
         /// The maximum allowed frame latency, or zero if you don't care.
         /// </summary>
         public int MaxFrameLatency { get; set; }
@@ -1070,6 +1075,7 @@ namespace SharpBgfx {
             Height = (int)native.Resolution.Height;
             ResetFlags = (ResetFlags)native.Resolution.Flags;
             BackBufferCount = native.Resolution.NumBackBuffers;
+            MaxEncoders = (int)native.Limits.MaxEncoders;
             MaxFrameLatency = native.Resolution.MaxFrameLatency;
             PlatformData = native.PlatformData;
         }
