@@ -301,7 +301,7 @@ namespace SharpBgfx {
         public static extern void bgfx_set_view_scissor (ushort id, ushort x, ushort y, ushort width, ushort height);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void bgfx_set_view_clear (ushort id, ClearTargets flags, int rgba, float depth, byte stencil);
+        public static extern void bgfx_set_view_clear (ushort id, ClearTargets flags, uint rgba, float depth, byte stencil);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void bgfx_set_view_clear_mrt (ushort id, ClearTargets flags, float depth, byte stencil, byte rt0, byte rt1, byte rt2, byte rt3, byte rt4, byte rt5, byte rt6, byte rt7);
