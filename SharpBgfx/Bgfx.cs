@@ -410,7 +410,7 @@ namespace SharpBgfx {
         /// <param name="colorRgba">The clear color.</param>
         /// <param name="depth">The value to fill the depth buffer.</param>
         /// <param name="stencil">The value to fill the stencil buffer.</param>
-        public static void SetViewClear (ushort id, ClearTargets targets, int colorRgba, float depth = 1.0f, byte stencil = 0) {
+        public static void SetViewClear (ushort id, ClearTargets targets, uint colorRgba, float depth = 1.0f, byte stencil = 0) {
             NativeMethods.bgfx_set_view_clear(id, targets, colorRgba, depth, stencil);
         }
 
