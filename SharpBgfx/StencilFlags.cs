@@ -235,7 +235,7 @@ namespace SharpBgfx {
             if (state == null)
                 return false;
 
-            return Equals(state);
+            return Equals(state.Value);
         }
 
         /// <summary>
