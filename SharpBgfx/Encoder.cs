@@ -444,7 +444,7 @@ namespace SharpBgfx {
         /// Finishes submission of commands from this encoder.
         /// </summary>
         public void Dispose () {
-            NativeMethods.bgfx_end(ptr);
+            NativeMethods.bgfx_encoder_end(ptr);
         }
 
         /// <summary>

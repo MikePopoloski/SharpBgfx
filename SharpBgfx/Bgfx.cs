@@ -235,6 +235,7 @@ namespace SharpBgfx {
             native.Resolution.MaxFrameLatency = (byte)settings.MaxFrameLatency;
             native.Callbacks = CallbackShim.CreateShim(settings.CallbackHandler ?? new DefaultCallbackHandler());
             native.PlatformData = settings.PlatformData;
+            native.Limits.MaxEncoders = (ushort)(settings.MaxEncoders > 0 ? settings.MaxEncoders : 1);
 
             return NativeMethods.bgfx_init(&native);
         }
@@ -958,7 +959,7 @@ namespace SharpBgfx {
         /// </summary>
         /// <returns>An encoder instance that can be used to submit commands.</returns>
         public static Encoder Begin () {
-            return new Encoder(NativeMethods.bgfx_begin());
+            return new Encoder(NativeMethods.bgfx_encoder_begin());
         }
 
         class DefaultCallbackHandler : ICallbackHandler {
